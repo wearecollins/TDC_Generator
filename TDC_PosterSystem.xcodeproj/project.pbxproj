@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0124CF9918A430E300EAB3AF /* TypeParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0124CF9718A430E300EAB3AF /* TypeParticleSystem.cpp */; };
+		0124CF9E18A4312700EAB3AF /* TypeParticle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0124CF9C18A4312700EAB3AF /* TypeParticle.cpp */; };
+		01A2040518A4308500096698 /* ofxLabFlexParticle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01A203FF18A4308500096698 /* ofxLabFlexParticle.cpp */; };
+		01A2040618A4308500096698 /* ofxLabFlexParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01A2040018A4308500096698 /* ofxLabFlexParticleSystem.cpp */; };
+		01A2040718A4308500096698 /* ofxLabFlexQuad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01A2040118A4308500096698 /* ofxLabFlexQuad.cpp */; };
+		01A2040818A4308500096698 /* ofxLabFlexVectorField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01A2040218A4308500096698 /* ofxLabFlexVectorField.cpp */; };
 		1B5F996886A777589D5DD794 /* svgtiny_list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 077F7AC989DAB289A1EC643F /* svgtiny_list.cpp */; };
 		1D6B78EF041B097CE4F423C4 /* svgtiny.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 38BC601AD0A2F4F2319D1460 /* svgtiny.cpp */; };
 		4294163B15857489B2176769 /* svgtiny_gradient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 582921BA98D224ED41833868 /* svgtiny_gradient.cpp */; };
@@ -71,6 +77,19 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0124CF9718A430E300EAB3AF /* TypeParticleSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeParticleSystem.cpp; path = tdc/TypeParticleSystem.cpp; sourceTree = "<group>"; };
+		0124CF9818A430E300EAB3AF /* TypeParticleSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeParticleSystem.h; path = tdc/TypeParticleSystem.h; sourceTree = "<group>"; };
+		0124CF9C18A4312700EAB3AF /* TypeParticle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeParticle.cpp; path = tdc/TypeParticle.cpp; sourceTree = "<group>"; };
+		0124CF9D18A4312700EAB3AF /* TypeParticle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeParticle.h; path = tdc/TypeParticle.h; sourceTree = "<group>"; };
+		01A203F918A4308500096698 /* ofxLabFlexParticle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexParticle.h; sourceTree = "<group>"; };
+		01A203FA18A4308500096698 /* ofxLabFlexParticleSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexParticleSystem.h; sourceTree = "<group>"; };
+		01A203FB18A4308500096698 /* ofxLabFlexQuad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexQuad.h; sourceTree = "<group>"; };
+		01A203FC18A4308500096698 /* ofxLabFlexVectorField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexVectorField.h; sourceTree = "<group>"; };
+		01A203FD18A4308500096698 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		01A203FF18A4308500096698 /* ofxLabFlexParticle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxLabFlexParticle.cpp; sourceTree = "<group>"; };
+		01A2040018A4308500096698 /* ofxLabFlexParticleSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxLabFlexParticleSystem.cpp; sourceTree = "<group>"; };
+		01A2040118A4308500096698 /* ofxLabFlexQuad.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxLabFlexQuad.cpp; sourceTree = "<group>"; };
+		01A2040218A4308500096698 /* ofxLabFlexVectorField.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxLabFlexVectorField.cpp; sourceTree = "<group>"; };
 		01BA1D5C18A15D2E0074AB04 /* TypeGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TypeGrid.h; sourceTree = "<group>"; };
 		01DCC0911400F9ACF5B65578 /* ofxXmlSettings.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxXmlSettings.h; path = ../../../addons/ofxXmlSettings/src/ofxXmlSettings.h; sourceTree = SOURCE_ROOT; };
 		077F7AC989DAB289A1EC643F /* svgtiny_list.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = svgtiny_list.cpp; path = ../../../addons/ofxSvg/libs/svgTiny/src/svgtiny_list.cpp; sourceTree = SOURCE_ROOT; };
@@ -100,7 +119,7 @@
 		E45BE9770E8CC7DD009D7055 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		E45BE9790E8CC7DD009D7055 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		E45BE97A0E8CC7DD009D7055 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
-		E4B69B5B0A3A1756003C02F2 /* TDC_PosterTestDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TDC_PosterTestDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4B69B5B0A3A1756003C02F2 /* TDC_PosterTestDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TDC_PosterTestDebug.app; path = TDC_PosterSystemDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
 		E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = testApp.cpp; path = src/testApp.cpp; sourceTree = SOURCE_ROOT; };
 		E4B69E1F0A3A1BDC003C02F2 /* testApp.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = testApp.h; path = src/testApp.h; sourceTree = SOURCE_ROOT; };
@@ -145,6 +164,58 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0124CF9A18A430F100EAB3AF /* particle system */ = {
+			isa = PBXGroup;
+			children = (
+				01BA1D5C18A15D2E0074AB04 /* TypeGrid.h */,
+				0124CF9818A430E300EAB3AF /* TypeParticleSystem.h */,
+				0124CF9718A430E300EAB3AF /* TypeParticleSystem.cpp */,
+				0124CF9C18A4312700EAB3AF /* TypeParticle.cpp */,
+				0124CF9D18A4312700EAB3AF /* TypeParticle.h */,
+			);
+			name = "particle system";
+			sourceTree = "<group>";
+		};
+		0124CF9B18A430F900EAB3AF /* behaviors */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = behaviors;
+			sourceTree = "<group>";
+		};
+		01A203EA18A4308400096698 /* ofxLabFlexParticleSystem */ = {
+			isa = PBXGroup;
+			children = (
+				01A203F818A4308500096698 /* include */,
+				01A203FD18A4308500096698 /* README.md */,
+				01A203FE18A4308500096698 /* src */,
+			);
+			name = ofxLabFlexParticleSystem;
+			path = ../../../addons/ofxLabFlexParticleSystem;
+			sourceTree = "<group>";
+		};
+		01A203F818A4308500096698 /* include */ = {
+			isa = PBXGroup;
+			children = (
+				01A203F918A4308500096698 /* ofxLabFlexParticle.h */,
+				01A203FA18A4308500096698 /* ofxLabFlexParticleSystem.h */,
+				01A203FB18A4308500096698 /* ofxLabFlexQuad.h */,
+				01A203FC18A4308500096698 /* ofxLabFlexVectorField.h */,
+			);
+			path = include;
+			sourceTree = "<group>";
+		};
+		01A203FE18A4308500096698 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				01A203FF18A4308500096698 /* ofxLabFlexParticle.cpp */,
+				01A2040018A4308500096698 /* ofxLabFlexParticleSystem.cpp */,
+				01A2040118A4308500096698 /* ofxLabFlexQuad.cpp */,
+				01A2040218A4308500096698 /* ofxLabFlexVectorField.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		0F437E4761003E66B16524BE /* libs */ = {
 			isa = PBXGroup;
 			children = (
@@ -226,6 +297,7 @@
 		BB4B014C10F69532006C3DED /* addons */ = {
 			isa = PBXGroup;
 			children = (
+				01A203EA18A4308400096698 /* ofxLabFlexParticleSystem */,
 				F5F1F1EF8441E64FD46F07C8 /* ofxSvg */,
 				916B8DF9E7519F5BB8A2990B /* ofxVectorGraphics */,
 				1F4FB5C423662B96ADFDCC0B /* ofxXmlSettings */,
@@ -313,10 +385,11 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				0124CF9B18A430F900EAB3AF /* behaviors */,
+				0124CF9A18A430F100EAB3AF /* particle system */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* testApp.h */,
-				01BA1D5C18A15D2E0074AB04 /* TypeGrid.h */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -426,12 +499,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0124CF9E18A4312700EAB3AF /* TypeParticle.cpp in Sources */,
+				0124CF9918A430E300EAB3AF /* TypeParticleSystem.cpp in Sources */,
+				01A2040718A4308500096698 /* ofxLabFlexQuad.cpp in Sources */,
 				E4B69E200A3A1BDC003C02F2 /* main.cpp in Sources */,
 				E4B69E210A3A1BDC003C02F2 /* testApp.cpp in Sources */,
 				B88A57B4B0BA6191EF3571E9 /* ofxSvg.cpp in Sources */,
 				6A565A9714A6A12EB9098F52 /* src_colors.cpp in Sources */,
+				01A2040518A4308500096698 /* ofxLabFlexParticle.cpp in Sources */,
 				1D6B78EF041B097CE4F423C4 /* svgtiny.cpp in Sources */,
 				4294163B15857489B2176769 /* svgtiny_gradient.cpp in Sources */,
+				01A2040618A4308500096698 /* ofxLabFlexParticleSystem.cpp in Sources */,
+				01A2040818A4308500096698 /* ofxLabFlexVectorField.cpp in Sources */,
 				1B5F996886A777589D5DD794 /* svgtiny_list.cpp in Sources */,
 				603044E656EA8D499FCF7DEA /* ofxVectorGraphics.cpp in Sources */,
 				F01092BB147FA462845C38C7 /* CreEPS.cpp in Sources */,

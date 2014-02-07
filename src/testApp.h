@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include "TypeGrid.h"
+#include "TypeParticleSystem.h"
 
 class testApp : public ofBaseApp{
 
@@ -20,7 +20,12 @@ class testApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-        TypeGrid type;
+        // particle system
+        TypeParticleSystem particles;
+    
+        int drawMode;
+    
+        // image saving logic
         ofFbo toSave;
         ofPixels pix;
 };
