@@ -1,4 +1,4 @@
 .DS_Store
 *.app
 xcuserdata
-bin/data/*.png
+*/bin/data/*.png
