@@ -12,6 +12,7 @@
 
 class TypeParticle : public ofxLabFlexParticle
 {
+    friend class TypeParticleSystem;
 public:
     
     TypeParticle();
@@ -25,5 +26,8 @@ public:
 protected:
     
     ofVec2f seedPosition;
+    int offsetX;
+    int offsetY;
+    bool bSet;
 };
 

@@ -1,7 +1,13 @@
 #include "testApp.h"
 
 bool bClear = true;
+bool bCapture = false;
+bool bSave    = false;
+bool bUseGrid = true;
+bool bDrawTypeAsOverlay = true;
+
 int mode = 0;
+int lastDrawMode = -1;
 
 //--------------------------------------------------------------
 void testApp::setup(){
@@ -12,14 +18,58 @@ void testApp::setup(){
     ofClear(0,0,0,0);
     toSave.end();
     
-//    ofEnableBlendMode(OF_BLENDMODE_ADD);
-    drawMode = 0;
+    // load optional type overlay
+    
+    type.load("TDC_Type_Sketching.svg");
+    lastDrawMode = 0;
+    drawMode = TypeParticleSystem::DRAW_POINTS;
     ofDisableDepthTest();
     glPointSize(2.0f);
+    
+    // GUI
+    gui = new ofxUISuperCanvas("---- SETTINGS ----", 10, 10, 200, ofGetHeight());
+    gui->setVisible(false);
+    gui->addSpacer();
+    gui->addSpacer();
+    gui->addLabel("DRAWING");
+    gui->addLabel("Drawmode Label", "Draw Points");
+    gui->addIntSlider("Draw Mode", 0, TypeParticleSystem::DRAW_SHAPES + 1, &drawMode);
+    gui->addSpacer();
+    gui->addToggle("Use grid or outline", &bUseGrid);
+    gui->addSpacer();
+    gui->addIntSlider("Blend Mode", 0, OF_BLENDMODE_SCREEN, &mode);
+    gui->addToggle("Auto Clear Background", &bClear);
+    gui->addToggle("Draw type overlay", &bDrawTypeAsOverlay);
+    gui->addSpacer();
+    
+    gui->addLabel("MOVEMENT");
+    gui->addSpacer();
+    gui->addLabel("EVENTS");
+    gui->addToggle("Save Frame", &bCapture);
+    gui->addToggle("Save Settings", &bSave);
+    gui->loadSettings("settings.xml");
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
+    if ( lastDrawMode != drawMode ){
+        lastDrawMode = drawMode;
+        particles.setDrawMode( (TypeParticleSystem::DrawMode) drawMode);
+        ((ofxUILabel*)gui->getWidget("Drawmode Label"))->setLabel(particles.getDrawModeString());
+    }
+    if ( bCapture ){
+        bCapture = false;
+        
+        toSave.readToPixels(pix);
+        ofImage save; save.setFromPixels(pix);
+        save.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
+    }
+    if ( bSave ){
+        gui->saveSettings("settings.xml");
+        bSave = false;
+    }
+    
+    particles.setUseGrid(bUseGrid);
     particles.update();
     ofSetWindowTitle(ofToString(ofGetFrameRate(), 2));
 }
@@ -37,36 +87,19 @@ void testApp::draw(){
     ofEnableAlphaBlending();
     ofEnableBlendMode((ofBlendMode) mode);
     particles.draw();
+    if (bDrawTypeAsOverlay){
+        type.draw();
+    }
     toSave.end();
     
     ofSetColor(255);
     toSave.draw(0, 0);
-    
-    ofDrawBitmapString("Press ' ' to save image\nPress 'c' to toggle background clearing\nPress '+' to change draw modes\nPress 'm' to change blend modes", 20, 40 );
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
-    
-    if ( key == ' '){
-        toSave.readToPixels(pix);
-        ofImage save; save.setFromPixels(pix);
-        save.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
-    } else if ( key == 'c' ){
-        bClear = !bClear;
-    } else if ( key == 'r' ){
-        //type.resetColor();
-    } else if ( key == 'm' ){
-        mode++;
-        if ( mode > OF_BLENDMODE_ADD ){
-            mode = 0;
-        }
-    } else if ( key == '=' && ofGetKeyPressed(OF_KEY_SHIFT)){
-        drawMode++;
-        if ( drawMode > TypeParticleSystem::DRAW_SHAPES ){
-            drawMode = 0;
-        }
-        particles.setDrawMode( (TypeParticleSystem::DrawMode) drawMode);
+    if ( key == 'g' ){
+        gui->toggleVisible();
     }
 }
 

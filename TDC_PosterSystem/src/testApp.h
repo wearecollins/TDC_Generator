@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "TypeParticleSystem.h"
+#include "ofxUI.h"
 
 class testApp : public ofBaseApp{
 
@@ -28,4 +29,10 @@ class testApp : public ofBaseApp{
         // image saving logic
         ofFbo toSave;
         ofPixels pix;
+    
+        // type
+        ofxSVG type;
+    
+        // tweakin'
+        ofxUISuperCanvas * gui;
 };
