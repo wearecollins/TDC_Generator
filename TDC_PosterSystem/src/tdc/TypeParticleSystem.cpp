@@ -37,7 +37,7 @@ void TypeParticleSystem::setup( string file ){
     behaviors[ MOVE_NONE ] = NULL;
     behaviors[ MOVE_NOISE ] = new Noise();
     behaviors[ MOVE_WARP ] = new Warp();
-    behaviors[ MOVE_FLOCK ] = new Flocking();
+    behaviors[ MOVE_FLOCK ] = NULL;
     
     //MOVE_FLOCK,
     //MOVE_GRAVITY,
@@ -391,7 +391,12 @@ void TypeParticleSystem::threadedFunction(){
 void TypeParticleSystem::update(){
     // leave the mesh alone until it's done
     if (!bMeshIsUpdated) return;
+    
+    
     lock();
+    if ( currentMesh && currentMesh->getNumVertices() > 0 && behaviors[ MOVE_FLOCK ] == NULL){
+        behaviors[ MOVE_FLOCK ] = new Flocking(&_particles);
+    }
     gridMesh = bufferGridMesh;
     outlineMesh = bufferOutlineMesh;
     currentBehavior = behaviors[ moveType ];
@@ -402,12 +407,27 @@ void TypeParticleSystem::update(){
     } else {
         currentMesh = &outlineMesh;
     }
+    if ( currentMesh && currentMesh->getNumVertices() > 0 ){
+        if ( currentBehavior != NULL ){
+            currentBehavior->beginDraw();
+        }
+        //currentMesh->draw();
+        
+        if ( currentBehavior != NULL ){
+            currentBehavior->endDraw();
+        }
+    }
 }
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::draw()
 {
-    if ( currentMesh && currentMesh->getNumVertices() > 0 ) currentMesh->draw();
+    if ( currentMesh && currentMesh->getNumVertices() > 0 ){
+        currentMesh->draw();
+        if ( currentBehavior != NULL ){
+            currentBehavior->draw();
+        }
+    }
     meshUpdatingFrames++;
     if ( meshUpdatingFrames > 3 ){
         ofSetColor(0,50);

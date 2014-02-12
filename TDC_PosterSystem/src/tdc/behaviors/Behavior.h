@@ -26,12 +26,16 @@ public:
         return name;
     }
     
+    
+    virtual void setup( ofxLabFlexParticleSystem::Container * c ){};
+    
     virtual void update( TypeParticle * p ){};
     virtual void updateAll( ofxLabFlexParticleSystem::Container * c ){};
     
     // call before/after draw (duh)
     virtual void beginDraw(){}
     virtual void endDraw(){}
+    virtual void draw(){}
     
     // settings
     ofVec2f intensity;

@@ -86,16 +86,16 @@ protected:
     TypeOutline outline;
     TypeGrid    grid;
     TypeMesh *  currentTypeMesh;
-    ofMesh *    currentMesh;
-    ofMesh *    currentMeshBuffer;
+    ofVboMesh *    currentMesh;
+    ofVboMesh *    currentMeshBuffer;
     
     Behavior *  currentBehavior;
     map<MovementType, Behavior *> behaviors;
     
     vector<vector <QuickVertex> > * currentLetterParticles;
     
-    ofMesh      gridMesh, bufferGridMesh;
-    ofMesh      outlineMesh, bufferOutlineMesh;
+    ofVboMesh      gridMesh, bufferGridMesh;
+    ofVboMesh      outlineMesh, bufferOutlineMesh;
     TypeIterator it;
     ofVec2f     lastMouse;
     float       lastMass;

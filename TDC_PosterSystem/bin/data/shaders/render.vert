@@ -4,7 +4,6 @@
 
 uniform sampler2DRect posTex;
 uniform vec2 screen;
-uniform float resolution;
 
 void main() {
     // use the texture coordinates as an index into the position texture
@@ -16,8 +15,8 @@ void main() {
     // Maps the position from the texture (from 0.0 to 1.0) to
     // the screen position (0 - screenWidth/screenHeight)
     //
-    pixPos.x *= screen.x;
-    pixPos.y *= screen.y;
+    //pixPos.x *= screen.x;
+    //pixPos.y *= screen.y;
     
     gl_Position = pixPos;
     gl_FrontColor =  gl_Color;

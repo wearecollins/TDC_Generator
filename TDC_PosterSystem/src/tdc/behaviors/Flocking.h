@@ -10,6 +10,47 @@
 
 #include "Behavior.h"
 
+// PING PONG from shader particle ex
+struct pingPongBuffer {
+public:
+    void allocate( int _width, int _height, int _internalformat = GL_RGBA, float _dissipation = 1.0f){
+        // Allocate
+        for(int i = 0; i < 2; i++){
+            FBOs[i].allocate(_width,_height, _internalformat );
+            FBOs[i].getTextureReference().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+        }
+        
+        // Clean
+        clear();
+        
+        // Set everything to 0
+        flag = 0;
+        swap();
+        flag = 0;
+    }
+    
+    void swap(){
+        src = &(FBOs[(flag)%2]);
+        dst = &(FBOs[++(flag)%2]);
+    }
+    
+    void clear(){
+        for(int i = 0; i < 2; i++){
+            FBOs[i].begin();
+            ofClear(0,255);
+            FBOs[i].end();
+        }
+    }
+    
+    ofFbo& operator[]( int n ){ return FBOs[n];}
+    
+    ofFbo   *src;       // Source       ->  Ping
+    ofFbo   *dst;       // Destination  ->  Pong
+private:
+    ofFbo   FBOs[2];    // Real addresses of ping/pong FBO´s
+    int     flag;       // Integer for making a quick swap
+};
+
 // this should be namespaced like woah
 
 class Flocking : public Behavior {
@@ -17,155 +58,202 @@ public:
     
     Flocking() : Behavior(){
         name = "flocking";
+    }
+    
+    Flocking( ofxLabFlexParticleSystem::Container * particles ) : Behavior(){
+        name = "flocking";
+        setup(particles);
+    }
+    
+    void setup( ofxLabFlexParticleSystem::Container * particles ){
         
         maxspeed = 3;
         maxforce = 0.05;
+        
+        // setup shaders
+        string shadersFolder;
+        shadersFolder="shaders";
+        
+        timeStep = 0.005f;
+        particleSize = 30.0f;
+        
+        // Loading the Shaders
+        updatePos.load("",shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels
+        updateVel.load("",shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels
+        updateRender.load(shadersFolder+"/render.vert",shadersFolder+"/render.frag");
+        
+        //TODO: this should be dynamic
+        numParticles = particles->size();
+        livepos = new float[numParticles*3];
+        
+        // Seting the textures where the information ( position and velocity ) will be
+        textureRes = (int)sqrt((float)numParticles);
+        numParticles = textureRes * textureRes;
+        
+        // 1. Making arrays of float pixels with position information
+        ofxLabFlexParticleSystem::Iterator it = particles->begin();
+        
+        float * pos = new float[numParticles*3];
+        for (int x = 0; x < textureRes; x++){
+            for (int y = 0; y < textureRes; y++){
+                int i = textureRes * y + x;
+                
+                pos[i*3 + 0] = it->second->x / (float) ofGetWidth();
+                pos[i*3 + 1] = it->second->y / (float) ofGetHeight();
+                pos[i*3 + 2] = 0.0;
+                ++it;
+            }
+        }
+        // Load this information in to the FBOÔøΩs texture
+        posPingPong.allocate(textureRes, textureRes,GL_RGB32F);
+        posPingPong.src->getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
+        posPingPong.dst->getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
+        delete [] pos;    // Delete the array
+        
+        
+        // 2. Making arrays of float pixels with velocity information and the load it to a texture
+        it = particles->begin();
+        float * vel = new float[numParticles*3];
+        for (int i = 0; i < numParticles; i++){
+            vel[i*3 + 0] = 0.0;//it->second->velocity.x;
+            vel[i*3 + 1] = 0.0;//it->second->velocity.y;
+            vel[i*3 + 2] = 1.0;
+        }
+        // Load this information in to the FBOÔøΩs texture
+        velPingPong.allocate(textureRes, textureRes,GL_RGB32F);
+        velPingPong.src->getTextureReference().loadData(vel, textureRes, textureRes, GL_RGB);
+        velPingPong.dst->getTextureReference().loadData(vel, textureRes, textureRes, GL_RGB);
+        delete [] vel; // Delete the array
+        
+        // Allocate the final 
+        renderFBO.allocate(ofGetWidth(), ofGetHeight(), GL_RGB32F);
+        renderFBO.begin();
+        ofClear(0, 0, 0, 0);
+        renderFBO.end();
+        
+        mesh.setMode(OF_PRIMITIVE_POINTS);
+        for(int x = 0; x < textureRes; x++){
+            for(int y = 0; y < textureRes; y++){
+                mesh.addVertex(ofVec3f(x,y));
+                mesh.addTexCoord(ofVec2f(x, y));
+            }
+        }
     }
+    
+    void beginDraw(){
+        // Load this information in to the FBOÔøΩs texture
+        posPingPong.src->getTextureReference().loadData(livepos, textureRes, textureRes, GL_RGB);
+        
+        velPingPong.dst->begin();
+        ofClear(0);
+        updateVel.begin();
+        updateVel.setUniformTexture("backbuffer", velPingPong.src->getTextureReference(), 0);   // passing the previus velocity information
+        updateVel.setUniformTexture("posData", posPingPong.src->getTextureReference(), 1);  // passing the position information
+        //updateVel.setUniform1i("resolution", (int)textureRes);
+        updateVel.setUniform2f("screen", (float)ofGetWidth(), (float)ofGetHeight());
+        updateVel.setUniform1f("timestep", (float)timeStep);
+        
+        // draw the source velocity texture to be updated
+        velPingPong.src->draw(0, 0);
+        
+        updateVel.end();
+        velPingPong.dst->end();
+        
+        velPingPong.swap();
+        
+        
+        // Positions PingPong
+        //
+        // With the velocity calculated updates the position
+        //
+        posPingPong.dst->begin();
+        ofClear(0);
+        updatePos.begin();
+        updatePos.setUniformTexture("prevPosData", posPingPong.src->getTextureReference(), 0); // Previus position
+        updatePos.setUniformTexture("velData", velPingPong.src->getTextureReference(), 1);  // Velocity
+        updatePos.setUniform1f("timestep",(float) timeStep );
+        
+        // draw the source position texture to be updated
+        posPingPong.src->draw(0, 0);
+        
+        updatePos.end();
+        posPingPong.dst->end();
+        
+        posPingPong.swap();
+        
+        
+        // Rendering
+        //
+        // 1.   Sending this vertex to the Vertex Shader.
+        //      Each one itÔøΩs draw exactly on the position that match where itÔøΩs stored on both vel and pos textures
+        //      So on the Vertex Shader (thatÔøΩs is first at the pipeline) can search for it information and move it
+        //      to it right position.
+        //
+        renderFBO.begin();
+        ofClear(0,0,0,0);
+        updateRender.begin();
+        updateRender.setUniformTexture("posTex", posPingPong.dst->getTextureReference(), 0);
+        updateRender.setUniform1i("resolution", (float)textureRes);
+        updateRender.setUniform2f("screen", (float)ofGetWidth(), (float)ofGetHeight());
+        //updateRender.setUniform1f("size", (float)particleSize);
+        
+        ofPushStyle();
+        ofEnableBlendMode( OF_BLENDMODE_ADD );
+        ofSetColor(255);
+        
+        mesh.draw();
+        
+        ofDisableBlendMode();
+        glEnd();
+        
+        updateRender.end();
+        renderFBO.end();
+        ofPopStyle();
+    }
+    
+    void endDraw(){
+    }
+    
     
     void updateAll( ofxLabFlexParticleSystem::Container * c ){
-        static ofxLabFlexParticleSystem::Iterator it = c->begin();
-        ofxLabFlexParticleSystem::Iterator begin = c->begin();
-        
-        if ( std::distance( begin, it) >= c->size() ){
-            it = c->begin();
-        }
-        ofxLabFlexParticleSystem::Iterator next = it;
-        std::advance( next, 100 );
-        if ( std::distance( begin, next) >= c->size() ) next = c->end();
-        
-        for( it; it != next; ++it )
-        {
-            it->second->damping = 1.0;
-            it->second->radius = 10.0;
-            flock( it->second, c );
+        ofxLabFlexParticleSystem::Iterator it = c->begin();
+        for (int x = 0; x < textureRes; x++){
+            for (int y = 0; y < textureRes; y++){
+                int i = textureRes * y + x;
+                
+                livepos[i*3 + 0] = it->second->x / (float) ofGetWidth();
+                livepos[i*3 + 1] = it->second->y / (float) ofGetHeight();
+                livepos[i*3 + 2] = 0.0;
+                ++it;
+            }
         }
     }
     
-    void update( TypeParticle * p ){
+    void draw(){
+        ofSetColor(255);
+        renderFBO.draw( -renderFBO.getWidth()/2.0, -renderFBO.getHeight()/2.0 );
     }
     
 protected:
+    float * livepos;
     
     float maxforce;    // Maximum steering force
     float maxspeed;    // Maximum speed
     
-    void flock( ofxLabFlexParticle * p, ofxLabFlexParticleSystem::Container * boids) {
-        ofVec2f sep = separate(p, boids);   // Separation
-        ofVec2f ali = align(p, boids);      // Alignment
-        ofVec2f coh = cohesion(p, boids);   // Cohesion
-        // Arbitrarily weight these forces
-        sep *= (1.5);
-        ali *= (1.0);
-        coh *= (1.0);
-        // Add the force vectors to acceleration
-        applyForce(p, sep);
-        applyForce(p, ali);
-        applyForce(p, coh);
-    }
+    ofShader    updatePos;
+    ofShader    updateVel;
+    ofShader    updateRender; // do we need this one?
     
-    // Separation
-    // Method checks for nearby boids and steers away
-    ofVec2f separate (ofxLabFlexParticle * p, ofxLabFlexParticleSystem::Container * boids ) {
-        float desiredseparation = 25.0f;
-        ofVec2f steer = ofVec2f(0,0);
-        int count = 0;
-        // For every boid in the system, check if it's too close
-        static ofxLabFlexParticleSystem::Iterator sepIt;
-        for( sepIt = boids->begin(); sepIt != boids->end(); ++sepIt )
-        {
-            ofxLabFlexParticle * other = sepIt->second;
-            float d = p->distance( *other );
-            // If the distance is greater than 0 and less than an arbitrary amount (0 when you are yourself)
-            if ((d > 0) && (d < desiredseparation)) {
-                // Calculate vector pointing away from neighbor
-                ofVec2f diff = *p - *other;
-                diff.normalize();
-                diff /= d;        // Weight by distance
-                steer += (diff);
-                count++;            // Keep track of how many
-            }
-        }
-        // Average -- divide by how many
-        if (count > 0) {
-            steer /= ((float)count);
-        }
-        
-        // As long as the vector is greater than 0
-        if (steer.length() > 0) {
-            // Implement Reynolds: Steering = Desired - Velocity
-            steer.normalize();
-            steer *= (maxspeed);
-            steer /= (p->velocity);
-            steer.limit(maxforce);
-        }
-        return steer;
-    }
+    float       timeStep;
+    float       particleSize;
+    ofFbo       renderFBO;
     
-    // Alignment
-    // For every nearby boid in the system, calculate the average velocity
-    ofVec2f align (ofxLabFlexParticle * p, ofxLabFlexParticleSystem::Container * boids) {
-        float neighbordist = 50;
-        ofVec2f sum = ofVec2f(0,0);
-        int count = 0;
-        static ofxLabFlexParticleSystem::Iterator alignIt;
-        for( alignIt = boids->begin(); alignIt != boids->end(); ++alignIt )
-        {
-            ofxLabFlexParticle * other = alignIt->second;
-            float d = p->distance( *other );
-            if ((d > 0) && (d < neighbordist)) {
-                sum += (other->velocity);
-                count++;
-            }
-        }
-        if (count > 0) {
-            sum /= ((float)count);
-            sum.normalize();
-            sum *= (maxspeed);
-            ofVec2f steer = sum - p->velocity;
-            steer.limit(maxforce);
-            return steer;
-        } else {
-            return ofVec2f(0,0);
-        }
-    }
+    pingPongBuffer posPingPong;
+    pingPongBuffer velPingPong;
     
-    // Cohesion
-    // For the average location (i.e. center) of all nearby boids, calculate steering vector towards that location
-    ofVec2f cohesion (ofxLabFlexParticle * p, ofxLabFlexParticleSystem::Container * boids) {
-        float neighbordist = 50;
-        ofVec2f sum = ofVec2f(0,0);   // Start with empty vector to accumulate all locations
-        int count = 0;
-        static ofxLabFlexParticleSystem::Iterator cohIt;
-        for( cohIt = boids->begin(); cohIt != boids->end(); ++cohIt )
-        {
-            ofxLabFlexParticle * other = cohIt->second;
-            float d = p->distance( *other );
-            if ((d > 0) && (d < neighbordist)) {
-                sum += (*other); // Add location
-                count++;
-            }
-        }
-        if (count > 0) {
-            sum /= (count);
-            return seek(p, sum);  // Steer towards the location
-        } else {
-            return ofVec2f(0,0);
-        }
-    }
+    ofVboMesh       mesh;
     
-    void applyForce(ofxLabFlexParticle * p, ofVec2f force) {
-        // We could add mass here if we want A = F / M
-        p->acceleration += (force);
-    }
-    
-    ofVec2f seek(ofxLabFlexParticle * p, ofVec2f target) {
-        ofVec2f desired = target - *p;  // A vector pointing from the location to the target
-        // Normalize desired and scale to maximum speed
-        desired.normalize();
-        desired *= (maxspeed);
-        // Steering = Desired minus Velocity
-        ofVec2f steer = desired - p->velocity;
-        steer.limit(maxforce);  // Limit to maximum steering force
-        return steer;
-    }
+    int     width, height;
+    int     numParticles;
+    int     textureRes;
 };
