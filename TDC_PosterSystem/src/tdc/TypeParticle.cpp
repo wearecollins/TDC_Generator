@@ -36,7 +36,7 @@ void TypeParticle::update()
         offsetY = ofRandom(10000);
     }
     ofxLabFlexParticle::update();
-    velocity = velocity * .99 + (seedPosition - *this ) * .01;
+    //velocity = velocity * .99 + (seedPosition - *this ) * .01;
 }
 
 //-------------------------------------------------------------------------------------------

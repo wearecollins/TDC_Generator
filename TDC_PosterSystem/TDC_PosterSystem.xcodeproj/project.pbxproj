@@ -123,6 +123,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		010C130218ABC0820072A991 /* Behavior.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Behavior.h; path = tdc/behaviors/Behavior.h; sourceTree = "<group>"; };
+		010C130318ABC10B0072A991 /* Noise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Noise.h; path = tdc/behaviors/Noise.h; sourceTree = "<group>"; };
+		010C130418ABC3390072A991 /* Warp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Warp.h; path = tdc/behaviors/Warp.h; sourceTree = "<group>"; };
+		010C130518ABE83F0072A991 /* Flocking.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Flocking.h; path = tdc/behaviors/Flocking.h; sourceTree = "<group>"; };
 		0124CF9718A430E300EAB3AF /* TypeParticleSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeParticleSystem.cpp; path = tdc/TypeParticleSystem.cpp; sourceTree = "<group>"; };
 		0124CF9818A430E300EAB3AF /* TypeParticleSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TypeParticleSystem.h; path = tdc/TypeParticleSystem.h; sourceTree = "<group>"; };
 		0124CF9C18A4312700EAB3AF /* TypeParticle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TypeParticle.cpp; path = tdc/TypeParticle.cpp; sourceTree = "<group>"; };
@@ -265,7 +269,7 @@
 		E45BE9770E8CC7DD009D7055 /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = /System/Library/Frameworks/CoreServices.framework; sourceTree = "<absolute>"; };
 		E45BE9790E8CC7DD009D7055 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		E45BE97A0E8CC7DD009D7055 /* QuickTime.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuickTime.framework; path = /System/Library/Frameworks/QuickTime.framework; sourceTree = "<absolute>"; };
-		E4B69B5B0A3A1756003C02F2 /* TDC_PosterTestDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = TDC_PosterTestDebug.app; path = TDC_PosterSystemDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E4B69B5B0A3A1756003C02F2 /* TDC_PosterSystemDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TDC_PosterSystemDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4B69E1D0A3A1BDC003C02F2 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
 		E4B69E1E0A3A1BDC003C02F2 /* testApp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = testApp.cpp; path = src/testApp.cpp; sourceTree = SOURCE_ROOT; };
 		E4B69E1F0A3A1BDC003C02F2 /* testApp.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = testApp.h; path = src/testApp.h; sourceTree = SOURCE_ROOT; };
@@ -310,9 +314,21 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		010C130118ABC06D0072A991 /* behaviors */ = {
+			isa = PBXGroup;
+			children = (
+				010C130218ABC0820072A991 /* Behavior.h */,
+				010C130318ABC10B0072A991 /* Noise.h */,
+				010C130418ABC3390072A991 /* Warp.h */,
+				010C130518ABE83F0072A991 /* Flocking.h */,
+			);
+			name = behaviors;
+			sourceTree = "<group>";
+		};
 		0124CF9A18A430F100EAB3AF /* particle system */ = {
 			isa = PBXGroup;
 			children = (
+				010C130118ABC06D0072A991 /* behaviors */,
 				0148F9C518A97C44007F715A /* type_shapes */,
 				0124CF9818A430E300EAB3AF /* TypeParticleSystem.h */,
 				0124CF9718A430E300EAB3AF /* TypeParticleSystem.cpp */,
@@ -649,7 +665,7 @@
 				E4EEC9E9138DF44700A80321 /* openFrameworks */,
 				BB4B014C10F69532006C3DED /* addons */,
 				E45BE5980E8CC70C009D7055 /* frameworks */,
-				E4B69B5B0A3A1756003C02F2 /* TDC_PosterTestDebug.app */,
+				E4B69B5B0A3A1756003C02F2 /* TDC_PosterSystemDebug.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -702,7 +718,7 @@
 			);
 			name = TDC_PosterSystem;
 			productName = myOFApp;
-			productReference = E4B69B5B0A3A1756003C02F2 /* TDC_PosterTestDebug.app */;
+			productReference = E4B69B5B0A3A1756003C02F2 /* TDC_PosterSystemDebug.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */

@@ -32,6 +32,17 @@ void TypeParticleSystem::setup( string file ){
     bNeedToChangeMesh = false;
     bUseGrid = true;
     
+    // behavior
+    
+    behaviors[ MOVE_NONE ] = NULL;
+    behaviors[ MOVE_NOISE ] = new Noise();
+    behaviors[ MOVE_WARP ] = new Warp();
+    behaviors[ MOVE_FLOCK ] = new Flocking();
+    
+    //MOVE_FLOCK,
+    //MOVE_GRAVITY,
+    //MOVE_WARP
+    
     // containers
     if ( bUseGrid ){
         currentTypeMesh = &grid;
@@ -45,7 +56,9 @@ void TypeParticleSystem::setup( string file ){
         currentLetterParticles = &letterOutlineParticles;
     }
     
-    moveType = MOVE_WARP;
+    moveType = MOVE_NOISE;
+    
+    currentBehavior = behaviors[ moveType ];
     gravity  = ofVec2f(0,4.0f);
     
     // lez do it
@@ -154,6 +167,12 @@ void TypeParticleSystem::threadedFunction(){
     
     while (isThreadRunning()){
         lock();
+        
+        // some behaviors need everybody
+        if ( currentBehavior != NULL ){
+            currentBehavior->updateAll(&_particles);
+        }
+        
         ofxLabFlexParticleSystem::update();
         
         bMeshIsUpdated = false;
@@ -175,11 +194,17 @@ void TypeParticleSystem::threadedFunction(){
         
         // update mesh based on positionsIterator it;
         int i=0;
+        
         for( it = _particles.begin(); it != _particles.end(); ++it )
         {
             TypeParticle * p = (TypeParticle*)(it->second);
-            if( moveType == MOVE_NOISE ){
-                (*p) += ofVec2f( ofSignedNoise(p->offsetX + ofGetElapsedTimef() * .1) * 20.0f, ofSignedNoise(p->offsetY + ofGetElapsedTimef() * .2) * 20.0f);
+            
+            if ( currentBehavior != NULL ){
+                currentBehavior->update(p);
+            }
+            
+            /*if( moveType == MOVE_NOISE ){
+                
             } else if ( moveType == MOVE_FLOCK ){
                 
             } else if ( moveType == MOVE_GRAVITY ){
@@ -187,8 +212,8 @@ void TypeParticleSystem::threadedFunction(){
             } else if ( moveType == MOVE_WARP ){
                 //(*p) += ofVec2f( ofSignedNoise(p->seedPosition.x + ofGetElapsedTimef() * .1), ofSignedNoise(p->seedPosition.x + ofGetElapsedTimef() * .2) * 50.0f);
                 //(*p) += ofVec2f( 0, sin(p->seedPosition.x + ofGetElapsedTimeMillis() * .2) * 10.0);
-                (*p) += ofVec2f( 0, ofSignedNoise(p->seedPosition.x + ofGetElapsedTimeMillis() * .01) * 50.0);
-            }
+                (*p) += ofVec2f( 0, ofSignedNoise((p->seedPosition.x / ofGetWidth() * 10.0f) + ofGetElapsedTimeMillis() * .001) * 50.0);
+            }*/
             
             currentMeshBuffer->setVertex(i, *it->second);
             i++;
@@ -369,6 +394,7 @@ void TypeParticleSystem::update(){
     lock();
     gridMesh = bufferGridMesh;
     outlineMesh = bufferOutlineMesh;
+    currentBehavior = behaviors[ moveType ];
     unlock();
     
     if ( bUseGrid ){
@@ -449,11 +475,21 @@ void TypeParticleSystem::setUseGrid( bool useGrid ){
 }
 
 //-------------------------------------------------------------------------------------------
+Behavior * TypeParticleSystem::getCurrentBehavior(){
+    return currentBehavior;
+}
+
+//-------------------------------------------------------------------------------------------
+void TypeParticleSystem::setBehavior( MovementType type ){
+    moveType = type;
+}
+
+//-------------------------------------------------------------------------------------------
 void TypeParticleSystem::mouseMoved( int x, int y ){
     if (!bMeshIsUpdated) return;
     
     ofVec3f mp = ofVec3f(x,y,0);
-    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * 2.0f * .8);
+    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * .8);
     lastMouse = mp;
     lastMass = mouseMass;
     

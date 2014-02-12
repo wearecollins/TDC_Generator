@@ -10,9 +10,12 @@
 
 #include "ofxLabFlexParticle.h"
 
+class Behavior;
+
 class TypeParticle : public ofxLabFlexParticle
 {
     friend class TypeParticleSystem;
+    friend class Behavior;
 public:
     
     TypeParticle();
@@ -22,6 +25,10 @@ public:
     void update();
     void draw();
     ofVec2f getStart(){ return seedPosition; };
+    
+    int getOffsetX(){ return offsetX; };
+    int getOffsetY(){ return offsetY; };
+    ofVec3f getSeedPosition(){ return seedPosition; };
     
 protected:
     

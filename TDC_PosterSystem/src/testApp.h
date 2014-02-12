@@ -21,6 +21,8 @@ class testApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
+        void onGui( ofxUIEventArgs & e );
+    
         // particle system
         TypeParticleSystem particles;
     

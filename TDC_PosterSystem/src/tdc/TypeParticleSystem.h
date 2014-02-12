@@ -15,6 +15,11 @@
 
 #include "ofxLabFlexParticleSystem.h"
 
+// behaviorz
+#include "behaviors/Flocking.h"
+#include "behaviors/Noise.h"
+#include "behaviors/Warp.h"
+
 // this is dumb
 struct QuickVertex
 {
@@ -40,9 +45,9 @@ public:
     enum MovementType {
         MOVE_NONE = 0,
         MOVE_NOISE,
+        MOVE_WARP,
         MOVE_FLOCK,
-        MOVE_GRAVITY,
-        MOVE_WARP
+        MOVE_GRAVITY
     };
     
     ~TypeParticleSystem();
@@ -55,6 +60,10 @@ public:
     // draw mode
     void setDrawMode( DrawMode mode );
     string getDrawModeString();
+    
+    // behavior
+    Behavior * getCurrentBehavior();
+    void setBehavior( MovementType type );
     
     // grid vs outline
     void setUseGrid( bool useGrid );
@@ -79,6 +88,10 @@ protected:
     TypeMesh *  currentTypeMesh;
     ofMesh *    currentMesh;
     ofMesh *    currentMeshBuffer;
+    
+    Behavior *  currentBehavior;
+    map<MovementType, Behavior *> behaviors;
+    
     vector<vector <QuickVertex> > * currentLetterParticles;
     
     ofMesh      gridMesh, bufferGridMesh;

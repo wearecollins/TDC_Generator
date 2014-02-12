@@ -44,10 +44,18 @@ void testApp::setup(){
     
     gui->addLabel("MOVEMENT");
     gui->addSpacer();
+    gui->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_FLOCK, TypeParticleSystem::MOVE_NONE);
+    // this should be separate panels for each behavior
+    gui->addSlider("intensityX", 0.0, 100.0, 10.0f);
+    gui->addSlider("intensityY", 0.0, 100.0, 50.0f);
+    gui->addSlider("rate", 0.0, 10.0, 10.0);
+    gui->addSpacer();
     gui->addLabel("EVENTS");
     gui->addToggle("Save Frame", &bCapture);
     gui->addToggle("Save Settings", &bSave);
     gui->loadSettings("settings.xml");
+    
+    ofAddListener(gui->newGUIEvent, this, &testApp::onGui);
 }
 
 //--------------------------------------------------------------
@@ -112,6 +120,28 @@ void testApp::keyReleased(int key){
 void testApp::mouseMoved(int x, int y ){
     //type.mouseMoved(x,y);
     particles.mouseMoved(x,y);
+}
+
+void testApp::onGui( ofxUIEventArgs & e ){
+    if ( e.getName() == "intensityX" ){
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->intensity.x = e.getSlider()->getValue();
+        }
+    } else if ( e.getName() == "intensityY" ){
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->intensity.y = e.getSlider()->getValue();
+        }
+    } else if ( e.getName() == "rate" ){
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->timeFactor = e.getSlider()->getValue() / 1000.0;
+        }
+    } else if ( e.getName() == "Movement Type" ){
+        ofxUIIntSlider * s = (ofxUIIntSlider *) e.getSlider();
+        particles.setBehavior( (TypeParticleSystem::MovementType) s->getValue() );
+    }
 }
 
 //--------------------------------------------------------------
