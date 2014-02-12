@@ -21,13 +21,22 @@ void testApp::setup(){
     // load optional type overlay
     
     type.load("TDC_Type_Sketching.svg");
+    
+    int n = type.getNumPath();
+    
+    for (int i=0; i<n; i++){
+        type.getPathAt(i).setUseShapeColor(false);
+    }
+    
     lastDrawMode = 0;
     drawMode = TypeParticleSystem::DRAW_POINTS;
     ofDisableDepthTest();
-    glPointSize(2.0f);
+    //glPointSize(2.0f);
     
     // GUI
-    gui = new ofxUISuperCanvas("---- SETTINGS ----", 10, 10, 200, ofGetHeight());
+    gui = new ofxUISuperCanvas("---- SETTINGS ----", 10, 10, 500, ofGetHeight());
+    ofAddListener(gui->newGUIEvent, this, &testApp::onGui);
+    
     gui->setVisible(false);
     gui->addSpacer();
     gui->addSpacer();
@@ -49,13 +58,15 @@ void testApp::setup(){
     gui->addSlider("intensityX", 0.0, 100.0, 10.0f);
     gui->addSlider("intensityY", 0.0, 100.0, 50.0f);
     gui->addSlider("rate", 0.0, 10.0, 10.0);
+    gui->addSlider("mix", 0.0, 1.0, .5);
+    
     gui->addSpacer();
     gui->addLabel("EVENTS");
     gui->addToggle("Save Frame", &bCapture);
     gui->addToggle("Save Settings", &bSave);
-    gui->loadSettings("settings.xml");
     
-    ofAddListener(gui->newGUIEvent, this, &testApp::onGui);
+    gui->setTriggerWidgetsUponLoad(true);
+    gui->loadSettings("settings.xml");
 }
 
 //--------------------------------------------------------------
@@ -96,6 +107,7 @@ void testApp::draw(){
     ofEnableBlendMode((ofBlendMode) mode);
     particles.draw();
     if (bDrawTypeAsOverlay){
+        ofSetColor(0);
         type.draw();
     }
     toSave.end();
@@ -141,6 +153,12 @@ void testApp::onGui( ofxUIEventArgs & e ){
     } else if ( e.getName() == "Movement Type" ){
         ofxUIIntSlider * s = (ofxUIIntSlider *) e.getSlider();
         particles.setBehavior( (TypeParticleSystem::MovementType) s->getValue() );
+    } else if ( e.getName() == "mix" ){
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->mix = e.getSlider()->getValue();
+            cout << "MIX "<<b->mix<<endl;
+        }
     }
 }
 

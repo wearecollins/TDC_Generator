@@ -40,6 +40,7 @@ public:
     // settings
     ofVec2f intensity;
     double   timeFactor;
+    float    mix;
     
 protected:
     

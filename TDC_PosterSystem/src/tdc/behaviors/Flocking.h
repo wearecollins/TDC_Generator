@@ -58,11 +58,33 @@ public:
     
     Flocking() : Behavior(){
         name = "flocking";
+        bNeedToRefreshAttract = false;
     }
     
     Flocking( ofxLabFlexParticleSystem::Container * particles ) : Behavior(){
         name = "flocking";
         setup(particles);
+        mix = 0.0;
+        intensity.set(1,1);
+        bNeedToRefreshAttract = false;
+    }
+    
+    float maxspeed;
+    float maxforce;
+    
+    void setLetters( ofxLabFlexParticleSystem::Container * particles ){
+        ofxLabFlexParticleSystem::Iterator it = particles->begin();
+        for (int x = 0; x < textureRes; x++){
+            for (int y = 0; y < textureRes; y++){
+                int i = textureRes * y + x;
+                
+                livepos[i*3 + 0] = it->second->x / (float) ofGetWidth();
+                livepos[i*3 + 1] = it->second->y / (float) ofGetHeight();
+                livepos[i*3 + 2] = 0.0;
+                ++it;
+            }
+        }
+        bNeedToRefreshAttract = true;
     }
     
     void setup( ofxLabFlexParticleSystem::Container * particles ){
@@ -108,6 +130,11 @@ public:
         posPingPong.allocate(textureRes, textureRes,GL_RGB32F);
         posPingPong.src->getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
         posPingPong.dst->getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
+        
+        // load into attract zone
+        attractFbo.allocate(textureRes, textureRes,GL_RGB32F);
+        attractFbo.getTextureReference().loadData(pos, textureRes, textureRes, GL_RGB);
+        
         delete [] pos;    // Delete the array
         
         
@@ -115,8 +142,8 @@ public:
         it = particles->begin();
         float * vel = new float[numParticles*3];
         for (int i = 0; i < numParticles; i++){
-            vel[i*3 + 0] = 0.0;//it->second->velocity.x;
-            vel[i*3 + 1] = 0.0;//it->second->velocity.y;
+            vel[i*3 + 0] = ofRandom(-.01,.01);//it->second->velocity.x;
+            vel[i*3 + 1] = ofRandom(-.01,.01);//it->second->velocity.y;
             vel[i*3 + 2] = 1.0;
         }
         // Load this information in to the FBOÔøΩs texture
@@ -141,17 +168,30 @@ public:
     }
     
     void beginDraw(){
+        if ( bNeedToRefreshAttract ){
+            bNeedToRefreshAttract = false;
+            // load into attract zone
+            attractFbo.getTextureReference().loadData(livepos, textureRes, textureRes, GL_RGB);
+        }
+        
         // Load this information in to the FBOÔøΩs texture
-        posPingPong.src->getTextureReference().loadData(livepos, textureRes, textureRes, GL_RGB);
+        //posPingPong.src->getTextureReference().loadData(livepos, textureRes, textureRes, GL_RGB);
         
         velPingPong.dst->begin();
         ofClear(0);
         updateVel.begin();
+        updateVel.setUniform1i("posWidth", velPingPong.src->getWidth());
+        updateVel.setUniform1i("posHeight", velPingPong.src->getWidth());
         updateVel.setUniformTexture("backbuffer", velPingPong.src->getTextureReference(), 0);   // passing the previus velocity information
-        updateVel.setUniformTexture("posData", posPingPong.src->getTextureReference(), 1);  // passing the position information
+        updateVel.setUniformTexture("posData", posPingPong.src->getTextureReference(), 1);      // passing the position information
+        updateVel.setUniformTexture("attractData", attractFbo.getTextureReference(), 2);        // much attractive data
+        
         //updateVel.setUniform1i("resolution", (int)textureRes);
         updateVel.setUniform2f("screen", (float)ofGetWidth(), (float)ofGetHeight());
         updateVel.setUniform1f("timestep", (float)timeStep);
+        updateVel.setUniform1f("maxspeed", intensity.x / 5000.0f);
+        updateVel.setUniform1f("maxforce", intensity.y / 5000.0f);
+        updateVel.setUniform1f("attractMix", mix);
         
         // draw the source velocity texture to be updated
         velPingPong.src->draw(0, 0);
@@ -169,6 +209,8 @@ public:
         posPingPong.dst->begin();
         ofClear(0);
         updatePos.begin();
+        updatePos.setUniform1i("posWidth", velPingPong.src->getWidth());
+        updatePos.setUniform1i("posHeight", velPingPong.src->getWidth());
         updatePos.setUniformTexture("prevPosData", posPingPong.src->getTextureReference(), 0); // Previus position
         updatePos.setUniformTexture("velData", velPingPong.src->getTextureReference(), 1);  // Velocity
         updatePos.setUniform1f("timestep",(float) timeStep );
@@ -194,21 +236,18 @@ public:
         updateRender.begin();
         updateRender.setUniformTexture("posTex", posPingPong.dst->getTextureReference(), 0);
         updateRender.setUniform1i("resolution", (float)textureRes);
-        updateRender.setUniform2f("screen", (float)ofGetWidth(), (float)ofGetHeight());
+        updateRender.setUniform2f("screen", (float)2.0, (float)2.0);
         //updateRender.setUniform1f("size", (float)particleSize);
         
         ofPushStyle();
-        ofEnableBlendMode( OF_BLENDMODE_ADD );
         ofSetColor(255);
         
         mesh.draw();
         
-        ofDisableBlendMode();
-        glEnd();
+        ofPopStyle();
         
         updateRender.end();
         renderFBO.end();
-        ofPopStyle();
     }
     
     void endDraw(){
@@ -217,7 +256,7 @@ public:
     
     void updateAll( ofxLabFlexParticleSystem::Container * c ){
         ofxLabFlexParticleSystem::Iterator it = c->begin();
-        for (int x = 0; x < textureRes; x++){
+        /*for (int x = 0; x < textureRes; x++){
             for (int y = 0; y < textureRes; y++){
                 int i = textureRes * y + x;
                 
@@ -226,19 +265,17 @@ public:
                 livepos[i*3 + 2] = 0.0;
                 ++it;
             }
-        }
+        }*/
     }
     
     void draw(){
         ofSetColor(255);
-        renderFBO.draw( -renderFBO.getWidth()/2.0, -renderFBO.getHeight()/2.0 );
+        renderFBO.draw(0,0 );
     }
     
 protected:
+    bool bNeedToRefreshAttract;
     float * livepos;
-    
-    float maxforce;    // Maximum steering force
-    float maxspeed;    // Maximum speed
     
     ofShader    updatePos;
     ofShader    updateVel;
@@ -250,6 +287,7 @@ protected:
     
     pingPongBuffer posPingPong;
     pingPongBuffer velPingPong;
+    ofFbo       attractFbo;
     
     ofVboMesh       mesh;
     

@@ -56,7 +56,7 @@ void TypeParticleSystem::setup( string file ){
         currentLetterParticles = &letterOutlineParticles;
     }
     
-    moveType = MOVE_NOISE;
+    moveType = MOVE_FLOCK;
     
     currentBehavior = behaviors[ moveType ];
     gravity  = ofVec2f(0,4.0f);
@@ -103,7 +103,7 @@ void TypeParticleSystem::threadedFunction(){
         }
         
         // build 10000 particles for grid
-        for (int i=0; i<10000; i++){
+        for (int i=0; i<7000; i++){
             int index = (int) ofRandom(0, t_gridMesh.getNumVertices());
             while ( grid.isOccupied(index)){
                 index = (int) ofRandom(0, t_gridMesh.getNumVertices());
@@ -147,7 +147,7 @@ void TypeParticleSystem::threadedFunction(){
             
             outline.occupyIndex(index);
             TypeParticle * t = new TypeParticle(t_outlineMesh.getVertex(index));
-            t->velocity = ofVec2f(ofRandom(-100,100));
+            //t->velocity = ofVec2f(ofRandom(-100,100));
             t->mass = 50.0f;
             t->damping  = .9f;
             
@@ -190,6 +190,7 @@ void TypeParticleSystem::threadedFunction(){
                 currentLetterParticles = &letterOutlineParticles;
                 _particles = _particlesOutline;
             }
+            if ( behaviors[ MOVE_FLOCK ]  != NULL ) ((Flocking*) behaviors[ MOVE_FLOCK ])->setLetters( &_particles );
         }
         
         // update mesh based on positionsIterator it;
@@ -423,7 +424,7 @@ void TypeParticleSystem::update(){
 void TypeParticleSystem::draw()
 {
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
-        currentMesh->draw();
+        if ( currentBehavior == NULL || currentBehavior->getName() != "flocking") currentMesh->draw();
         if ( currentBehavior != NULL ){
             currentBehavior->draw();
         }
