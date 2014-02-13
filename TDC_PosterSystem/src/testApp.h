@@ -4,6 +4,8 @@
 #include "TypeParticleSystem.h"
 #include "ofxUI.h"
 
+#include "ofxSpacebrew.h"
+
 class testApp : public ofBaseApp{
 
 	public:
@@ -37,4 +39,8 @@ class testApp : public ofBaseApp{
     
         // tweakin'
         ofxUISuperCanvas * gui;
+    
+        // interaction
+        Spacebrew::Connection spacebrew;
+        void onMessage( Spacebrew::Message & m );
 };

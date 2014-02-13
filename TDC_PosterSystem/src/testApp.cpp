@@ -67,6 +67,17 @@ void testApp::setup(){
     
     gui->setTriggerWidgetsUponLoad(true);
     gui->loadSettings("settings.xml");
+    
+    // build interaction
+    string host = "sandbox.spacebrew.cc";
+    Spacebrew::Config config;
+    config.addSubscribe("intensityx", "float_normalized");
+    config.addSubscribe("intensityy", "float_normalized");
+    config.addSubscribe("rate", "float_normalized");
+    config.addSubscribe("mix", "float_normalized");
+    spacebrew.connect(host, config);
+    
+    Spacebrew::addListener(this, spacebrew);
 }
 
 //--------------------------------------------------------------
@@ -163,31 +174,51 @@ void testApp::onGui( ofxUIEventArgs & e ){
 }
 
 //--------------------------------------------------------------
-void testApp::mouseDragged(int x, int y, int button){
-
+void testApp::onMessage( Spacebrew::Message & m ){
+    cout <<"siq "<<m.name<<":"<<m.value<<endl;
+    m.value = m.value.substr(1,m.value.length()-1);
+    if ( m.name == "intensityx" ){
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->intensity.x = ofToFloat(m.value) * 100.0f;
+        }
+        ((ofxUISlider *)gui->getWidget("intensityX"))->setValue(ofToFloat(m.value) * 100.0f);
+    } else if ( m.name == "intensityy"){
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->intensity.y = ofToFloat(m.value) * 100.0f;
+            ((ofxUISlider *)gui->getWidget("intensityY"))->setValue(ofToFloat(m.value) * 100.0f);
+        }
+    } else if ( m.name == "rate"){
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->timeFactor = ofToFloat(m.value) * 0.01;
+            ((ofxUISlider *)gui->getWidget("rate"))->setValue(ofToFloat(m.value) * 10.0f);
+        }
+    } else if ( m.name == "mix"){
+        
+        Behavior * b = particles.getCurrentBehavior();
+        if ( b != NULL ){
+            b->mix = ofToFloat(m.value);
+            ((ofxUISlider *)gui->getWidget("mix"))->setValue(ofToFloat(m.value));
+        }
+    }
 }
 
 //--------------------------------------------------------------
-void testApp::mousePressed(int x, int y, int button){
-
-}
+void testApp::mouseDragged(int x, int y, int button){}
 
 //--------------------------------------------------------------
-void testApp::mouseReleased(int x, int y, int button){
-
-}
+void testApp::mousePressed(int x, int y, int button){}
 
 //--------------------------------------------------------------
-void testApp::windowResized(int w, int h){
-
-}
+void testApp::mouseReleased(int x, int y, int button){}
 
 //--------------------------------------------------------------
-void testApp::gotMessage(ofMessage msg){
-
-}
+void testApp::windowResized(int w, int h){}
 
 //--------------------------------------------------------------
-void testApp::dragEvent(ofDragInfo dragInfo){ 
+void testApp::gotMessage(ofMessage msg){}
 
-}
+//--------------------------------------------------------------
+void testApp::dragEvent(ofDragInfo dragInfo){}
