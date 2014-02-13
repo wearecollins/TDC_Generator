@@ -14,6 +14,8 @@ uniform float timestep;
 uniform float maxspeed;
 uniform float maxforce;
 
+uniform vec2 mouse;
+
 // vector utils
 vec2 limit(vec2 v,float m){
     float x = v.x;
@@ -216,6 +218,29 @@ void main(void){
     
     vel.x = vel.x * (1.0 - attractMix / 10.0) + ( att.x - pos.x ) * (attractMix / 10.0);
     vel.y = vel.y * (1.0 - attractMix / 10.0) + ( att.y - pos.y ) * (attractMix / 10.0);
+    
+    // mouse interaction
+    vec2 mouseNorm = mouse;
+    mouseNorm.x = mouse.x / screen.x;
+    mouseNorm.y = mouse.y / screen.y;
+    
+    float dist = length( pos - mouseNorm);
+    float mouseMass = .02; // this should be dynamic
+    float particleMass = .001; // this should be dynamic
+    
+    if( dist < .1 ) {
+        vec2 diff = mouseNorm - pos;
+        
+        diff = normalize(diff);
+        
+        // http://www.grantchronicles.com/astro09.htm
+        // this is a really lose interpretation.. like not very close
+        float d = max( 1, dist ) == abs(dist) ? dist : 1;
+        float force = mouseMass * particleMass / d;
+        float accel = force / particleMass;
+        
+        vel += diff * accel;
+    }
     
     // If it´s going to collide change the velocity course
     //

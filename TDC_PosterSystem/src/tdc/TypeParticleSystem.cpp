@@ -515,6 +515,10 @@ void TypeParticleSystem::mouseMoved( int x, int y ){
     lastMass = mouseMass;
     
     lock();
+    if ( currentBehavior != NULL ){
+        currentBehavior->setMouse( lastMouse );
+    }
+    
     for( it = _particles.begin(); it != _particles.end(); ++it )
     {
         TypeParticle * p = (TypeParticle *) it->second;

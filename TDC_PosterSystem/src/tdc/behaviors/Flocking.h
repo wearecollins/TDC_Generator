@@ -188,6 +188,7 @@ public:
         
         //updateVel.setUniform1i("resolution", (int)textureRes);
         updateVel.setUniform2f("screen", (float)ofGetWidth(), (float)ofGetHeight());
+        updateVel.setUniform2f("mouse", mouse.x, mouse.y);
         updateVel.setUniform1f("timestep", (float)timeStep);
         updateVel.setUniform1f("maxspeed", intensity.x / 5000.0f);
         updateVel.setUniform1f("maxforce", intensity.y / 5000.0f);
@@ -248,6 +249,9 @@ public:
         
         updateRender.end();
         renderFBO.end();
+        
+        // reset mouse to junk
+        mouse.set(-1,-1);
     }
     
     void endDraw(){

@@ -27,6 +27,7 @@ public:
     }
     
     
+    virtual void setMouse( ofVec2f mousePosition ){ mouse = mousePosition; };
     virtual void setup( ofxLabFlexParticleSystem::Container * c ){};
     
     virtual void update( TypeParticle * p ){};
@@ -45,5 +46,5 @@ public:
 protected:
     
     string name;
-    
+    ofVec2f mouse;
 };

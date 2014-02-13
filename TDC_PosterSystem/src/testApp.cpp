@@ -168,14 +168,12 @@ void testApp::onGui( ofxUIEventArgs & e ){
         Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->mix = e.getSlider()->getValue();
-            cout << "MIX "<<b->mix<<endl;
         }
     }
 }
 
 //--------------------------------------------------------------
 void testApp::onMessage( Spacebrew::Message & m ){
-    cout <<"siq "<<m.name<<":"<<m.value<<endl;
     m.value = m.value.substr(1,m.value.length()-1);
     if ( m.name == "intensityx" ){
         Behavior * b = particles.getCurrentBehavior();
