@@ -10,47 +10,6 @@
 
 #include "Behavior.h"
 
-// PING PONG from shader particle ex
-struct pingPongBuffer {
-public:
-    void allocate( int _width, int _height, int _internalformat = GL_RGBA, float _dissipation = 1.0f){
-        // Allocate
-        for(int i = 0; i < 2; i++){
-            FBOs[i].allocate(_width,_height, _internalformat );
-            FBOs[i].getTextureReference().setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
-        }
-        
-        // Clean
-        clear();
-        
-        // Set everything to 0
-        flag = 0;
-        swap();
-        flag = 0;
-    }
-    
-    void swap(){
-        src = &(FBOs[(flag)%2]);
-        dst = &(FBOs[++(flag)%2]);
-    }
-    
-    void clear(){
-        for(int i = 0; i < 2; i++){
-            FBOs[i].begin();
-            ofClear(0,255);
-            FBOs[i].end();
-        }
-    }
-    
-    ofFbo& operator[]( int n ){ return FBOs[n];}
-    
-    ofFbo   *src;       // Source       ->  Ping
-    ofFbo   *dst;       // Destination  ->  Pong
-private:
-    ofFbo   FBOs[2];    // Real addresses of ping/pong FBO´s
-    int     flag;       // Integer for making a quick swap
-};
-
 // this should be namespaced like woah
 
 class Flocking : public Behavior {
@@ -102,7 +61,7 @@ public:
         // Loading the Shaders
         updatePos.load("",shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels
         updateVel.load("",shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels
-        updateRender.load(shadersFolder+"/render.vert",shadersFolder+"/render.frag");
+        updateRender.load(shadersFolder+"/render.vert","");//shadersFolder+"/render.frag");
         
         //TODO: this should be dynamic
         numParticles = particles->size();
@@ -153,7 +112,7 @@ public:
         delete [] vel; // Delete the array
         
         // Allocate the final 
-        renderFBO.allocate(ofGetWidth(), ofGetHeight(), GL_RGB32F);
+        renderFBO.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA32F);
         renderFBO.begin();
         ofClear(0, 0, 0, 0);
         renderFBO.end();
@@ -274,7 +233,7 @@ public:
     
     void draw(){
         ofSetColor(255);
-        renderFBO.draw(0,0 );
+        renderFBO.draw(0,0);
     }
     
 protected:

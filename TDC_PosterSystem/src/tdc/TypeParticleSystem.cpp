@@ -38,6 +38,8 @@ void TypeParticleSystem::setup( string file ){
     behaviors[ MOVE_NOISE ] = new Noise();
     behaviors[ MOVE_WARP ] = new Warp();
     behaviors[ MOVE_FLOCK ] = NULL;
+    behaviors[ MOVE_BUMP ] = new BumpMap();
+    behaviors[ MOVE_BUMP ]->setup(NULL);
     
     //MOVE_FLOCK,
     //MOVE_GRAVITY,
@@ -103,7 +105,7 @@ void TypeParticleSystem::threadedFunction(){
         }
         
         // build 10000 particles for grid
-        for (int i=0; i<7000; i++){
+        for (int i=0; i<10000; i++){
             int index = (int) ofRandom(0, t_gridMesh.getNumVertices());
             while ( grid.isOccupied(index)){
                 index = (int) ofRandom(0, t_gridMesh.getNumVertices());
@@ -412,7 +414,7 @@ void TypeParticleSystem::update(){
         if ( currentBehavior != NULL ){
             currentBehavior->beginDraw();
         }
-        //currentMesh->draw();
+        currentMesh->draw();
         
         if ( currentBehavior != NULL ){
             currentBehavior->endDraw();
@@ -424,7 +426,7 @@ void TypeParticleSystem::update(){
 void TypeParticleSystem::draw()
 {
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
-        if ( currentBehavior == NULL || currentBehavior->getName() != "flocking") currentMesh->draw();
+        if ( currentBehavior == NULL || (currentBehavior->getName() != "flocking" && currentBehavior->getName() != "bumpmap")) currentMesh->draw();
         if ( currentBehavior != NULL ){
             currentBehavior->draw();
         }

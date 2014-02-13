@@ -19,6 +19,7 @@
 #include "behaviors/Flocking.h"
 #include "behaviors/Noise.h"
 #include "behaviors/Warp.h"
+#include "behaviors/BumpMap.h"
 
 // this is dumb
 struct QuickVertex
@@ -47,6 +48,7 @@ public:
         MOVE_NOISE,
         MOVE_WARP,
         MOVE_FLOCK,
+        MOVE_BUMP,
         MOVE_GRAVITY
     };
     

@@ -8,6 +8,7 @@ bool bDrawTypeAsOverlay = true;
 
 int mode = 0;
 int lastDrawMode = -1;
+float bgAlpha = 255.0f;
 
 //--------------------------------------------------------------
 void testApp::setup(){
@@ -48,12 +49,13 @@ void testApp::setup(){
     gui->addSpacer();
     gui->addIntSlider("Blend Mode", 0, OF_BLENDMODE_SCREEN, &mode);
     gui->addToggle("Auto Clear Background", &bClear);
+    gui->addSlider("Background Alpha Clear", 0.0, 255.0f, &bgAlpha);
     gui->addToggle("Draw type overlay", &bDrawTypeAsOverlay);
     gui->addSpacer();
     
     gui->addLabel("MOVEMENT");
     gui->addSpacer();
-    gui->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_FLOCK, TypeParticleSystem::MOVE_NONE);
+    gui->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_BUMP, TypeParticleSystem::MOVE_NONE);
     // this should be separate panels for each behavior
     gui->addSlider("intensityX", 0.0, 100.0, 10.0f);
     gui->addSlider("intensityY", 0.0, 100.0, 50.0f);
@@ -108,9 +110,9 @@ void testApp::update(){
 void testApp::draw(){
     ofBackground(0);
     toSave.begin();
-    if ( bClear ) ofClear(0,0,0,0);
+    if ( bClear ) ofClear(0,0,0,255);
     else {
-        ofSetColor(0,0,0,5);
+        ofSetColor(0,0,0,bgAlpha);
         ofRect(0,0, toSave.getWidth(), toSave.getHeight());
         ofSetColor(255,255);
     }
