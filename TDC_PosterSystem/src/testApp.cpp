@@ -84,7 +84,7 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::update(){
-    if ( lastDrawMode != drawMode ){
+    if ( lastDrawMode != drawMode || particles.getDrawMode() != ((TypeParticleSystem::DrawMode) drawMode) ){
         lastDrawMode = drawMode;
         particles.setDrawMode( (TypeParticleSystem::DrawMode) drawMode);
         ((ofxUILabel*)gui->getWidget("Drawmode Label"))->setLabel(particles.getDrawModeString());

@@ -44,3 +44,16 @@ void TypeParticle::draw()
 {
     ofEllipse( *this, radius, radius );
 }
+
+
+//-------------------------------------------------------------------------------------------
+TypeParticle& TypeParticle::operator=( const TypeParticle& p ){
+    ofxLabFlexParticle::operator=(p);
+    offsetX=p.offsetX;
+    offsetY=p.offsetY;
+    index=p.index;
+    
+    cout << "correct = is called "<<endl;
+    
+    return *this;
+}

@@ -66,6 +66,7 @@ public:
     void mouseMoved( int x, int y );
     
     // draw mode
+    DrawMode getDrawMode();
     void setDrawMode( DrawMode mode );
     string getDrawModeString();
     
@@ -90,7 +91,7 @@ protected:
     bool        bNeedToChangeMesh;
     bool        bUseGrid;
     
-    map<DrawMode, map<GridType,ofVboMesh> > meshes;
+    map<DrawMode, map<GridType,ofMesh> > meshes;
     void        buildMeshes();
     void        buildMesh(DrawMode mode, GridType type );
     
@@ -98,16 +99,16 @@ protected:
     TypeOutline outline;
     TypeGrid    grid;
     TypeMesh *  currentTypeMesh;
-    ofVboMesh *    currentMesh;
-    ofVboMesh *    currentMeshBuffer;
+    ofMesh *    currentMesh;
+    ofMesh *    currentMeshBuffer;
     
     Behavior *  currentBehavior;
     map<MovementType, Behavior *> behaviors;
     
     vector<vector <QuickVertex> > * currentLetterParticles;
     
-    ofVboMesh      gridMesh, bufferGridMesh;
-    ofVboMesh      outlineMesh, bufferOutlineMesh;
+    ofMesh      gridMesh, bufferGridMesh;
+    ofMesh      outlineMesh, bufferOutlineMesh;
     TypeIterator it;
     ofVec2f     lastMouse;
     float       lastMass;

@@ -30,6 +30,11 @@ public:
     int getOffsetY(){ return offsetY; };
     ofVec3f getSeedPosition(){ return seedPosition; };
     
+    int index;
+    
+    
+    TypeParticle& operator=( const TypeParticle& p );
+    
 protected:
     
     ofVec2f seedPosition;

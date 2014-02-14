@@ -8,6 +8,7 @@
 
 #include "TypeParticleSystem.h"
 
+ofMesh test;
 
 //-------------------------------------------------------------------------------------------
 TypeParticleSystem::~TypeParticleSystem(){
@@ -44,10 +45,10 @@ void TypeParticleSystem::setup( string file ){
     //MOVE_GRAVITY,
     
     // null till we builds them
-    currentMesh = NULL;
+    currentMesh = new ofMesh();
     
     // containers
-    currentMeshBuffer = new ofVboMesh();
+    currentMeshBuffer = new ofMesh();
     
     if ( bUseGrid ){
         currentTypeMesh = &grid;
@@ -62,6 +63,9 @@ void TypeParticleSystem::setup( string file ){
     currentBehavior = behaviors[ moveType ];
     gravity  = ofVec2f(0,4.0f);
     
+    test.load("meshes/mesh_1_0");
+    test.setMode(OF_PRIMITIVE_TRIANGLES);
+    
     // lez do it
     startThread();
 }
@@ -74,8 +78,23 @@ void TypeParticleSystem::threadedFunction(){
     
     if (!bIsSetup){
         // setup grid
-        grid.load(svgFile);
-        outline.load(svgFile);
+        ofxXmlSettings gridParticleSettings;
+        bool bLoaded = gridParticleSettings.load("settings/grid_particles.xml");
+        
+        
+        ofxXmlSettings gridOutlineSettings;
+        bool bLoaded2 = gridOutlineSettings.load("settings/type_grid_settings.xml");
+        int numLetters = 0;
+        
+        if (!bLoaded2 || test.getNumVertices() == 0){
+            grid.load(svgFile);
+            outline.load(svgFile);
+            numLetters = outline.getNumLetters();
+            gridOutlineSettings.addValue("numLetter", numLetters);
+            gridOutlineSettings.save("settings/type_grid_settings.xml");
+        } else {
+            numLetters = gridOutlineSettings.getValue("numLetter", numLetters);
+        }
         
         ofMesh t_gridMesh     = grid.getMesh();
         ofMesh t_outlineMesh  = outline.getMesh();
@@ -98,107 +117,241 @@ void TypeParticleSystem::threadedFunction(){
         }
         
         // set up letter containers
-        for ( int i=0; i< grid.getNumLetters(); i++){
+        for ( int i=0; i< numLetters; i++){
             letterGridParticles.push_back(vector<QuickVertex>());
             letterOutlineParticles.push_back(vector<QuickVertex>());
         }
         
-        // build 10000 particles for grid
-        for (int i=0; i<10000; i++){
-            int index = (int) ofRandom(0, t_gridMesh.getNumVertices());
-            while ( grid.isOccupied(index)){
-                index = (int) ofRandom(0, t_gridMesh.getNumVertices());
+        if ( !bLoaded ){
+            
+            // build 10000 particles for grid
+            for (int i=0; i<10000; i++){
+                int index = (int) ofRandom(0, t_gridMesh.getNumVertices());
+                while ( grid.isOccupied(index)){
+                    index = (int) ofRandom(0, t_gridMesh.getNumVertices());
+                }
+                int letter = grid.getLetterByParticle( index );
+                
+                QuickVertex qv;
+                qv.pos      = t_gridMesh.getVertex(index);
+                qv.index    = i;
+                
+                letterGridParticles[letter].push_back(qv);
+                
+                grid.occupyIndex(index);
+                TypeParticle * t = new TypeParticle(t_gridMesh.getVertex(index));
+                t->velocity = ofVec2f(ofRandom(-100,100));
+                t->mass = 50.0f;
+                t->damping  = .9f;
+                t->index = i;
+                
+                addParticle(t);
+                bufferGridMesh.addVertex(t_gridMesh.getVertex(index));
+                ofColor localColor = color;
+                color.setHue( color.getHue() + sin(i) * 50.0f );
+                bufferGridMesh.addColor( localColor );
+                
+                gridParticleSettings.addTag("particle");
+                gridParticleSettings.pushTag("particle", i); {
+                    gridParticleSettings.addValue("x", t->x );
+                    gridParticleSettings.addValue("y", t->y );
+                    gridParticleSettings.addValue("z", t->z );
+                    
+                    gridParticleSettings.addValue("grid_index", index);
+                    gridParticleSettings.addValue("letter", letter);
+                    
+                    gridParticleSettings.addValue("vel_x", t->velocity.x);
+                    gridParticleSettings.addValue("vel_y", t->velocity.y);
+                    gridParticleSettings.addValue("mass", t->mass);
+                    gridParticleSettings.addValue("damping", t->damping);
+                    gridParticleSettings.addValue("index", t->index);
+                    
+                    gridParticleSettings.addValue("r", color.r );
+                    gridParticleSettings.addValue("g", color.g );
+                    gridParticleSettings.addValue("b", color.b );
+                } gridParticleSettings.popTag();
             }
-            int letter = grid.getLetterByParticle( index );
-            
-            QuickVertex qv;
-            qv.pos      = t_gridMesh.getVertex(index);
-            qv.index    = i;
-            
-            letterGridParticles[letter].push_back(qv);
-            
-            grid.occupyIndex(index);
-            TypeParticle * t = new TypeParticle(t_gridMesh.getVertex(index));
-            t->velocity = ofVec2f(ofRandom(-100,100));
-            t->mass = 50.0f;
-            t->damping  = .9f;
-            
-            addParticle(t);
-            bufferGridMesh.addVertex(t_gridMesh.getVertex(index));
-            ofColor localColor = color;
-            color.setHue( color.getHue() + sin(i) * 50.0f );
-            bufferGridMesh.addColor( localColor );
+            gridParticleSettings.save("settings/grid_particles.xml");
+        } else {
+            int n = gridParticleSettings.getNumTags("particle");
+            for (int i=0; i<n; i++){
+                gridParticleSettings.pushTag("particle", i); {
+                    ofVec3f pos;
+                    pos.x = gridParticleSettings.getValue("x", pos.x );
+                    pos.y = gridParticleSettings.getValue("y", pos.y );
+                    pos.z = gridParticleSettings.getValue("z", pos.z );
+                    
+                    int index = gridParticleSettings.getValue("grid_index", 0);
+                    int letter = gridParticleSettings.getValue("letter", 0);
+                    
+                    TypeParticle * t = new TypeParticle(pos);
+                    
+                    t->velocity.x = gridParticleSettings.getValue("vel_x", t->velocity.x);
+                    t->velocity.y= gridParticleSettings.getValue("vel_y", t->velocity.y);
+                    
+                    t->mass = gridParticleSettings.getValue("mass", t->mass);
+                    t->damping = gridParticleSettings.getValue("damping", t->damping);
+                    t->index = gridParticleSettings.getValue("index", 0);
+                    
+                    addParticle(t);
+                    bufferGridMesh.addVertex(pos);
+                    ofColor localColor = color;
+                    color.setHue( color.getHue() + sin(i) * 50.0f );
+                    bufferGridMesh.addColor( localColor );
+                    
+                    QuickVertex qv;
+                    qv.pos      = pos;
+                    qv.index    = t->index;
+                    letterGridParticles[letter].push_back(qv);
+                    
+                    //gridParticleSettings.addValue("r", color.r );
+                    //gridParticleSettings.addValue("g", color.g );
+                    //gridParticleSettings.addValue("b", color.b );
+                } gridParticleSettings.popTag();
+            }
+            cout << "LOADED "<<n<<" PARTICLES"<<endl;
         }
         _particlesGrid = _particles;
-        clear();
+        _particles.clear();
         
-        // add 8000 particles for outline
-        for (int i=0; i<7000; i++){
-            int index = (int) ofRandom(0, t_outlineMesh.getNumVertices());
-            while ( outline.isOccupied(index) && !outline.isFull() ){
-                index = (int) ofRandom(0, t_outlineMesh.getNumVertices());
+        ofxXmlSettings outlineParticleSettings;
+        bLoaded = outlineParticleSettings.load("settings/outline_particles.xml");
+        
+        if ( !bLoaded ){
+            
+            // add 8000 particles for outline
+            for (int i=0; i<7000; i++){
+                int index = (int) ofRandom(0, t_outlineMesh.getNumVertices());
+                while ( outline.isOccupied(index) && !outline.isFull() ){
+                    index = (int) ofRandom(0, t_outlineMesh.getNumVertices());
+                }
+                int letter = outline.getLetterByParticle( index );
+                
+                QuickVertex qv;
+                qv.pos      = t_outlineMesh.getVertex(index);
+                qv.index    = i;
+                
+                letterOutlineParticles[letter].push_back(qv);
+                
+                outline.occupyIndex(index);
+                TypeParticle * t = new TypeParticle(t_outlineMesh.getVertex(index));
+                //t->velocity = ofVec2f(ofRandom(-100,100));
+                t->mass = 50.0f;
+                t->damping  = .9f;
+                t->index = i;
+                
+                addParticle(t);
+                bufferOutlineMesh.addVertex(t_outlineMesh.getVertex(index));
+                ofColor localColor = color;
+                color.setHue( color.getHue() + sin(i) * 50.0f );
+                bufferOutlineMesh.addColor( localColor );
+                
+                outlineParticleSettings.addTag("particle");
+                outlineParticleSettings.pushTag("particle", i); {
+                    outlineParticleSettings.addValue("x", t->x );
+                    outlineParticleSettings.addValue("y", t->y );
+                    outlineParticleSettings.addValue("z", t->z );
+                    
+                    outlineParticleSettings.addValue("grid_index", index);
+                    outlineParticleSettings.addValue("letter", letter);
+                    
+                    outlineParticleSettings.addValue("vel_x", t->velocity.x);
+                    outlineParticleSettings.addValue("vel_y", t->velocity.y);
+                    outlineParticleSettings.addValue("mass", t->mass);
+                    outlineParticleSettings.addValue("damping", t->damping);
+                    outlineParticleSettings.addValue("index", t->index);
+                    
+                    outlineParticleSettings.addValue("r", color.r );
+                    outlineParticleSettings.addValue("g", color.g );
+                    outlineParticleSettings.addValue("b", color.b );
+                } outlineParticleSettings.popTag();
             }
-            int letter = outline.getLetterByParticle( index );
-            
-            QuickVertex qv;
-            qv.pos      = t_outlineMesh.getVertex(index);
-            qv.index    = i;
-            
-            letterOutlineParticles[letter].push_back(qv);
-            
-            outline.occupyIndex(index);
-            TypeParticle * t = new TypeParticle(t_outlineMesh.getVertex(index));
-            //t->velocity = ofVec2f(ofRandom(-100,100));
-            t->mass = 50.0f;
-            t->damping  = .9f;
-            
-            addParticle(t);
-            bufferOutlineMesh.addVertex(t_outlineMesh.getVertex(index));
-            ofColor localColor = color;
-            color.setHue( color.getHue() + sin(i) * 50.0f );
-            bufferOutlineMesh.addColor( localColor );
+            outlineParticleSettings.save("settings/outline_particles.xml");
+        } else {
+            int n = outlineParticleSettings.getNumTags("particle");
+            for (int i=0; i<n; i++){
+                outlineParticleSettings.pushTag("particle", i); {
+                    ofVec3f pos;
+                    pos.x = outlineParticleSettings.getValue("x", pos.x );
+                    pos.y = outlineParticleSettings.getValue("y", pos.y );
+                    pos.z = outlineParticleSettings.getValue("z", pos.z );
+                    
+                    int index = outlineParticleSettings.getValue("grid_index", 0);
+                    int letter = outlineParticleSettings.getValue("letter", 0);
+                    
+                    TypeParticle * t = new TypeParticle(pos);
+                    
+                    t->velocity.x = outlineParticleSettings.getValue("vel_x", t->velocity.x);
+                    t->velocity.y= outlineParticleSettings.getValue("vel_y", t->velocity.y);
+                    
+                    t->mass = outlineParticleSettings.getValue("mass", t->mass);
+                    t->damping = outlineParticleSettings.getValue("damping", t->damping);
+                    t->index = outlineParticleSettings.getValue("index", 0);
+                    
+                    addParticle(t);
+                    bufferOutlineMesh.addVertex(pos);
+                    ofColor localColor = color;
+                    color.setHue( color.getHue() + sin(i) * 50.0f );
+                    bufferOutlineMesh.addColor( localColor );
+                    
+                    QuickVertex qv;
+                    qv.pos      = pos;
+                    qv.index    = t->index;
+                    letterOutlineParticles[letter].push_back(qv);
+                    
+                    //outlineParticleSettings.addValue("r", color.r );
+                    //outlineParticleSettings.addValue("g", color.g );
+                    //outlineParticleSettings.addValue("b", color.b );
+                } outlineParticleSettings.popTag();
+            }
+            cout << "LOADED "<<n<<" PARTICLES"<<endl;
         }
         _particlesOutline = _particles;
-        clear();
+        _particles.clear();
         
         lastDrawMode = DRAW_NULL;
         drawMode = DRAW_POINTS;
         
         buildMeshes();
         
+        currentMeshBuffer->append( meshes[ drawMode ][ bUseGrid ? GRID_POINTS : GRID_OUTLINE ]);
+        
         bIsSetup = true;
     }
     
     while (isThreadRunning()){
-        lock();
         
         // some behaviors need everybody
         if ( currentBehavior != NULL ){
             currentBehavior->updateAll(&_particles);
         }
         
+        // FIRST!
+        if ( bNeedToChangeMesh || lastDrawMode != drawMode ){
+            
+            lock();
+            
+            if ( bUseGrid ){
+                _particles = _particlesGrid;
+            } else {
+                _particles = _particlesOutline;
+            }
+            
+            currentMeshBuffer->clear();
+            currentMeshBuffer->append( meshes[ drawMode ][ bUseGrid ? GRID_POINTS : GRID_OUTLINE ]);
+            currentMeshBuffer->setMode( meshes[ drawMode ][ bUseGrid ? GRID_POINTS : GRID_OUTLINE ].getMode());
+            lastDrawMode = drawMode;
+            
+            if ( behaviors[ MOVE_FLOCK ]  != NULL ) ((Flocking*) behaviors[ MOVE_FLOCK ])->setLetters( &_particles );
+            unlock();
+        }
+        
+        lock();
         ofxLabFlexParticleSystem::update();
         
         bMeshIsUpdated = false;
         
-        // FIRST!
-        if ( bNeedToChangeMesh ){
-            if ( bUseGrid ){
-                currentTypeMesh = &grid;
-                currentLetterParticles = &letterGridParticles;
-                _particles = _particlesGrid;
-            } else {
-                currentTypeMesh = &outline;
-                currentLetterParticles = &letterOutlineParticles;
-                _particles = _particlesOutline;
-            }
-            currentMeshBuffer = &meshes[ drawMode ][ bUseGrid ? GRID_POINTS : GRID_OUTLINE ];
-            
-            if ( behaviors[ MOVE_FLOCK ]  != NULL ) ((Flocking*) behaviors[ MOVE_FLOCK ])->setLetters( &_particles );
-        }
-        
         // update mesh based on positionsIterator it;
-        int i=0;
         
         for( it = _particles.begin(); it != _particles.end(); ++it )
         {
@@ -207,30 +360,15 @@ void TypeParticleSystem::threadedFunction(){
             if ( currentBehavior != NULL ){
                 currentBehavior->update(p);
             }
-            
-            /*if( moveType == MOVE_NOISE ){
-                
-            } else if ( moveType == MOVE_FLOCK ){
-                
-            } else if ( moveType == MOVE_GRAVITY ){
-                (*p).velocity += gravity;
-            } else if ( moveType == MOVE_WARP ){
-                //(*p) += ofVec2f( ofSignedNoise(p->seedPosition.x + ofGetElapsedTimef() * .1), ofSignedNoise(p->seedPosition.x + ofGetElapsedTimef() * .2) * 50.0f);
-                //(*p) += ofVec2f( 0, sin(p->seedPosition.x + ofGetElapsedTimeMillis() * .2) * 10.0);
-                (*p) += ofVec2f( 0, ofSignedNoise((p->seedPosition.x / ofGetWidth() * 10.0f) + ofGetElapsedTimeMillis() * .001) * 50.0);
-            }*/
-            
-            currentMeshBuffer->setVertex(i, *it->second);
-            i++;
+            currentMeshBuffer->setVertex(p->index, *p);
         }
         
         bMeshIsUpdated = true;
         bNeedToChangeMesh = false;
         meshUpdatingFrames = 0;
-        lastDrawMode = drawMode;
         unlock();
         
-        sleep(16.6667); // run at ~60fps
+        sleep(8);//16.6667); // run at ~60fps
     }
 }
 
@@ -239,13 +377,16 @@ void TypeParticleSystem::update(){
     // leave the mesh alone until it's done
     if (!bMeshIsUpdated) return;
     
-    
     lock();
+    
     if ( currentMesh && currentMesh->getNumVertices() > 0 && behaviors[ MOVE_FLOCK ] == NULL){
         behaviors[ MOVE_FLOCK ] = new Flocking(&_particles);
     }
     //gridMesh = bufferGridMesh;
     //outlineMesh = bufferOutlineMesh;
+    currentMesh->clear();
+    currentMesh->append(*currentMeshBuffer);
+    currentMesh->setMode(currentMeshBuffer->getMode());
     currentBehavior = behaviors[ moveType ];
     unlock();
     
@@ -255,7 +396,6 @@ void TypeParticleSystem::update(){
         currentMesh = &outlineMesh;
     }*/
     
-    currentMesh = currentMeshBuffer;
     
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
         if ( currentBehavior != NULL ){
@@ -291,6 +431,12 @@ void TypeParticleSystem::draw()
         
         ofDrawBitmapString(str, ofGetWidth()/2.0, ofGetHeight()/2.0);
     }
+}
+
+
+//-------------------------------------------------------------------------------------------
+TypeParticleSystem::DrawMode TypeParticleSystem::getDrawMode(){
+    return drawMode;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -360,12 +506,14 @@ void TypeParticleSystem::buildMeshes(){
     
     buildMesh(DRAW_SHAPES, GRID_POINTS);
     buildMesh(DRAW_SHAPES, GRID_OUTLINE);
+    
+    cout << "done building"<<endl;
 }
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
     meshes[ mode ][ type ] = ofVboMesh();
-
+    
     ofMesh * mesh = &meshes[ mode ][ type ];
     vector<vector <QuickVertex> > * letterParticles = type == GRID_POINTS ? &letterGridParticles : &letterOutlineParticles;
     
@@ -379,6 +527,32 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
     
     if ( bLoad ){
         ofLogWarning()<<"Load success "<<mode<<":"<<type;
+        
+        switch (mode) {
+            case DRAW_LINES:
+                mesh->setMode(OF_PRIMITIVE_LINES);
+                break;
+                
+            case DRAW_LINES_RANDOMIZED:
+                mesh->setMode(OF_PRIMITIVE_LINES);
+                break;
+                
+            case DRAW_LINES_ARBITARY:
+                mesh->setMode(OF_PRIMITIVE_LINES);
+                break;
+                
+            case DRAW_POINTS:
+                mesh->setMode(OF_PRIMITIVE_POINTS);
+                break;
+                
+            case DRAW_SHAPES:
+                mesh->setMode(OF_PRIMITIVE_TRIANGLES);
+                break;
+                
+            default:
+                break;
+        }
+        
         return;
     }
     
@@ -416,27 +590,36 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
     
     int i=0;
     vector<int> attach;
+    mesh->clearIndices();
     
     switch (mode) {
         case DRAW_LINES:
             mesh->setMode(OF_PRIMITIVE_LINES);
-            
             mesh->clearIndices();
             
             // method 1: randomize
-            if ( type == GRID_OUTLINE ){
+            //if ( type == GRID_OUTLINE ){
                 for (int j=0; j<letterParticles->size(); j++){
+                    
+                    vector <QuickVertex> quickVerts = letterParticles->at(j);
+                    
                     for (int k=0; k<(*letterParticles)[j].size(); k++){
                         mesh->addIndex((*letterParticles)[j][k].index);
-                        int ind = floor(ofRandom((*letterParticles)[j].size()));
-                        mesh->addIndex((*letterParticles)[j][ind].index);
+                        
+                        int ind = floor(ofRandom(quickVerts.size()));
+                        mesh->addIndex(quickVerts[ind].index);
+                        quickVerts.erase( quickVerts.begin() + ind );
+                        if ( quickVerts.size() == 0 ) break;
                     }
                 }
-            } else {
+            /*} else {
                 // method 2: attach to anywhere inside letter
                 
+                attach.clear();
+                i = 0;
+                
                 for (int j=0; j<letterParticles->size(); j++){
-                    QuickVertex qv = (*letterParticles)[j][ofRandom((*letterParticles)[j].size())];
+                    QuickVertex qv = letterParticles->at(j).at(ofRandom(letterParticles->at(j).size()));
                     attach.push_back(qv.index);
                 }
                 
@@ -448,14 +631,12 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
                     
                     i++;
                 }
-            }
+            }*/
             
             break;
             
         case DRAW_LINES_RANDOMIZED:
             mesh->setMode(OF_PRIMITIVE_LINES);
-            
-            mesh->clearIndices();
             
         {
             
@@ -469,20 +650,23 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
             
             for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
             {
-                int letterIndex = typeMesh->getLetterByParticle(typeMesh->getParticleIndex(((TypeParticle*)it->second)->getStart()));
-                mesh->addIndex( i );
+                TypeParticle* p = (TypeParticle*)it->second;
+                int letterIndex = typeMesh->getLetterByParticle(typeMesh->getParticleIndex(p->getStart()));
+                mesh->addIndex( p->index );
                 
                 int index = (int) ofRandom(tempLetters[letterIndex].size());
+                int tries = 100;
+                
                 QuickVertex pt = tempLetters[letterIndex][index];
                 while (pt.pos == *it->second) {
                     index = (int) ofRandom(tempLetters[letterIndex].size());
                     pt = tempLetters[letterIndex][index];
+                    tries--;
+                    if (tries <= 0) continue;
                 }
                 
                 mesh->addIndex(pt.index);
                 tempLetters[letterIndex].erase(tempLetters[letterIndex].begin() + index);
-                
-                i++;
             }
         }
             break;
@@ -522,11 +706,13 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
             
             
         case DRAW_POINTS:
+            cout << "draw points "<<endl;
             mesh->setMode(OF_PRIMITIVE_POINTS);
             mesh->clearIndices();
             for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
             {
-                mesh->addIndex(i);
+                TypeParticle* p = (TypeParticle*)it->second;
+                mesh->addIndex(p->index);
                 i++;
             }
             break;
@@ -539,34 +725,50 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
             // method 1: randomize
             for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
             {
-                mesh->addIndex(i);
+                int ind1, ind2, ind3;
+                ind1 = ind2 = ind3 = -1;
+                
+                TypeParticle* p = (TypeParticle*)it->second;
+                if ( p == NULL ) continue;
+                ind1 = p->index;
+                
+                TypeParticle* p2;
+                TypeParticle* p3;
+                
+                
                 Iterator it2;
-                int j=0;
                 for( it2 = particlePtr.begin(); it2 != particlePtr.end(); ++it2 )
                 {
                     if ( it2 != it ){
-                        if ( it->second->distance( *it2->second ) < 10 ){
-                            mesh->addIndex(j);
+                        p2 = (TypeParticle*)it2->second;
+                        if ( p->distance( *p2 ) < 10 ){
+                            ind2 = p2->index;
                             break;
                         }
                     }
-                    j++;
                 }
                 
-                j=0;
+                if ( p2 == NULL ) continue;
                 
                 Iterator it3;
                 for( it3 = particlePtr.begin(); it3 != particlePtr.end(); ++it3 )
                 {
                     if ( it3 != it && it3 != it2 ){
-                        if ( it->second->distance( *it3->second ) < 20 ){
-                            mesh->addIndex(j);
+                        p3 = (TypeParticle*)it3->second;
+                        if ( p2->distance( *p3 ) < 20 ){
+                            ind3 = p3->index;
                             break;
                         }
                     }
-                    j++;
                 }
-                i++;
+                if ( p3 == NULL ) continue;
+                
+                if ( ind1 != -1 && ind2 != -1 && ind3 != -1 ){
+                    mesh->addIndex(ind1);
+                    mesh->addIndex(ind2);
+                    mesh->addIndex(ind3);
+                }
+
             }
             break;
             
