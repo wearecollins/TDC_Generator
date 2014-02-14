@@ -1,0 +1,3 @@
+[submodule "APIs/spacebrew-webservices"]
+	path = APIs/spacebrew-webservices
+	url = https://github.com/julioterra/spacebrew-webservices.git

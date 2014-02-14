@@ -26,6 +26,7 @@ struct QuickVertex
 {
     ofVec2f pos;
     int     index;
+    bool    bInterior;
 };
 
 class TypeParticleSystem : public ofxLabFlexParticleSystem, protected ofThread

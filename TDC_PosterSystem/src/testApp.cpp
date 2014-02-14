@@ -12,7 +12,7 @@ float bgAlpha = 255.0f;
 
 //--------------------------------------------------------------
 void testApp::setup(){
-    particles.setup("TDC_Type_Sketching.svg");
+    particles.setup("TDC_Type_Sketching_800_600.svg");
     toSave.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA, 6);
     
     toSave.begin();
@@ -110,6 +110,11 @@ void testApp::update(){
 void testApp::draw(){
     ofBackground(0);
     toSave.begin();
+    ofPushMatrix();
+    
+//    static float scale = fmax( ofGetWidth()/1280.0f, ofGetHeight()/720.0f );
+//    ofScale(scale, scale);
+    
     if ( bClear ) ofClear(0,0,0,255);
     else {
         ofSetColor(0,0,0,bgAlpha);
@@ -118,11 +123,14 @@ void testApp::draw(){
     }
     ofEnableAlphaBlending();
     ofEnableBlendMode((ofBlendMode) mode);
+    //ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+    //ofTranslate(-1280/2.0, -720./2.0);
     particles.draw();
     if (bDrawTypeAsOverlay){
         ofSetColor(0);
         type.draw();
     }
+    ofPopMatrix();
     toSave.end();
     
     ofSetColor(255);
@@ -133,6 +141,13 @@ void testApp::draw(){
 void testApp::keyPressed(int key){
     if ( key == 'g' ){
         gui->toggleVisible();
+    } else if ( key == 'f' ){
+        ofToggleFullscreen();
+        if ( ofGetWindowMode() == OF_FULLSCREEN ){
+            ofHideCursor();
+        } else {
+            ofShowCursor();
+        }
     }
 }
 

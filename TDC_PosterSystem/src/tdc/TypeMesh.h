@@ -200,6 +200,22 @@ public:
         return 0;
     }
     
+    // even tricker: letter interior or exterior
+    bool isParticleInterior( int particleIndex )
+    {
+        ofVec2f p = mesh.getVertex( particleIndex );
+        
+        for (int i=0; i<letters.size(); i++){
+            for (int j=0; j<letters[i].size(); j++){
+                if ( letters[i][j].distance( p ) < 2 ){
+                    return j == 0;
+                }
+            }
+        }
+        ofLogError()<<"Not found :( "<<particleIndex;
+        return false;
+    }
+    
     // brute force particle finder
     int getParticleIndex( ofVec3f part )
     {

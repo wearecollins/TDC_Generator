@@ -63,7 +63,7 @@ void TypeParticleSystem::setup( string file ){
     currentBehavior = behaviors[ moveType ];
     gravity  = ofVec2f(0,4.0f);
     
-    test.load("meshes/mesh_1_0");
+    test.load("meshes/mesh_2_0");
     test.setMode(OF_PRIMITIVE_TRIANGLES);
     
     // lez do it
@@ -135,6 +135,7 @@ void TypeParticleSystem::threadedFunction(){
                 QuickVertex qv;
                 qv.pos      = t_gridMesh.getVertex(index);
                 qv.index    = i;
+                qv.bInterior = grid.isParticleInterior(index);
                 
                 letterGridParticles[letter].push_back(qv);
                 
@@ -159,6 +160,7 @@ void TypeParticleSystem::threadedFunction(){
                     
                     gridParticleSettings.addValue("grid_index", index);
                     gridParticleSettings.addValue("letter", letter);
+                    gridParticleSettings.addValue("isInterior", qv.bInterior);
                     
                     gridParticleSettings.addValue("vel_x", t->velocity.x);
                     gridParticleSettings.addValue("vel_y", t->velocity.y);
@@ -202,6 +204,7 @@ void TypeParticleSystem::threadedFunction(){
                     QuickVertex qv;
                     qv.pos      = pos;
                     qv.index    = t->index;
+                    qv.bInterior = gridParticleSettings.getValue("isInterior", false);
                     letterGridParticles[letter].push_back(qv);
                     
                     //gridParticleSettings.addValue("r", color.r );
@@ -230,6 +233,7 @@ void TypeParticleSystem::threadedFunction(){
                 QuickVertex qv;
                 qv.pos      = t_outlineMesh.getVertex(index);
                 qv.index    = i;
+                qv.bInterior = outline.isParticleInterior(index);
                 
                 letterOutlineParticles[letter].push_back(qv);
                 
@@ -254,6 +258,7 @@ void TypeParticleSystem::threadedFunction(){
                     
                     outlineParticleSettings.addValue("grid_index", index);
                     outlineParticleSettings.addValue("letter", letter);
+                    outlineParticleSettings.addValue("isInterior", qv.bInterior);
                     
                     outlineParticleSettings.addValue("vel_x", t->velocity.x);
                     outlineParticleSettings.addValue("vel_y", t->velocity.y);
@@ -297,6 +302,7 @@ void TypeParticleSystem::threadedFunction(){
                     QuickVertex qv;
                     qv.pos      = pos;
                     qv.index    = t->index;
+                    qv.bInterior = outlineParticleSettings.getValue("isInterior", false);
                     letterOutlineParticles[letter].push_back(qv);
                     
                     //outlineParticleSettings.addValue("r", color.r );
@@ -640,34 +646,75 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
             
         {
             
-            vector<vector <QuickVertex> >  tempLetters;
+            vector<vector <QuickVertex> >  tempLettersExt;
+            vector<vector <QuickVertex> >  tempLettersInt;
+            
             for ( int j=0; j<letterParticles->size(); j++){
-                tempLetters.push_back( vector<QuickVertex>() );
+                tempLettersExt.push_back( vector<QuickVertex>() );
+                tempLettersInt.push_back( vector<QuickVertex>() );
                 for ( int k=0; k<(*letterParticles)[j].size(); k++ ){
-                    tempLetters[j].push_back( (*letterParticles)[j][k]);
+                    if ( (*letterParticles)[j][k].bInterior ){
+                        tempLettersInt[j].push_back( (*letterParticles)[j][k]);
+                    } else {
+                        tempLettersExt[j].push_back( (*letterParticles)[j][k]);
+                    }
                 }
             }
             
-            for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
+            for (int j=0; j<tempLettersExt.size(); j++){
+                for (int k=0; k<tempLettersExt[j].size(); k++){
+                    mesh->addIndex( tempLettersExt[j][k].index );
+                    if ( tempLettersInt[j].size() > 0 ){
+                        
+                        int min = 0;
+                        float minDist = 10000;
+                        
+                        for ( int l=0; l<tempLettersInt[j].size(); l++){
+                            float dist = tempLettersExt[j][k].pos.distance(tempLettersInt[j][l].pos);
+                            if ( dist < minDist ){
+                                min = l;
+                                minDist = dist;
+                            }
+                        }
+                        
+                        mesh->addIndex( tempLettersInt[j][min].index );
+                    } else {
+                        int min = 0;
+                        float minDist = 10000;
+                        
+                        for ( int l=0; l<tempLettersExt[j].size(); l++){
+                            float dist = tempLettersExt[j][k].pos.distance(tempLettersExt[j][l].pos);
+                            if ( dist < minDist && dist > 2 ){
+                                min = l;
+                                minDist = dist;
+                            }
+                        }
+                        
+                        mesh->addIndex( tempLettersExt[j][min].index );
+                    }
+                }
+            }
+            
+            /*for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
             {
                 TypeParticle* p = (TypeParticle*)it->second;
                 int letterIndex = typeMesh->getLetterByParticle(typeMesh->getParticleIndex(p->getStart()));
                 mesh->addIndex( p->index );
                 
-                int index = (int) ofRandom(tempLetters[letterIndex].size());
+                int index = (int) ofRandom(tempLettersExt[letterIndex].size());
                 int tries = 100;
                 
-                QuickVertex pt = tempLetters[letterIndex][index];
+                QuickVertex pt = tempLettersExt[letterIndex][index];
                 while (pt.pos == *it->second) {
-                    index = (int) ofRandom(tempLetters[letterIndex].size());
-                    pt = tempLetters[letterIndex][index];
+                    index = (int) ofRandom(tempLettersExt[letterIndex].size());
+                    pt = tempLettersExt[letterIndex][index];
                     tries--;
                     if (tries <= 0) continue;
                 }
                 
                 mesh->addIndex(pt.index);
-                tempLetters[letterIndex].erase(tempLetters[letterIndex].begin() + index);
-            }
+                tempLettersExt[letterIndex].erase(tempLettersExt[letterIndex].begin() + index);
+            }*/
         }
             break;
             
