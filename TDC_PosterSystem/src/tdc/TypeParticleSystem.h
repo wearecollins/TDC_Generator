@@ -34,6 +34,12 @@ public:
     
     typedef map<unsigned long, ofxLabFlexParticle*>::iterator               TypeIterator;
     
+    enum GridType {
+        GRID_POINTS = 0,
+        GRID_OUTLINE,
+        GRID_NEGATIVE
+    };
+    
     enum DrawMode {
         DRAW_NULL   = -1,
         DRAW_POINTS = 0,
@@ -83,6 +89,10 @@ protected:
     
     bool        bNeedToChangeMesh;
     bool        bUseGrid;
+    
+    map<DrawMode, map<GridType,ofVboMesh> > meshes;
+    void        buildMeshes();
+    void        buildMesh(DrawMode mode, GridType type );
     
     DrawMode    drawMode, lastDrawMode;
     TypeOutline outline;

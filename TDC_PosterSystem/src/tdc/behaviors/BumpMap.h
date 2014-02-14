@@ -24,6 +24,7 @@ public:
     }
     
     void setup( ofxLabFlexParticleSystem::Container * particles ){
+        return;
         // setup device
         device = new ofxNI2::Device();
         device->setup();

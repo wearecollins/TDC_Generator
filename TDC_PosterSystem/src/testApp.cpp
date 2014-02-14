@@ -55,7 +55,7 @@ void testApp::setup(){
     
     gui->addLabel("MOVEMENT");
     gui->addSpacer();
-    gui->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_BUMP, TypeParticleSystem::MOVE_NONE);
+    gui->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_FLOCK, TypeParticleSystem::MOVE_NONE);
     // this should be separate panels for each behavior
     gui->addSlider("intensityX", 0.0, 100.0, 10.0f);
     gui->addSlider("intensityY", 0.0, 100.0, 50.0f);

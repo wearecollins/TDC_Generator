@@ -41,20 +41,19 @@ void TypeParticleSystem::setup( string file ){
     behaviors[ MOVE_BUMP ] = new BumpMap();
     behaviors[ MOVE_BUMP ]->setup(NULL);
     
-    //MOVE_FLOCK,
     //MOVE_GRAVITY,
-    //MOVE_WARP
+    
+    // null till we builds them
+    currentMesh = NULL;
     
     // containers
+    currentMeshBuffer = new ofVboMesh();
+    
     if ( bUseGrid ){
         currentTypeMesh = &grid;
-        currentMesh = &gridMesh;
-        currentMeshBuffer = &bufferGridMesh;
         currentLetterParticles = &letterGridParticles;
     } else {
         currentTypeMesh = &outline;
-        currentMesh = &outlineMesh;
-        currentMeshBuffer = &bufferOutlineMesh;
         currentLetterParticles = &letterOutlineParticles;
     }
     
@@ -164,6 +163,9 @@ void TypeParticleSystem::threadedFunction(){
         
         lastDrawMode = DRAW_NULL;
         drawMode = DRAW_POINTS;
+        
+        buildMeshes();
+        
         bIsSetup = true;
     }
     
@@ -183,15 +185,15 @@ void TypeParticleSystem::threadedFunction(){
         if ( bNeedToChangeMesh ){
             if ( bUseGrid ){
                 currentTypeMesh = &grid;
-                currentMeshBuffer = &bufferGridMesh;
                 currentLetterParticles = &letterGridParticles;
                 _particles = _particlesGrid;
             } else {
                 currentTypeMesh = &outline;
-                currentMeshBuffer = &bufferOutlineMesh;
                 currentLetterParticles = &letterOutlineParticles;
                 _particles = _particlesOutline;
             }
+            currentMeshBuffer = &meshes[ drawMode ][ bUseGrid ? GRID_POINTS : GRID_OUTLINE ];
+            
             if ( behaviors[ MOVE_FLOCK ]  != NULL ) ((Flocking*) behaviors[ MOVE_FLOCK ])->setLetters( &_particles );
         }
         
@@ -222,164 +224,6 @@ void TypeParticleSystem::threadedFunction(){
             i++;
         }
         
-        if ( lastDrawMode != drawMode || bNeedToChangeMesh ){
-            int i=0;
-            vector<int> attach;
-            
-            switch (drawMode) {
-                case DRAW_LINES:
-                    currentMeshBuffer->setMode(OF_PRIMITIVE_LINES);
-                    
-                    currentMeshBuffer->clearIndices();
-                    // method 1: randomize
-                    if ( !bUseGrid ){
-                        for (int j=0; j<currentLetterParticles->size(); j++){
-                            for (int k=0; k<(*currentLetterParticles)[j].size(); k++){
-                                currentMeshBuffer->addIndex((*currentLetterParticles)[j][k].index);
-                                int ind = floor(ofRandom((*currentLetterParticles)[j].size()));
-                                currentMeshBuffer->addIndex((*currentLetterParticles)[j][ind].index);
-                            }
-                        }
-                    } else {
-                        // method 2: attach to anywhere inside letter
-                        
-                        for (int j=0; j<currentLetterParticles->size(); j++){
-                            QuickVertex qv = (*currentLetterParticles)[j][ofRandom((*currentLetterParticles)[j].size())];
-                            attach.push_back(qv.index);
-                        }
-                        
-                        for( it = _particles.begin(); it != _particles.end(); ++it )
-                        {
-                            int letterIndex = currentTypeMesh->getLetterByParticle(currentTypeMesh->getParticleIndex(((TypeParticle*)it->second)->getStart()));
-                            currentMeshBuffer->addIndex(attach[letterIndex]);
-                            currentMeshBuffer->addIndex(i);
-                            
-                            i++;
-                        }
-                    }
-                    
-                    break;
-                    
-                case DRAW_LINES_RANDOMIZED:
-                    currentMeshBuffer->setMode(OF_PRIMITIVE_LINES);
-                    
-                    currentMeshBuffer->clearIndices();
-                    
-                {
-                    vector<vector <QuickVertex> >  tempLetters;
-                    for ( int j=0; j<currentLetterParticles->size(); j++){
-                        tempLetters.push_back( vector<QuickVertex>() );
-                        for ( int k=0; k<(*currentLetterParticles)[j].size(); k++ ){
-                            tempLetters[j].push_back( (*currentLetterParticles)[j][k]);
-                        }
-                    }
-                    
-                    for( it = _particles.begin(); it != _particles.end(); ++it )
-                    {
-                        int letterIndex = currentTypeMesh->getLetterByParticle(currentTypeMesh->getParticleIndex(((TypeParticle*)it->second)->getStart()));
-                        currentMeshBuffer->addIndex( i );
-                        
-                        int index = (int) ofRandom(tempLetters[letterIndex].size());
-                        QuickVertex pt = tempLetters[letterIndex][index];
-                        while (pt.pos == *it->second) {
-                            index = (int) ofRandom(tempLetters[letterIndex].size());
-                            pt = tempLetters[letterIndex][index];
-                        }
-                        
-                        currentMeshBuffer->addIndex(pt.index);
-                        tempLetters[letterIndex].erase(tempLetters[letterIndex].begin() + index);
-                        
-                        i++;
-                    }
-                }
-                    break;
-                    
-                case DRAW_LINES_ARBITARY:
-                    currentMeshBuffer->setMode(OF_PRIMITIVE_LINES);
-                    
-                    currentMeshBuffer->clearIndices();
-                    
-                {
-                    int lpIndex = ofRandom(currentLetterParticles->size());
-                    QuickVertex qv = (*currentLetterParticles)[lpIndex][ofRandom((*currentLetterParticles)[lpIndex].size())];
-                    int attachIndex = qv.index;
-                    ofColor color = currentMeshBuffer->getColor(attachIndex);
-                    color.a = 0;
-                    currentMeshBuffer->setColor(attachIndex, color);
-                    
-                    for( it = _particles.begin(); it != _particles.end(); ++it )
-                    {
-                        int letterIndex = currentTypeMesh->getLetterByParticle(currentTypeMesh->getParticleIndex(((TypeParticle*)it->second)->getStart()));
-                        currentMeshBuffer->addIndex(attachIndex);
-                        
-                        int index = (int) ofRandom((*currentLetterParticles)[letterIndex].size());
-                        QuickVertex pt = (*currentLetterParticles)[letterIndex][index];
-                        while (pt.pos == *it->second) {
-                            index = (int) ofRandom((*currentLetterParticles)[letterIndex].size());
-                            pt = (*currentLetterParticles)[letterIndex][index];
-                        }
-                        
-                        currentMeshBuffer->addIndex(pt.index);
-                        
-                        i++;
-                    }
-                }
-                    break;
-                    
-                    
-                case DRAW_POINTS:
-                    currentMeshBuffer->setMode(OF_PRIMITIVE_POINTS);
-                    currentMeshBuffer->clearIndices();
-                    for( it = _particles.begin(); it != _particles.end(); ++it )
-                    {
-                        currentMeshBuffer->addIndex(i);
-                        i++;
-                    }
-                    break;
-                    
-                case DRAW_SHAPES:
-                    currentMeshBuffer->setMode(OF_PRIMITIVE_TRIANGLES);
-                    // to-do: triangulation!
-                    currentMeshBuffer->clearIndices();
-                    
-                    // method 1: randomize
-                    for( it = _particles.begin(); it != _particles.end(); ++it )
-                    {
-                        currentMeshBuffer->addIndex(i);
-                        Iterator it2;
-                        int j=0;
-                        for( it2 = _particles.begin(); it2 != _particles.end(); ++it2 )
-                        {
-                            if ( it2 != it ){
-                                if ( it->second->distance( *it2->second ) < 10 ){
-                                    currentMeshBuffer->addIndex(j);
-                                    break;
-                                }
-                            }
-                            j++;
-                        }
-                        
-                        j=0;
-                        
-                        Iterator it3;
-                        for( it3 = _particles.begin(); it3 != _particles.end(); ++it3 )
-                        {
-                            if ( it3 != it && it3 != it2 ){
-                                if ( it->second->distance( *it3->second ) < 20 ){
-                                    currentMeshBuffer->addIndex(j);
-                                    break;
-                                }
-                            }
-                            j++;
-                        }
-                        i++;
-                    }
-                    break;
-                    
-                default:
-                    break;
-            }
-        }
         bMeshIsUpdated = true;
         bNeedToChangeMesh = false;
         meshUpdatingFrames = 0;
@@ -400,16 +244,19 @@ void TypeParticleSystem::update(){
     if ( currentMesh && currentMesh->getNumVertices() > 0 && behaviors[ MOVE_FLOCK ] == NULL){
         behaviors[ MOVE_FLOCK ] = new Flocking(&_particles);
     }
-    gridMesh = bufferGridMesh;
-    outlineMesh = bufferOutlineMesh;
+    //gridMesh = bufferGridMesh;
+    //outlineMesh = bufferOutlineMesh;
     currentBehavior = behaviors[ moveType ];
     unlock();
     
-    if ( bUseGrid ){
+    /*if ( bUseGrid ){
         currentMesh = &gridMesh;
     } else {
         currentMesh = &outlineMesh;
-    }
+    }*/
+    
+    currentMesh = currentMeshBuffer;
+    
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
         if ( currentBehavior != NULL ){
             currentBehavior->beginDraw();
@@ -486,6 +333,249 @@ string TypeParticleSystem::getDrawModeString(){
             return "Undefined";
             break;
     }
+}
+
+
+//-------------------------------------------------------------------------------------------
+void TypeParticleSystem::buildMeshes(){
+    /*
+    DRAW_POINTS = 0,
+    DRAW_LINES,
+    DRAW_LINES_RANDOMIZED,
+    DRAW_LINES_ARBITARY,
+    DRAW_SHAPES
+    */
+    
+    buildMesh(DRAW_POINTS, GRID_POINTS);
+    buildMesh(DRAW_POINTS, GRID_OUTLINE);
+    
+    buildMesh(DRAW_LINES, GRID_POINTS);
+    buildMesh(DRAW_LINES, GRID_OUTLINE);
+    
+    buildMesh(DRAW_LINES_RANDOMIZED, GRID_POINTS);
+    buildMesh(DRAW_LINES_RANDOMIZED, GRID_OUTLINE);
+    
+    buildMesh(DRAW_LINES_ARBITARY, GRID_POINTS);
+    buildMesh(DRAW_LINES_ARBITARY, GRID_OUTLINE);
+    
+    buildMesh(DRAW_SHAPES, GRID_POINTS);
+    buildMesh(DRAW_SHAPES, GRID_OUTLINE);
+}
+
+//-------------------------------------------------------------------------------------------
+void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
+    meshes[ mode ][ type ] = ofVboMesh();
+
+    ofMesh * mesh = &meshes[ mode ][ type ];
+    vector<vector <QuickVertex> > * letterParticles = type == GRID_POINTS ? &letterGridParticles : &letterOutlineParticles;
+    
+    // FIRST: try to load this mesh
+    string folder = "meshes/";
+    string file = folder + "mesh_" + ofToString( mode ) + "_" + ofToString( type );
+    
+    mesh->load( file );
+    
+    bool bLoad = mesh->getVertices().size() > 0;
+    
+    if ( bLoad ){
+        ofLogWarning()<<"Load success "<<mode<<":"<<type;
+        return;
+    }
+    
+    TypeMesh * typeMesh;
+    
+    // add vertices and colors
+    switch (type) {
+        case GRID_POINTS:
+            typeMesh = &grid;
+            for ( int i=0; i< bufferGridMesh.getNumVertices(); i++){
+                meshes[ mode ][ type ].addVertex(bufferGridMesh.getVertex(i));
+                meshes[ mode ][ type ].addColor(bufferGridMesh.getColor(i));
+            }
+            break;
+            
+        case GRID_OUTLINE:
+            typeMesh = &outline;
+            for ( int i=0; i< bufferOutlineMesh.getNumVertices(); i++){
+                meshes[ mode ][ type ].addVertex(bufferOutlineMesh.getVertex(i));
+                meshes[ mode ][ type ].addColor(bufferOutlineMesh.getColor(i));
+            }
+            break;
+            
+        default:
+            break;
+    }
+    
+    Container particlePtr;
+    if ( type == GRID_OUTLINE ){
+        particlePtr = _particlesOutline;
+    } else {
+        particlePtr = _particlesGrid;
+    }
+    
+    
+    int i=0;
+    vector<int> attach;
+    
+    switch (mode) {
+        case DRAW_LINES:
+            mesh->setMode(OF_PRIMITIVE_LINES);
+            
+            mesh->clearIndices();
+            
+            // method 1: randomize
+            if ( type == GRID_OUTLINE ){
+                for (int j=0; j<letterParticles->size(); j++){
+                    for (int k=0; k<(*letterParticles)[j].size(); k++){
+                        mesh->addIndex((*letterParticles)[j][k].index);
+                        int ind = floor(ofRandom((*letterParticles)[j].size()));
+                        mesh->addIndex((*letterParticles)[j][ind].index);
+                    }
+                }
+            } else {
+                // method 2: attach to anywhere inside letter
+                
+                for (int j=0; j<letterParticles->size(); j++){
+                    QuickVertex qv = (*letterParticles)[j][ofRandom((*letterParticles)[j].size())];
+                    attach.push_back(qv.index);
+                }
+                
+                for( it = _particlesGrid.begin(); it != _particlesGrid.end(); ++it )
+                {
+                    int letterIndex = typeMesh->getLetterByParticle(typeMesh->getParticleIndex(((TypeParticle*)it->second)->getStart()));
+                    mesh->addIndex(attach[letterIndex]);
+                    mesh->addIndex(i);
+                    
+                    i++;
+                }
+            }
+            
+            break;
+            
+        case DRAW_LINES_RANDOMIZED:
+            mesh->setMode(OF_PRIMITIVE_LINES);
+            
+            mesh->clearIndices();
+            
+        {
+            
+            vector<vector <QuickVertex> >  tempLetters;
+            for ( int j=0; j<letterParticles->size(); j++){
+                tempLetters.push_back( vector<QuickVertex>() );
+                for ( int k=0; k<(*letterParticles)[j].size(); k++ ){
+                    tempLetters[j].push_back( (*letterParticles)[j][k]);
+                }
+            }
+            
+            for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
+            {
+                int letterIndex = typeMesh->getLetterByParticle(typeMesh->getParticleIndex(((TypeParticle*)it->second)->getStart()));
+                mesh->addIndex( i );
+                
+                int index = (int) ofRandom(tempLetters[letterIndex].size());
+                QuickVertex pt = tempLetters[letterIndex][index];
+                while (pt.pos == *it->second) {
+                    index = (int) ofRandom(tempLetters[letterIndex].size());
+                    pt = tempLetters[letterIndex][index];
+                }
+                
+                mesh->addIndex(pt.index);
+                tempLetters[letterIndex].erase(tempLetters[letterIndex].begin() + index);
+                
+                i++;
+            }
+        }
+            break;
+            
+        case DRAW_LINES_ARBITARY:
+            mesh->setMode(OF_PRIMITIVE_LINES);
+            
+            mesh->clearIndices();
+            
+        {
+            
+            int lpIndex = ofRandom(letterParticles->size());
+            QuickVertex qv = (*letterParticles)[lpIndex][ofRandom((*letterParticles)[lpIndex].size())];
+            int attachIndex = qv.index;
+            ofColor color = mesh->getColor(attachIndex);
+            color.a = 0;
+            mesh->setColor(attachIndex, color);
+            
+            for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
+            {
+                int letterIndex = typeMesh->getLetterByParticle(typeMesh->getParticleIndex(((TypeParticle*)it->second)->getStart()));
+                mesh->addIndex(attachIndex);
+                
+                int index = (int) ofRandom((*letterParticles)[letterIndex].size());
+                QuickVertex pt = (*letterParticles)[letterIndex][index];
+                while (pt.pos == *it->second) {
+                    index = (int) ofRandom((*letterParticles)[letterIndex].size());
+                    pt = (*letterParticles)[letterIndex][index];
+                }
+                
+                mesh->addIndex(pt.index);
+                
+                i++;
+            }
+        }
+            break;
+            
+            
+        case DRAW_POINTS:
+            mesh->setMode(OF_PRIMITIVE_POINTS);
+            mesh->clearIndices();
+            for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
+            {
+                mesh->addIndex(i);
+                i++;
+            }
+            break;
+            
+        case DRAW_SHAPES:
+            mesh->setMode(OF_PRIMITIVE_TRIANGLES);
+            // to-do: triangulation!
+            mesh->clearIndices();
+            
+            // method 1: randomize
+            for( it = particlePtr.begin(); it != particlePtr.end(); ++it )
+            {
+                mesh->addIndex(i);
+                Iterator it2;
+                int j=0;
+                for( it2 = particlePtr.begin(); it2 != particlePtr.end(); ++it2 )
+                {
+                    if ( it2 != it ){
+                        if ( it->second->distance( *it2->second ) < 10 ){
+                            mesh->addIndex(j);
+                            break;
+                        }
+                    }
+                    j++;
+                }
+                
+                j=0;
+                
+                Iterator it3;
+                for( it3 = particlePtr.begin(); it3 != particlePtr.end(); ++it3 )
+                {
+                    if ( it3 != it && it3 != it2 ){
+                        if ( it->second->distance( *it3->second ) < 20 ){
+                            mesh->addIndex(j);
+                            break;
+                        }
+                    }
+                    j++;
+                }
+                i++;
+            }
+            break;
+            
+        default:
+            break;
+    }
+    
+    // save that shit
+    mesh->save(file, false);
 }
 
 //-------------------------------------------------------------------------------------------
