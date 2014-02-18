@@ -3,25 +3,48 @@
 bool bClear = true;
 bool bCapture = false;
 bool bSave    = false;
+bool bReload    = false;
 bool bUseGrid = true;
 bool bDrawTypeAsOverlay = true;
 
+// main layout vars
 int mode = 0;
 int lastDrawMode = -1;
 float bgAlpha = 255.0f;
+double scale = 1.0;
+
+// particle settings
+ofFloatColor particleColor, lastParticleColor;
+float        hueVariance;
+
+// positioning
+double x = 0;
+double y = 0;
+
+// type color
+float typeColor = 0;
+
+// poster
+ofRectangle poster = ofRectangle(0,0,100,400);
+ofFloatColor posterColor = ofColor(1.0,0,0);
 
 //--------------------------------------------------------------
 void testApp::setup(){
     particles.setup("TDC_Type_Sketching_800_600.svg");
-    toSave.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA, 6);
+    toSave.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
+    toSavePoster.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
     
     toSave.begin();
     ofClear(0,0,0,0);
     toSave.end();
     
+    toSavePoster.begin();
+    ofClear(0,0,0,0);
+    toSavePoster.end();
+    
     // load optional type overlay
     
-    type.load("TDC_Type_Sketching.svg");
+    type.load("TDC_Type_Sketching_800_600.svg");
     
     int n = type.getNumPath();
     
@@ -35,40 +58,75 @@ void testApp::setup(){
     //glPointSize(2.0f);
     
     // GUI
-    gui = new ofxUISuperCanvas("---- SETTINGS ----", 10, 10, 500, ofGetHeight());
-    ofAddListener(gui->newGUIEvent, this, &testApp::onGui);
-    
+    gui = new ofxUITabBar(10, 10, ofGetWidth(), ofGetHeight());
     gui->setVisible(false);
-    gui->addSpacer();
-    gui->addSpacer();
-    gui->addLabel("DRAWING");
-    gui->addLabel("Drawmode Label", "Draw Points");
-    gui->addIntSlider("Draw Mode", 0, TypeParticleSystem::DRAW_SHAPES + 1, &drawMode);
-    gui->addSpacer();
-    gui->addToggle("Use grid or outline", &bUseGrid);
-    gui->addSpacer();
-    gui->addIntSlider("Blend Mode", 0, OF_BLENDMODE_SCREEN, &mode);
-    gui->addToggle("Auto Clear Background", &bClear);
-    gui->addSlider("Background Alpha Clear", 0.0, 255.0f, &bgAlpha);
-    gui->addToggle("Draw type overlay", &bDrawTypeAsOverlay);
-    gui->addSpacer();
     
-    gui->addLabel("MOVEMENT");
-    gui->addSpacer();
-    gui->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_FLOCK, TypeParticleSystem::MOVE_NONE);
+    ofxUISuperCanvas * guiDrawing = new ofxUISuperCanvas("DRAWING",0,0,ofGetWidth()-100, ofGetHeight());
+    guis.push_back(guiDrawing);
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
+    
+    guis.back()->setName("DRAWING");
+    guis.back()->addLabel("Drawmode Label", "Draw Points");
+    guis.back()->addIntSlider("Draw Mode", 0, TypeParticleSystem::DRAW_SHAPES + 1, &drawMode);
+    guis.back()->addSpacer();
+    guis.back()->addToggle("Use grid or outline", &bUseGrid);
+    guis.back()->addSpacer();
+    guis.back()->addIntSlider("Blend Mode", 0, OF_BLENDMODE_SCREEN, &mode);
+    guis.back()->addToggle("Auto Clear Background", &bClear);
+    guis.back()->addSlider("Background Alpha Clear", 0.0, 255.0f, &bgAlpha);
+    guis.back()->addSpacer();
+    guis.back()->addSlider("Particle Color: R", 0.0, 1.0, &particleColor.r);
+    guis.back()->addSlider("Particle Color: G", 0.0, 1.0, &particleColor.g);
+    guis.back()->addSlider("Particle Color: B", 0.0, 1.0, &particleColor.b);
+    guis.back()->addSlider("Particle Color: Hue Randomization", 0.0, 1.0, &hueVariance);
+    gui->addCanvas(guis.back());
+    
+    ofxUISuperCanvas * guiTypeOverlay = new ofxUISuperCanvas("TYPE",0,0,ofGetWidth()-100, ofGetHeight());
+    guis.push_back(guiTypeOverlay);
+    guis.back()->setName("TYPE");
+    guis.back()->addToggle("Draw type overlay", &bDrawTypeAsOverlay);
+    guis.back()->addDoubleSlider("scale", 0.0, 1.0, &particles.scale);
+    guis.back()->addDoubleSlider("x", -1.0, 1.0, &x);
+    guis.back()->addDoubleSlider("y", -1.0, 1.0, &y);
+    guis.back()->addSlider("type color", 0, 255.0f, &typeColor);
+    gui->addCanvas(guis.back());
+    
+    ofxUISuperCanvas * guiMovement = new ofxUISuperCanvas("MOVEMENT",0,0,ofGetWidth()-100, ofGetHeight());
+    guis.push_back(guiMovement);
+    guis.back()->setName("MOVEMENT");
+    guis.back()->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_BUMP, TypeParticleSystem::MOVE_NONE);
     // this should be separate panels for each behavior
-    gui->addSlider("intensityX", 0.0, 100.0, 10.0f);
-    gui->addSlider("intensityY", 0.0, 100.0, 50.0f);
-    gui->addSlider("rate", 0.0, 10.0, 10.0);
-    gui->addSlider("mix", 0.0, 1.0, .5);
+    guis.back()->addSlider("intensityX", 0.0, 100.0, 10.0f);
+    guis.back()->addSlider("intensityY", 0.0, 100.0, 50.0f);
+    guis.back()->addSlider("rate", 0.0, 10.0, 10.0);
+    guis.back()->addSlider("mix", 0.0, 1.0, .5);
+    gui->addCanvas(guis.back());
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
-    gui->addSpacer();
-    gui->addLabel("EVENTS");
-    gui->addToggle("Save Frame", &bCapture);
-    gui->addToggle("Save Settings", &bSave);
+    ofxUISuperCanvas * guiPoster = new ofxUISuperCanvas("POSTER",0,0,ofGetWidth()-100, ofGetHeight());
+    guis.push_back(guiPoster);
+    guis.back()->setName("POSTER");
+    guis.back()->addSlider("Poster X", 0.0, ofGetWidth(), &poster.x);
+    guis.back()->addSlider("Poster Y", 0.0, ofGetWidth(), &poster.y);
+    guis.back()->addSlider("Poster Width", 0.0, ofGetWidth(), &poster.width);
+    guis.back()->addSlider("Poster Height", 0.0, ofGetWidth(), &poster.height);
+    guis.back()->addSlider("Poster Color: R", 0.0, 1.0, &posterColor.r);
+    guis.back()->addSlider("Poster Color: G", 0.0, 1.0, &posterColor.g);
+    guis.back()->addSlider("Poster Color: B", 0.0, 1.0, &posterColor.b);
+    gui->addCanvas(guis.back());
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
+    
+    ofxUISuperCanvas * guiEvents = new ofxUISuperCanvas("EVENTS",0,0,ofGetWidth()-100, ofGetHeight());
+    guis.push_back(guiEvents);
+    guis.back()->setName("EVENTS");
+    guis.back()->addToggle("Save Frame", &bCapture);
+    guis.back()->addToggle("Save Settings", &bSave);
+    guis.back()->addToggle("Reload Settings", &bReload);
+    gui->addCanvas(guis.back());
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
     gui->setTriggerWidgetsUponLoad(true);
-    gui->loadSettings("settings.xml");
+    gui->loadSettings("settings/", "ui-");
     
     // build interaction
     string host = "sandbox.spacebrew.cc";
@@ -87,18 +145,27 @@ void testApp::update(){
     if ( lastDrawMode != drawMode || particles.getDrawMode() != ((TypeParticleSystem::DrawMode) drawMode) ){
         lastDrawMode = drawMode;
         particles.setDrawMode( (TypeParticleSystem::DrawMode) drawMode);
-        ((ofxUILabel*)gui->getWidget("Drawmode Label"))->setLabel(particles.getDrawModeString());
+        //((ofxUILabel*)gui->getActiveCanvas()->getWidget("Drawmode Label"))->setLabel(particles.getDrawModeString());
+    }
+    if ( lastParticleColor != particleColor ){ 
+        particles.setColor(particleColor, hueVariance / 10.0f);
+        lastParticleColor = particleColor;
     }
     if ( bCapture ){
         bCapture = false;
         
-        toSave.readToPixels(pix);
+        toSavePoster.readToPixels(pix);
         ofImage save; save.setFromPixels(pix);
         save.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
     }
     if ( bSave ){
-        gui->saveSettings("settings.xml");
+        gui->saveSettings("settings/", "ui-");
         bSave = false;
+    }
+    if ( bReload ){
+        
+        gui->loadSettings("settings/", "ui-");
+        bReload = false;
     }
     
     particles.setUseGrid(bUseGrid);
@@ -115,7 +182,7 @@ void testApp::draw(){
 //    static float scale = fmax( ofGetWidth()/1280.0f, ofGetHeight()/720.0f );
 //    ofScale(scale, scale);
     
-    if ( bClear ) ofClear(0,0,0,255);
+    if ( bClear ) ofClear(0,0,0,0);
     else {
         ofSetColor(0,0,0,bgAlpha);
         ofRect(0,0, toSave.getWidth(), toSave.getHeight());
@@ -123,31 +190,49 @@ void testApp::draw(){
     }
     ofEnableAlphaBlending();
     ofEnableBlendMode((ofBlendMode) mode);
-    //ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
-    //ofTranslate(-1280/2.0, -720./2.0);
+    ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
+    
     particles.draw();
     if (bDrawTypeAsOverlay){
-        ofSetColor(0);
+        ofSetColor(typeColor);
+        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+        ofScale(particles.scale, particles.scale);
+        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
         type.draw();
     }
     ofPopMatrix();
     toSave.end();
     
-    ofSetColor(255);
-    toSave.draw(0, 0);
+    toSavePoster.begin(); {
+        ofClear(0,0,0,255);
+        ofPushMatrix(); {
+            ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
+            ofSetColor(posterColor);
+            ofRect(poster);
+        } ofPopMatrix();
+    
+        ofSetColor(255);
+        toSave.draw(0, 0);
+        
+    } toSavePoster.end();
+    
+    toSavePoster.draw(0,0);
 }
 
 //--------------------------------------------------------------
 void testApp::keyPressed(int key){
     if ( key == 'g' ){
         gui->toggleVisible();
+        if ( gui->isVisible() ){
+            ofShowCursor();
+        } else {
+            ofHideCursor();
+            for (int i=0; i<guis.size(); i++){
+                guis[i]->setVisible(false);
+            }
+        }
     } else if ( key == 'f' ){
         ofToggleFullscreen();
-        if ( ofGetWindowMode() == OF_FULLSCREEN ){
-            ofHideCursor();
-        } else {
-            ofShowCursor();
-        }
     }
 }
 

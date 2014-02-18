@@ -4,6 +4,8 @@
 
 uniform sampler2DRect posTex;
 uniform vec2 screen;
+uniform vec2 screenPos;
+uniform float scale;
 
 void main() {
     // use the texture coordinates as an index into the position texture
@@ -17,6 +19,12 @@ void main() {
     //
     pixPos.x -= .5;
     pixPos.y -= .5;
+    pixPos.x *= scale;
+    pixPos.y *= scale;
+    pixPos.x += .5;
+    pixPos.y += .5;
+    pixPos.x   += screenPos.x;
+    pixPos.y   += screenPos.y;
     pixPos.x *= screen.x;
     pixPos.y *= screen.y;
     

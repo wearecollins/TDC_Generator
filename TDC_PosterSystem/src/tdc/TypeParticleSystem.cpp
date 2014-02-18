@@ -32,6 +32,7 @@ void TypeParticleSystem::setup( string file ){
     meshUpdatingFrames = 0;
     bNeedToChangeMesh = false;
     bUseGrid = true;
+    scale = 1.0f;
     
     // behavior
     
@@ -81,12 +82,11 @@ void TypeParticleSystem::threadedFunction(){
         ofxXmlSettings gridParticleSettings;
         bool bLoaded = gridParticleSettings.load("settings/grid_particles.xml");
         
-        
         ofxXmlSettings gridOutlineSettings;
         bool bLoaded2 = gridOutlineSettings.load("settings/type_grid_settings.xml");
         int numLetters = 0;
         
-        if (!bLoaded2 || test.getNumVertices() == 0){
+        if (!bLoaded2 || !bLoaded || test.getNumVertices() == 0){
             grid.load(svgFile);
             outline.load(svgFile);
             numLetters = outline.getNumLetters();
@@ -125,7 +125,7 @@ void TypeParticleSystem::threadedFunction(){
         if ( !bLoaded ){
             
             // build 10000 particles for grid
-            for (int i=0; i<10000; i++){
+            for (int i=0; i<7000; i++){
                 int index = (int) ofRandom(0, t_gridMesh.getNumVertices());
                 while ( grid.isOccupied(index)){
                     index = (int) ofRandom(0, t_gridMesh.getNumVertices());
@@ -343,12 +343,30 @@ void TypeParticleSystem::threadedFunction(){
                 _particles = _particlesOutline;
             }
             
+            
+            //TODO: THIS SHOULD BE JUST RESETTING TARGET VERTICES!!!!
+            
             currentMeshBuffer->clear();
             currentMeshBuffer->append( meshes[ drawMode ][ bUseGrid ? GRID_POINTS : GRID_OUTLINE ]);
             currentMeshBuffer->setMode( meshes[ drawMode ][ bUseGrid ? GRID_POINTS : GRID_OUTLINE ].getMode());
             lastDrawMode = drawMode;
             
             if ( behaviors[ MOVE_FLOCK ]  != NULL ) ((Flocking*) behaviors[ MOVE_FLOCK ])->setLetters( &_particles );
+            unlock();
+        }
+        
+        // Colors
+        if ( bNeedToChangeColor ){
+            lock();
+            ofFloatColor currentColor = particleColor;
+            float currentVariance = colorVariance;
+            
+            for (int i=0; i<currentMeshBuffer->getNumColors(); i++){
+                ofFloatColor localColor = currentColor;
+                currentColor.setHue( localColor.getHue() + ofRandom(-currentVariance,currentVariance));
+                currentMeshBuffer->setColor(i, localColor);
+            }
+            bNeedToChangeColor = false;
             unlock();
         }
         
@@ -374,7 +392,7 @@ void TypeParticleSystem::threadedFunction(){
         meshUpdatingFrames = 0;
         unlock();
         
-        sleep(8);//16.6667); // run at ~60fps
+        sleep(16.6667); // run at ~60fps
     }
 }
 
@@ -419,8 +437,15 @@ void TypeParticleSystem::update(){
 void TypeParticleSystem::draw()
 {
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
+        
+        ofPushMatrix();
+        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+        ofScale(scale, scale);
+        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
         if ( currentBehavior == NULL || (currentBehavior->getName() != "flocking" && currentBehavior->getName() != "bumpmap")) currentMesh->draw();
+        ofPopMatrix();
         if ( currentBehavior != NULL ){
+            currentBehavior->scale = scale;
             currentBehavior->draw();
         }
     }
@@ -825,6 +850,14 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
     
     // save that shit
     mesh->save(file, false);
+}
+
+//-------------------------------------------------------------------------------------------
+void TypeParticleSystem::setColor( ofFloatColor color, float variance ){
+    particleColor = color;
+    colorVariance = variance;
+    
+    bNeedToChangeColor = true;
 }
 
 //-------------------------------------------------------------------------------------------

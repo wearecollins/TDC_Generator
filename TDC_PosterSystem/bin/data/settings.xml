@@ -13,12 +13,12 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Use grid or outline</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
     <Name>Blend Mode</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
@@ -33,22 +33,37 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Draw type overlay</Name>
-    <Value>0</Value>
+    <Value>1</Value>
+</Widget>
+<Widget>
+    <Kind>44</Kind>
+    <Name>scale</Name>
+    <Value>0.371212125</Value>
+</Widget>
+<Widget>
+    <Kind>44</Kind>
+    <Name>x</Name>
+    <Value>0.005050540</Value>
+</Widget>
+<Widget>
+    <Kind>44</Kind>
+    <Name>y</Name>
+    <Value>0.199494958</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
     <Name>Movement Type</Name>
-    <Value>2</Value>
+    <Value>4</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>intensityX</Name>
-    <Value>10.416666031</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>intensityY</Name>
-    <Value>4.687500000</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -58,7 +73,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>mix</Name>
-    <Value>0.000000000</Value>
+    <Value>0.532520354</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>

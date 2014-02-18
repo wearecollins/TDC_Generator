@@ -84,6 +84,7 @@ public:
     ofVec2f intensity;
     double   timeFactor;
     float    mix;
+    float   scale;
     
 protected:
     

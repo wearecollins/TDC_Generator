@@ -32,13 +32,15 @@ class testApp : public ofBaseApp{
     
         // image saving logic
         ofFbo toSave;
+        ofFbo toSavePoster;
         ofPixels pix;
     
         // type
         ofxSVG type;
     
         // tweakin'
-        ofxUISuperCanvas * gui;
+        vector<ofxUISuperCanvas *> guis;
+        ofxUITabBar * gui;
     
         // interaction
         Spacebrew::Connection spacebrew;

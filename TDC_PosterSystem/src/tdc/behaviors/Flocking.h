@@ -35,12 +35,15 @@ public:
         ofxLabFlexParticleSystem::Iterator it = particles->begin();
         for (int x = 0; x < textureRes; x++){
             for (int y = 0; y < textureRes; y++){
+                if ( it == particles->end() || it->first >= particles->size() ) break;
+                
                 int i = textureRes * y + x;
                 
                 livepos[i*3 + 0] = it->second->x / (float) ofGetWidth();
                 livepos[i*3 + 1] = it->second->y / (float) ofGetHeight();
                 livepos[i*3 + 2] = 0.0;
-                ++it;
+                it++;
+                if ( it == particles->end()) break;
             }
         }
         bNeedToRefreshAttract = true;
@@ -112,7 +115,7 @@ public:
         delete [] vel; // Delete the array
         
         // Allocate the final 
-        renderFBO.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA32F);
+        renderFBO.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//32F);
         renderFBO.begin();
         ofClear(0, 0, 0, 0);
         renderFBO.end();
@@ -152,6 +155,7 @@ public:
         updateVel.setUniform1f("maxspeed", intensity.x / 5000.0f);
         updateVel.setUniform1f("maxforce", intensity.y / 5000.0f);
         updateVel.setUniform1f("attractMix", mix);
+        updateVel.setUniform1f("scale", scale );
         
         // draw the source velocity texture to be updated
         velPingPong.src->draw(0, 0);
@@ -174,6 +178,7 @@ public:
         updatePos.setUniformTexture("prevPosData", posPingPong.src->getTextureReference(), 0); // Previus position
         updatePos.setUniformTexture("velData", velPingPong.src->getTextureReference(), 1);  // Velocity
         updatePos.setUniform1f("timestep",(float) timeStep );
+        updatePos.setUniform1f("scale", scale );
         
         // draw the source position texture to be updated
         posPingPong.src->draw(0, 0);
@@ -191,12 +196,18 @@ public:
         //      So on the Vertex Shader (thatÔøΩs is first at the pipeline) can search for it information and move it
         //      to it right position.
         //
-        renderFBO.begin();
+        /*renderFBO.begin();
+        
+        ofPushMatrix();
+        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+        ofScale(scale, scale);
+        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
         ofClear(0,0,0,0);
         updateRender.begin();
         updateRender.setUniformTexture("posTex", posPingPong.dst->getTextureReference(), 0);
         updateRender.setUniform1i("resolution", (float)textureRes);
         updateRender.setUniform2f("screen", (float)2.0, (float)2.0);
+        updateRender.setUniform1f("scale", scale );
         //updateRender.setUniform1f("size", (float)particleSize);
         
         ofPushStyle();
@@ -207,7 +218,8 @@ public:
         ofPopStyle();
         
         updateRender.end();
-        renderFBO.end();
+        ofPopMatrix();
+        renderFBO.end();*/
         
         // reset mouse to junk
         mouse.set(-1,-1);
@@ -233,7 +245,30 @@ public:
     
     void draw(){
         ofSetColor(255);
-        renderFBO.draw(0,0);
+//        renderFBO.draw(0,0);
+        ofPushMatrix();
+//            ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+//            ofScale(scale, scale);
+//            ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
+            ofVec3f trans = ofGetCurrentMatrix(OF_MATRIX_MODELVIEW).getTranslation();
+            //trans *= scale;
+            updateRender.begin();
+            updateRender.setUniformTexture("posTex", posPingPong.dst->getTextureReference(), 0);
+            updateRender.setUniform1i("resolution", (float)textureRes);
+            updateRender.setUniform2f("screen", (float)2.0, (float)2.0);
+            updateRender.setUniform2f("screenPos", (float) trans.x / (ofGetWidth()), (float) trans.y / (ofGetHeight()) );
+            updateRender.setUniform1f("scale", scale );
+            //updateRender.setUniform1f("size", (float)particleSize);
+            
+            ofPushStyle();
+            ofSetColor(255);
+            
+            mesh.draw();
+            
+            ofPopStyle();
+            
+            updateRender.end();
+        ofPopMatrix();
     }
     
 protected:

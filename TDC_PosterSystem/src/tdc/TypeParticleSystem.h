@@ -78,6 +78,11 @@ public:
     // grid vs outline
     void setUseGrid( bool useGrid );
     
+    double       scale;
+    
+    // set colors
+    void setColor( ofFloatColor color, float variance = 0.0 );
+    
 protected:
     string      svgFile;
     // threadzzz
@@ -89,8 +94,13 @@ protected:
     bool        bMeshIsUpdated;
     int         meshUpdatingFrames;
     
+    // flags to update mesh
     bool        bNeedToChangeMesh;
     bool        bUseGrid;
+    bool        bNeedToChangeColor;
+    
+    ofFloatColor     particleColor;
+    float           colorVariance;
     
     map<DrawMode, map<GridType,ofMesh> > meshes;
     void        buildMeshes();

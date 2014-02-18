@@ -13,3 +13,5 @@ ${PREFIX}labatrockwell/ofxLabFlexParticleSystem.git
 ${PREFIX}rezaali/ofxUI.git
 ${PREFIX}kylemcdonald/ofxCv.git
 ${PREFIX}satoruhiga/ofxNI2.git
+${PREFIX}labatrockwell/ofxLibwebsockets.git
+${PREFIX}spacebrew/ofxSpacebrew.git

@@ -11,7 +11,11 @@
 #include "Behavior.h"
 
 // for now
-#include "ofxNI2.h"
+#ifdef USE_OPENNI
+//#include "ofxNI2.h"
+#else
+#include "ofxKinect.h"
+#endif
 #include "DepthRemapToRange.h"
 
 // this should be namespaced like woah
@@ -24,7 +28,10 @@ public:
     }
     
     void setup( ofxLabFlexParticleSystem::Container * particles ){
-        return;
+        near = 800;
+        far  = 1000;
+        
+#ifdef USE_OPENNI
         // setup device
         device = new ofxNI2::Device();
         device->setup();
@@ -39,9 +46,12 @@ public:
             shader->setNear( 50 );
             shader->setFar( 2000 );
         }
-        
-        near = 800;
-        far  = 1000;
+#else
+        kinect.setRegistration(true);
+        kinect.init();
+        kinect.open();
+        kinect.setDepthClipping( near, far );
+#endif
         
         shader.load("shaders/bumpmap.vert","");
         renderFBO.allocate(ofGetWidth(), ofGetHeight());
@@ -52,13 +62,24 @@ public:
     }
     
     void beginDraw(){
+#ifdef USE_OPENNI
         depth.updateTextureIfNeeded();
         
         ofxNI2::depthRemapToRange(depth.getPixelsRef(), scaledPixels, near, far, true);
         toDraw.setFromPixels(scaledPixels);
+#else
+        kinect.update();
+        toDraw.setFromPixels(kinect.getDepthPixelsRef());
+#endif
+        
         toDraw.mirror(false, true);
         
         renderFBO.begin();
+        ofPushMatrix();
+        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+        ofScale(scale, scale);
+        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
+        
         ofClear(0,0,0,0);
         shader.begin();
         shader.setUniform2f("depthDims", 320.0f, 240.0f);
@@ -69,6 +90,7 @@ public:
     
     void endDraw(){
         shader.end();
+        ofPopMatrix();
         renderFBO.end();
     }
     
@@ -88,8 +110,11 @@ protected:
     ofPixels scaledPixels;
     int near, far;
     
+#ifdef USE_OPENNI
     ofxNI2::Device * device;
     ofxNI2::DepthStream depth;
-    
+#else
+    ofxKinect kinect;
+#endif
 };
 

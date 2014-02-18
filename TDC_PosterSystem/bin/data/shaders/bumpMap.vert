@@ -35,7 +35,7 @@ void main() {
     vec4 pos_og = pos_gl;
     
     //pos.z = (1.0-color.r) * extrusion;
-    pos.z = -extrusion + ((color.r) * extrusion);
+    pos.z = ((color.r) * extrusion);
     
     gl_Position = gl_ProjectionMatrix * gl_ModelViewMatrix * pos;
     gl_FrontColor =  gl_Color;
