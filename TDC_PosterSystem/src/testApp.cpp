@@ -55,7 +55,7 @@ void testApp::setup(){
     lastDrawMode = 0;
     drawMode = TypeParticleSystem::DRAW_POINTS;
     ofDisableDepthTest();
-    glPointSize(.5f);
+    //glPointSize(.5f);
     
     // GUI
     gui = new ofxUITabBar(10, 10, ofGetWidth(), ofGetHeight());
@@ -94,7 +94,7 @@ void testApp::setup(){
     ofxUISuperCanvas * guiMovement = new ofxUISuperCanvas("MOVEMENT",0,0,ofGetWidth()-100, ofGetHeight());
     guis.push_back(guiMovement);
     guis.back()->setName("MOVEMENT");
-    guis.back()->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_BUMP, TypeParticleSystem::MOVE_NONE);
+    guis.back()->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_PUSH, TypeParticleSystem::MOVE_NONE);
     // this should be separate panels for each behavior
     guis.back()->addSlider("intensityX", 0.0, 100.0, 10.0f);
     guis.back()->addSlider("intensityY", 0.0, 100.0, 50.0f);
@@ -248,18 +248,16 @@ void testApp::mouseMoved(int x, int y ){
 }
 
 void testApp::onGui( ofxUIEventArgs & e ){
+    Behavior * b = particles.getSettingsBehavior();
     if ( e.getName() == "intensityX" ){
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->intensity.x = e.getSlider()->getValue();
         }
     } else if ( e.getName() == "intensityY" ){
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->intensity.y = e.getSlider()->getValue();
         }
     } else if ( e.getName() == "rate" ){
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->timeFactor = e.getSlider()->getValue() / 1000.0;
         }
@@ -267,7 +265,6 @@ void testApp::onGui( ofxUIEventArgs & e ){
         ofxUIIntSlider * s = (ofxUIIntSlider *) e.getSlider();
         particles.setBehavior( (TypeParticleSystem::MovementType) s->getValue() );
     } else if ( e.getName() == "mix" ){
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->mix = e.getSlider()->getValue();
         }
@@ -276,28 +273,24 @@ void testApp::onGui( ofxUIEventArgs & e ){
 
 //--------------------------------------------------------------
 void testApp::onMessage( Spacebrew::Message & m ){
+    Behavior * b = particles.getSettingsBehavior();
     m.value = m.value.substr(1,m.value.length()-1);
     if ( m.name == "intensityx" ){
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->intensity.x = ofToFloat(m.value) * 100.0f;
         }
         ((ofxUISlider *)gui->getWidget("intensityX"))->setValue(ofToFloat(m.value) * 100.0f);
     } else if ( m.name == "intensityy"){
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->intensity.y = ofToFloat(m.value) * 100.0f;
             ((ofxUISlider *)gui->getWidget("intensityY"))->setValue(ofToFloat(m.value) * 100.0f);
         }
     } else if ( m.name == "rate"){
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->timeFactor = ofToFloat(m.value) * 0.01;
             ((ofxUISlider *)gui->getWidget("rate"))->setValue(ofToFloat(m.value) * 10.0f);
         }
     } else if ( m.name == "mix"){
-        
-        Behavior * b = particles.getCurrentBehavior();
         if ( b != NULL ){
             b->mix = ofToFloat(m.value);
             ((ofxUISlider *)gui->getWidget("mix"))->setValue(ofToFloat(m.value));

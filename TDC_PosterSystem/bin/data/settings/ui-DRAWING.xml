@@ -23,27 +23,27 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Auto Clear Background</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Background Alpha Clear</Name>
-    <Value>31.690752029</Value>
+    <Value>4.421965122</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: R</Name>
-    <Value>0.552023113</Value>
+    <Value>0.955202341</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: G</Name>
-    <Value>0.416184962</Value>
+    <Value>0.947976887</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: B</Name>
-    <Value>0.050578035</Value>
+    <Value>0.965317905</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

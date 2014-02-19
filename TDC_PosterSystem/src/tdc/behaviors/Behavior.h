@@ -68,6 +68,12 @@ public:
         return name;
     }
     
+    void copySettings( Behavior * from ){
+        intensity = from->intensity;
+        timeFactor = from->timeFactor;
+        mix = from->mix;
+        scale = from->scale;
+    }
     
     virtual void setMouse( ofVec2f mousePosition ){ mouse = mousePosition; };
     virtual void setup( ofxLabFlexParticleSystem::Container * c ){};

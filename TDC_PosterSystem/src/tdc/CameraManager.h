@@ -32,16 +32,22 @@ public:
     
     void update( ofEventArgs & e ){
         kinect.update();
-        toDraw.setFromPixels(kinect.getDepthPixelsRef());
+        if ( kinect.isFrameNew() ){
+            toDraw.setFromPixels(kinect.getDepthPixelsRef());
+            toDraw.mirror(false, true);
+        }
     }
     
     void draw( int width=160, int height=120){
-        toDraw.mirror(false, true);
         toDraw.draw(0,0,width,height);
     }
     
     ofImage & getImage(){
         return toDraw;
+    }
+    
+    ofxKinect & getKinect(){
+        return kinect;
     }
     
 protected:
@@ -50,4 +56,5 @@ protected:
     ofPixels scaledPixels;
     int near, far;
     ofxKinect kinect;
+    
 };

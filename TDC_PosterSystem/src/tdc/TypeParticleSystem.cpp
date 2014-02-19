@@ -36,15 +36,19 @@ void TypeParticleSystem::setup( string file ){
     
     // behavior
     
-    behaviors[ MOVE_NONE ] = NULL;
+    behaviors[ MOVE_NONE ] = new Behavior();
     behaviors[ MOVE_NOISE ] = new Noise();
     behaviors[ MOVE_WARP ] = new Warp();
     behaviors[ MOVE_FLOCK ] = NULL;
     behaviors[ MOVE_BUMP ] = new BumpMap();
+    behaviors[ MOVE_PUSH ] = new CameraWarp();
     
     camera.setup();
     behaviors[ MOVE_BUMP ]->setup(NULL);
     behaviors[ MOVE_BUMP ]->camera = &camera;
+    behaviors[ MOVE_PUSH ]->setup(NULL);
+    behaviors[ MOVE_PUSH ]->camera = &camera;
+    
     
     //MOVE_GRAVITY,
     
@@ -76,7 +80,15 @@ void TypeParticleSystem::setup( string file ){
     startThread();
 }
 
-//-------------------------------------------------------------------------------------------
+/********************************************************************************************
+  __  __    _    ___ _   _   _____ _   _ ____  _____    _    ____
+ |  \/  |  / \  |_ _| \ | | |_   _| | | |  _ \| ____|  / \  |  _ \
+ | |\/| | / _ \  | ||  \| |   | | | |_| | |_) |  _|   / _ \ | | | |
+ | |  | |/ ___ \ | || |\  |   | | |  _  |  _ <| |___ / ___ \| |_| |
+ |_|  |_/_/   \_\___|_| \_|   |_| |_| |_|_| \_\_____/_/   \_\____/
+ 
+ ********************************************************************************************/
+
 void TypeParticleSystem::threadedFunction(){
     static bool bIsSetup = false;
     
@@ -106,13 +118,13 @@ void TypeParticleSystem::threadedFunction(){
         
         //drawMesh.setupIndicesAuto();
         
+#pragma mark TODO: ATTACH TO API!
+        
         ofColor color;
         color.setHue( ofMap( ofGetHours(), 0, 24, 0, 360.0f ));
         color.setSaturation(180.0f);
         
         int hour = ofGetHours();
-        
-#pragma mark TODO: ATTACH TO API!
         
         if ( hour < 9 || hour > 18 ){
             color.setBrightness(100);
@@ -334,6 +346,7 @@ void TypeParticleSystem::threadedFunction(){
         
         // some behaviors need everybody
         if ( currentBehavior != NULL ){
+            currentBehavior->copySettings( behaviors[ MOVE_NONE ]);
             currentBehavior->updateAll(&_particles);
         }
         
@@ -427,17 +440,6 @@ void TypeParticleSystem::update(){
         currentMesh = &outlineMesh;
     }*/
     
-    
-    if ( currentMesh && currentMesh->getNumVertices() > 0 ){
-        if ( currentBehavior != NULL ){
-            currentBehavior->beginDraw();
-        }
-        currentMesh->draw();
-        
-        if ( currentBehavior != NULL ){
-            currentBehavior->endDraw();
-        }
-    }
 }
 
 //-------------------------------------------------------------------------------------------
@@ -445,14 +447,38 @@ void TypeParticleSystem::draw()
 {
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
         
-        ofPushMatrix();
-        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
-        ofScale(scale, scale);
-        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
-        if ( currentBehavior == NULL || (currentBehavior->getName() != "flocking" && currentBehavior->getName() != "bumpmap")) currentMesh->draw();
-        ofPopMatrix();
+        if ( currentBehavior == NULL ){
+            ofPushMatrix();
+            ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+            ofScale(scale, scale);
+            ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
+            currentMesh->draw();
+            ofPopMatrix();
+        } else {
+            ofSetColor(255);
+            if ( currentMesh && currentMesh->getNumVertices() > 0 ){
+                if ( currentBehavior->getName() != "flocking" ){
+                    ofPushMatrix();
+                    ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+                    ofScale(scale, scale);
+                    ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
+                }
+                if ( currentBehavior != NULL ){
+                    currentBehavior->scale = scale;
+                    currentBehavior->beginDraw();
+                }
+                if ( currentBehavior->getName() != "flocking" ) currentMesh->draw();
+                
+                if ( currentBehavior != NULL ){
+                    currentBehavior->endDraw();
+                }
+                if ( currentBehavior->getName() != "flocking" ){
+                    ofPopMatrix();
+                }
+            }
+        }
+        
         if ( currentBehavior != NULL ){
-            currentBehavior->scale = scale;
             currentBehavior->draw();
         }
     }
@@ -519,6 +545,15 @@ string TypeParticleSystem::getDrawModeString(){
     }
 }
 
+/********************************************************************************************
+  __  __ ______  _____ _    _    _____ ______ _   _
+ |  \/  |  ____|/ ____| |  | |  / ____|  ____| \ | |
+ | \  / | |__  | (___ | |__| | | |  __| |__  |  \| |
+ | |\/| |  __|  \___ \|  __  | | | |_ |  __| | . ` |
+ | |  | | |____ ____) | |  | | | |__| | |____| |\  |
+ |_|  |_|______|_____/|_|  |_|  \_____|______|_| \_|
+ 
+ ********************************************************************************************/
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::buildMeshes(){
@@ -859,6 +894,16 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
     mesh->save(file, false);
 }
 
+
+/********************************************************************************************
+  ____  _____ _____ _____ ___ _   _  ____ ____
+ / ___|| ____|_   _|_   _|_ _| \ | |/ ___/ ___|
+ \___ \|  _|   | |   | |  | ||  \| | |  _\___ \
+  ___) | |___  | |   | |  | || |\  | |_| |___) |
+ |____/|_____| |_|   |_| |___|_| \_|\____|____/
+ 
+ ********************************************************************************************/
+
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::setColor( ofFloatColor color, float variance ){
     particleColor = color;
@@ -876,6 +921,17 @@ void TypeParticleSystem::setUseGrid( bool useGrid ){
     }
 }
 
+#pragma mark behaviors
+/********************************************************************************************
+  ____  ______ _    _     __      _______ ____  _____   _____
+ |  _ \|  ____| |  | |   /\ \    / /_   _/ __ \|  __ \ / ____|
+ | |_) | |__  | |__| |  /  \ \  / /  | || |  | | |__) | (___
+ |  _ <|  __| |  __  | / /\ \ \/ /   | || |  | |  _  / \___ \
+ | |_) | |____| |  | |/ ____ \  /   _| || |__| | | \ \ ____) |
+ |____/|______|_|  |_/_/    \_\/   |_____\____/|_|  \_\_____/
+
+********************************************************************************************/
+
 //-------------------------------------------------------------------------------------------
 Behavior * TypeParticleSystem::getCurrentBehavior(){
     return currentBehavior;
@@ -885,6 +941,22 @@ Behavior * TypeParticleSystem::getCurrentBehavior(){
 void TypeParticleSystem::setBehavior( MovementType type ){
     moveType = type;
 }
+
+//-------------------------------------------------------------------------------------------
+Behavior *  TypeParticleSystem::getSettingsBehavior(){
+    return behaviors[ MOVE_NONE ];
+}
+
+
+#pragma mark interaction
+/********************************************************************************************
+ ___ _   _ _____ _____ ____      _    ____ _____ ___ ___  _   _
+ |_ _| \ | |_   _| ____|  _ \    / \  / ___|_   _|_ _/ _ \| \ | |
+  | ||  \| | | | |  _| | |_) |  / _ \| |     | |  | | | | |  \| |
+  | || |\  | | | | |___|  _ <  / ___ \ |___  | |  | | |_| | |\  |
+ |___|_| \_| |_| |_____|_| \_\/_/   \_\____| |_| |___\___/|_| \_|
+ 
+ ********************************************************************************************/
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::mouseMoved( int x, int y ){

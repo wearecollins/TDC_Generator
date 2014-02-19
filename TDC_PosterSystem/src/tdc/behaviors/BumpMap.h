@@ -31,33 +31,30 @@ public:
     }
     
     void beginDraw(){
-        
-        
-        renderFBO.begin();
-        ofPushMatrix();
-        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
-        ofScale(scale, scale);
-        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
-        
-        ofClear(0,0,0,0);
+                
+        //renderFBO.begin();
+        //ofClear(0,0,0,0);
         shader.begin();
         shader.setUniform2f("depthDims", 320.0f, 240.0f);
         shader.setUniform2f("screenDims", (float) ofGetWidth(), (float) ofGetHeight());
         shader.setUniform1f("extrusion", mix * 1000.0f);
         if ( camera != NULL ){
             shader.setUniformTexture("depthTex", camera->getImage().getTextureReference(), 0);
+        } else {
+            cout << "CAMERA IS NULL!"<<endl;
         }
     }
     
     void endDraw(){
         shader.end();
         ofPopMatrix();
-        renderFBO.end();
+        //renderFBO.end();
     }
     
     void draw(){
         ofSetColor(255);
-        renderFBO.draw(0,0);
+        //renderFBO.draw(0,0);
+        camera->draw();
     }
     
 protected:

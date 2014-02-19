@@ -16,6 +16,7 @@
 #include "ofxLabFlexParticleSystem.h"
 
 // behaviorz
+#include "behaviors/CameraWarp.h"
 #include "behaviors/Flocking.h"
 #include "behaviors/Noise.h"
 #include "behaviors/Warp.h"
@@ -59,6 +60,7 @@ public:
         MOVE_WARP,
         MOVE_FLOCK,
         MOVE_BUMP,
+        MOVE_PUSH,
         MOVE_GRAVITY
     };
     
@@ -77,6 +79,7 @@ public:
     // behavior
     Behavior * getCurrentBehavior();
     void setBehavior( MovementType type );
+    Behavior *  getSettingsBehavior(); // behaviors[ MOVE_NONE ] is used to store/set settings
     
     // grid vs outline
     void setUseGrid( bool useGrid );
