@@ -21,6 +21,9 @@
 #include "behaviors/Warp.h"
 #include "behaviors/BumpMap.h"
 
+// interaction
+#include "CameraManager.h"
+
 // this is dumb
 struct QuickVertex
 {
@@ -106,6 +109,8 @@ protected:
     void        buildMeshes();
     void        buildMesh(DrawMode mode, GridType type );
     
+    // drawing / meshes
+    
     DrawMode    drawMode, lastDrawMode;
     TypeOutline outline;
     TypeGrid    grid;
@@ -123,6 +128,9 @@ protected:
     TypeIterator it;
     ofVec2f     lastMouse;
     float       lastMass;
+    
+    // interaction
+    CameraManager camera;
     
     // movement stuff
     MovementType moveType;

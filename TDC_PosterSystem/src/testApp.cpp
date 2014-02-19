@@ -55,7 +55,7 @@ void testApp::setup(){
     lastDrawMode = 0;
     drawMode = TypeParticleSystem::DRAW_POINTS;
     ofDisableDepthTest();
-    //glPointSize(2.0f);
+    glPointSize(.5f);
     
     // GUI
     gui = new ofxUITabBar(10, 10, ofGetWidth(), ofGetHeight());

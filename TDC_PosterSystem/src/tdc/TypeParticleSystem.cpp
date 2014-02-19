@@ -41,7 +41,10 @@ void TypeParticleSystem::setup( string file ){
     behaviors[ MOVE_WARP ] = new Warp();
     behaviors[ MOVE_FLOCK ] = NULL;
     behaviors[ MOVE_BUMP ] = new BumpMap();
+    
+    camera.setup();
     behaviors[ MOVE_BUMP ]->setup(NULL);
+    behaviors[ MOVE_BUMP ]->camera = &camera;
     
     //MOVE_GRAVITY,
     
@@ -64,8 +67,10 @@ void TypeParticleSystem::setup( string file ){
     currentBehavior = behaviors[ moveType ];
     gravity  = ofVec2f(0,4.0f);
     
+    // test mesh to decide to start from scratch or not
     test.load("meshes/mesh_2_0");
     test.setMode(OF_PRIMITIVE_TRIANGLES);
+    
     
     // lez do it
     startThread();
@@ -367,6 +372,7 @@ void TypeParticleSystem::threadedFunction(){
                 currentMeshBuffer->setColor(i, localColor);
             }
             bNeedToChangeColor = false;
+            if ( behaviors[ MOVE_FLOCK ] != NULL ) behaviors[ MOVE_FLOCK ]->copyMesh(currentMesh);
             unlock();
         }
         
@@ -405,6 +411,7 @@ void TypeParticleSystem::update(){
     
     if ( currentMesh && currentMesh->getNumVertices() > 0 && behaviors[ MOVE_FLOCK ] == NULL){
         behaviors[ MOVE_FLOCK ] = new Flocking(&_particles);
+        behaviors[ MOVE_FLOCK ]->copyMesh(currentMesh);
     }
     //gridMesh = bufferGridMesh;
     //outlineMesh = bufferOutlineMesh;

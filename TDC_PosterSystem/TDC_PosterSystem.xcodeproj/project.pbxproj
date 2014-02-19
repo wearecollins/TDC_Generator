@@ -372,6 +372,7 @@
 		0148F92B18A92F21007F715A /* ofxUIWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUIWrapper.h; sourceTree = "<group>"; };
 		0148F9C218A9744A007F715A /* TypeOutline.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TypeOutline.h; path = tdc/TypeOutline.h; sourceTree = "<group>"; };
 		0148F9C418A974F7007F715A /* TypeMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TypeMesh.h; path = tdc/TypeMesh.h; sourceTree = "<group>"; };
+		0179A86418B5223800EDA4AB /* CameraManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CameraManager.h; path = tdc/CameraManager.h; sourceTree = "<group>"; };
 		01A203F918A4308500096698 /* ofxLabFlexParticle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexParticle.h; sourceTree = "<group>"; };
 		01A203FA18A4308500096698 /* ofxLabFlexParticleSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexParticleSystem.h; sourceTree = "<group>"; };
 		01A203FB18A4308500096698 /* ofxLabFlexQuad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexQuad.h; sourceTree = "<group>"; };
@@ -798,6 +799,7 @@
 		0124CF9A18A430F100EAB3AF /* particle system */ = {
 			isa = PBXGroup;
 			children = (
+				0179A86518B5225E00EDA4AB /* interaction */,
 				010C130118ABC06D0072A991 /* behaviors */,
 				0148F9C518A97C44007F715A /* type_shapes */,
 				0124CF9818A430E300EAB3AF /* TypeParticleSystem.h */,
@@ -937,6 +939,14 @@
 				01BA1D5C18A15D2E0074AB04 /* TypeGrid.h */,
 			);
 			name = type_shapes;
+			sourceTree = "<group>";
+		};
+		0179A86518B5225E00EDA4AB /* interaction */ = {
+			isa = PBXGroup;
+			children = (
+				0179A86418B5223800EDA4AB /* CameraManager.h */,
+			);
+			name = interaction;
 			sourceTree = "<group>";
 		};
 		01A203EA18A4308400096698 /* ofxLabFlexParticleSystem */ = {

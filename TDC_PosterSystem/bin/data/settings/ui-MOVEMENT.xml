@@ -8,25 +8,25 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Movement Type</Name>
-    <Value>0</Value>
+    <Value>3</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>intensityX</Name>
-    <Value>6.502889633</Value>
+    <Value>22.109825134</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>intensityY</Name>
-    <Value>5.057803631</Value>
+    <Value>4.624277115</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>rate</Name>
-    <Value>0.086705200</Value>
+    <Value>0.043352600</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>mix</Name>
-    <Value>0.147398844</Value>
+    <Value>0.784682095</Value>
 </Widget>

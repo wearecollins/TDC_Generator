@@ -10,7 +10,7 @@
 
 #include "ofMain.h"
 #include "ofxLabFlexParticleSystem.h"
-
+#include "CameraManager.h"
 
 // PING PONG from shader particle ex
 struct pingPongBuffer {
@@ -74,6 +74,7 @@ public:
     
     virtual void update( TypeParticle * p ){};
     virtual void updateAll( ofxLabFlexParticleSystem::Container * c ){};
+    virtual void copyMesh( ofMesh * m ){};
     
     // call before/after draw (duh)
     virtual void beginDraw(){}
@@ -85,6 +86,9 @@ public:
     double   timeFactor;
     float    mix;
     float   scale;
+    
+    // yeesh
+    CameraManager * camera;
     
 protected:
     
