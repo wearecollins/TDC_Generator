@@ -125,7 +125,18 @@ public:
             for(int y = 0; y < textureRes; y++){
                 mesh.addVertex(ofVec3f(x,y));
                 mesh.addTexCoord(ofVec2f(x, y));
+                mesh.addColor(ofFloatColor(1,1,1,1));
             }
+        }
+    }
+    
+    void copyMesh( ofMesh * m ){
+        if ( m->getNumColors() < mesh.getNumColors() ){
+            ofLogError()<<"Not enough colors";
+            return;
+        }
+        for (int i=0; i<mesh.getNumVertices(); i++){
+            mesh.setColor( i, m->getColor(i));
         }
     }
     
