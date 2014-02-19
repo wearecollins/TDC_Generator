@@ -27,7 +27,7 @@ public:
     }
     
 //    virtual void update( TypeParticle * p ){};
-    void updateAll( ofxLabFlexParticleSystem::Container * c ){
+    /*void updateAll( ofxLabFlexParticleSystem::Container * c ){
         if ( !last.isAllocated()) return;
         ofxLabFlexParticleSystem::Iterator it = c->begin();
         ofVec3f lmp(lastMaxLoc.x, lastMaxLoc.y, 0);
@@ -63,7 +63,7 @@ public:
         }
         lastMinLoc = minLoc;
         lastMaxLoc = maxLoc;
-    };
+    };*/
 //    virtual void copyMesh( ofMesh * m ){};
     
     void beginDraw(){
@@ -121,7 +121,7 @@ public:
                 //knockBlack.setUniformTexture("tex", currentDiff.getTextureReference(), 0);
                 //cout << (maxLoc.x - maxLocTemp.x) <<":"<<maxLoc.x <<":"<<maxLoc.y << endl;
                 
-                ofSetColor(lastMaxVal,10);
+                ofSetColor(lastMaxVal,2);
                 ofEllipse( maxLoc.x, maxLoc.y, ofMap(color, 0, 255, 25,100), ofMap(color, 0, 255, 25,100) );
                 
                 //knockBlack.end();
