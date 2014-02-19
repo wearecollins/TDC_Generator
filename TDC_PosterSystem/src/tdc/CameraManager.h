@@ -10,6 +10,7 @@
 
 #include "ofMain.h"
 #include "ofxKinect.h"
+#include "ofxCv.h"
 
 class CameraManager {
 public:
@@ -35,6 +36,30 @@ public:
         if ( kinect.isFrameNew() ){
             toDraw.setFromPixels(kinect.getDepthPixelsRef());
             toDraw.mirror(false, true);
+            
+            double minVal = 0, maxVal = 0;
+            cv::Point minLoc, maxLoc;
+            static cv::Rect rect;
+            rect.x      = 0;
+            rect.y      = 0;
+            rect.width  = toDraw.width;
+            rect.height = toDraw.height;
+            cv::Mat cameraMat = ofxCv::toCv(toDraw);
+            cv::Mat roiMat(cameraMat, rect);
+            cv::minMaxLoc( roiMat, &minVal, &maxVal, &minLoc, &maxLoc, cv::Mat());
+            
+            ofVec2f mouse;
+            mouse.x = ofMap( maxLoc.x, 0, toDraw.width, 0, (float) ofGetWidth());
+            mouse.y = ofMap( maxLoc.y, 0, toDraw.height, 0, (float) ofGetHeight());
+            
+            if ( lastPoint.distance(mouse) == 0) return;
+            
+            ofMouseEventArgs args;
+            args.x = mouse.x;
+            args.y = mouse.y;
+            
+            ofNotifyEvent(ofEvents().mouseMoved, args );
+            lastPoint.set(args.x, args.y);
         }
     }
     
@@ -57,4 +82,5 @@ protected:
     int near, far;
     ofxKinect kinect;
     
+    ofVec2f lastPoint;
 };
