@@ -225,7 +225,7 @@ void main(void){
     mouseNorm.y = mouse.y / screen.y;
     
     float dist = length( pos - mouseNorm);
-    float mouseMass = .02; // this should be dynamic
+    float mouseMass = .005; // this should be dynamic
     float particleMass = .001; // this should be dynamic
     
     if( dist < .1 ) {

@@ -20,7 +20,9 @@ public:
     }
     
     void update( TypeParticle * p ){
-        (*p) += ofVec2f( ofSignedNoise(p->getSeedPosition().x + p->getOffsetX() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.x, ofSignedNoise(p->getSeedPosition().y + p->getOffsetY() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.y);
+        (*p) += ofVec3f( ofSignedNoise(p->getSeedPosition().x + p->getOffsetX() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.x,
+                        ofSignedNoise(p->getSeedPosition().y + p->getOffsetY() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.y,
+                        ofSignedNoise(p->getSeedPosition().z + p->getOffsetZ() + (ofGetElapsedTimeMillis() * timeFactor)) * (intensity.z - .5));
     }
     
 };

@@ -6,6 +6,7 @@ bool bSave    = false;
 bool bReload    = false;
 bool bUseGrid = true;
 bool bDrawTypeAsOverlay = true;
+bool bDrawTypeInSpace = true;
 
 // main layout vars
 int mode = 0;
@@ -27,6 +28,7 @@ float typeColor = 0;
 // poster
 ofRectangle poster = ofRectangle(0,0,100,400);
 ofFloatColor posterColor = ofColor(1.0,0,0);
+ofFloatColor posterColorBottom = ofColor(1.0,0,0);
 
 //--------------------------------------------------------------
 void testApp::setup(){
@@ -85,6 +87,7 @@ void testApp::setup(){
     guis.push_back(guiTypeOverlay);
     guis.back()->setName("TYPE");
     guis.back()->addToggle("Draw type overlay", &bDrawTypeAsOverlay);
+    guis.back()->addToggle("Draw type in space", &bDrawTypeInSpace);
     guis.back()->addDoubleSlider("scale", 0.0, 1.0, &particles.scale);
     guis.back()->addDoubleSlider("x", -1.0, 1.0, &x);
     guis.back()->addDoubleSlider("y", -1.0, 1.0, &y);
@@ -98,6 +101,7 @@ void testApp::setup(){
     // this should be separate panels for each behavior
     guis.back()->addSlider("intensityX", 0.0, 100.0, 10.0f);
     guis.back()->addSlider("intensityY", 0.0, 100.0, 50.0f);
+    guis.back()->addSlider("intensityZ", 0.0, 100.0, 50.0f);
     guis.back()->addSlider("rate", 0.0, 10.0, 10.0);
     guis.back()->addSlider("mix", 0.0, 1.0, .5);
     gui->addCanvas(guis.back());
@@ -133,9 +137,28 @@ void testApp::setup(){
     Spacebrew::Config config;
     config.addSubscribe("intensityx", "float_normalized");
     config.addSubscribe("intensityy", "float_normalized");
+    config.addSubscribe("intensityz", "float_normalized");
     config.addSubscribe("rate", "float_normalized");
     config.addSubscribe("mix", "float_normalized");
     spacebrew.connect(host, config);
+    
+    // build poster mesh
+    posterMesh.load("meshes/poster");
+    if ( posterMesh.getNumVertices() == 0){
+        posterMesh.addVertex(ofVec3f(0,0));
+        posterMesh.addVertex(ofVec3f(ofGetWidth(),0));
+        posterMesh.addVertex(ofVec3f(ofGetWidth(),ofGetHeight()));
+        posterMesh.addVertex(ofVec3f(0,ofGetHeight()));
+        
+        posterMesh.addColor(ofFloatColor(1.0,1.0,1.0));
+        posterMesh.addColor(ofFloatColor(1.0,1.0,1.0));
+        posterMesh.addColor(ofFloatColor(1.0,1.0,1.0));
+        posterMesh.addColor(ofFloatColor(1.0,1.0,1.0));
+        
+        posterMesh.addIndex(0); posterMesh.addIndex(1); posterMesh.addIndex(3);
+        posterMesh.addIndex(1); posterMesh.addIndex(2); posterMesh.addIndex(3);
+        posterMesh.save("meshs/poster");
+    }
     
     Spacebrew::addListener(this, spacebrew);
 }
@@ -168,6 +191,31 @@ void testApp::update(){
         bReload = false;
     }
     
+    // update poster
+    float timeMappedSunset = particles.dataObject.time > .6 ? ofMap(particles.dataObject.time, .6, 1.0, 1.0, 0) : ofMap(particles.dataObject.time, 0.0, .6, 0, 1.0);
+    float timeMappedMidday = particles.dataObject.time > .5 ? ofMap(particles.dataObject.time, .5, 1.0, 1.0, 0.0) : ofMap(particles.dataObject.time, 0,1.0, 0, 1.0);
+    float yesterday = particles.dataObject.date - 1.0/365.0f;
+    //osterColor.setHue( yesterday * 1.0 * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time);
+    posterColorBottom.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
+    posterColorBottom.setSaturation( timeMappedSunset );
+    posterColorBottom.setBrightness( timeMappedMidday );
+
+    posterColor.setHue( particles.dataObject.date  );
+    posterColor.setSaturation( timeMappedSunset );
+    posterColor.setBrightness( timeMappedMidday );
+    
+    posterMesh.setVertex(0, ofVec2f(poster.x, poster.y));
+    posterMesh.setVertex(1, ofVec2f(poster.x + poster.width, poster.y));
+    posterMesh.setVertex(2, ofVec2f(poster.x + poster.width, poster.y + poster.height));
+    posterMesh.setVertex(3, ofVec2f(poster.x, poster.y + poster.height));
+    
+    posterMesh.setColor(0, posterColor );
+    posterMesh.setColor(1, posterColor );
+    posterMesh.setColor(2, posterColorBottom );
+    posterMesh.setColor(3, posterColorBottom );
+    
+    ofLogVerbose() << yesterday << ":" << particles.dataObject.date << ":" << timeMappedSunset << ":" << timeMappedMidday <<":"<<particles.dataObject.time<<endl;
+    
     particles.setUseGrid(bUseGrid);
     particles.update();
     ofSetWindowTitle(ofToString(ofGetFrameRate(), 2));
@@ -191,8 +239,18 @@ void testApp::draw(){
     ofEnableAlphaBlending();
     ofEnableBlendMode((ofBlendMode) mode);
     ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
-    
+    if (bDrawTypeInSpace){
+        ofEnableDepthTest();
+        ofPushMatrix();
+        ofSetColor(typeColor);
+        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
+        ofScale(particles.scale, particles.scale);
+        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
+        type.draw();
+        ofPopMatrix();
+    }
     particles.draw();
+    ofDisableDepthTest();
     if (bDrawTypeAsOverlay){
         ofSetColor(typeColor);
         ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
@@ -207,8 +265,7 @@ void testApp::draw(){
         ofClear(0,0,0,255);
         ofPushMatrix(); {
             ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
-            ofSetColor(posterColor);
-            ofRect(poster);
+            posterMesh.draw();
         } ofPopMatrix();
     
         ofSetColor(255);
@@ -256,6 +313,10 @@ void testApp::onGui( ofxUIEventArgs & e ){
     } else if ( e.getName() == "intensityY" ){
         if ( b != NULL ){
             b->intensity.y = e.getSlider()->getValue();
+        }
+    } else if ( e.getName() == "intensityZ" ){
+        if ( b != NULL ){
+            b->intensity.z = e.getSlider()->getValue();
         }
     } else if ( e.getName() == "rate" ){
         if ( b != NULL ){

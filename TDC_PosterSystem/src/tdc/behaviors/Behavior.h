@@ -88,7 +88,7 @@ public:
     virtual void draw(){}
     
     // settings
-    ofVec2f intensity;
+    ofVec3f intensity;
     double   timeFactor;
     float    mix;
     float   scale;

@@ -28,6 +28,7 @@ public:
     
     int getOffsetX(){ return offsetX; };
     int getOffsetY(){ return offsetY; };
+    int getOffsetZ(){ return offsetZ; };
     ofVec3f getSeedPosition(){ return seedPosition; };
     
     int index;
@@ -37,9 +38,10 @@ public:
     
 protected:
     
-    ofVec2f seedPosition;
+    ofVec3f seedPosition;
     int offsetX;
     int offsetY;
+    int offsetZ;
     bool bSet;
 };
 

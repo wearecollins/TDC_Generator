@@ -9,11 +9,16 @@
 #pragma once
 
 #include "ofMain.h"
+
+// system
 #include "TypeGrid.h"
 #include "TypeOutline.h"
 #include "TypeParticle.h"
 
 #include "ofxLabFlexParticleSystem.h"
+
+// data set
+#include "Data.h"
 
 // behaviorz
 #include "behaviors/CameraWarp.h"
@@ -88,6 +93,9 @@ public:
     
     // set colors
     void setColor( ofFloatColor color, float variance = 0.0 );
+    
+    // data object
+    Data        dataObject;
     
 protected:
     string      svgFile;

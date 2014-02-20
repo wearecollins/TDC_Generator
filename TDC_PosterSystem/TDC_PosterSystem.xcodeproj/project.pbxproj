@@ -761,6 +761,7 @@
 		0179AC7F18B5316800EDA4AB /* libopencv_ts231.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_ts231.a; sourceTree = "<group>"; };
 		0179AC8018B5316800EDA4AB /* libopencv_video231.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libopencv_video231.a; sourceTree = "<group>"; };
 		0179AC8118B5316800EDA4AB /* libzlib.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libzlib.a; sourceTree = "<group>"; };
+		0179AD0818B56A0000EDA4AB /* Data.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Data.h; path = tdc/Data.h; sourceTree = "<group>"; };
 		01A203F918A4308500096698 /* ofxLabFlexParticle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexParticle.h; sourceTree = "<group>"; };
 		01A203FA18A4308500096698 /* ofxLabFlexParticleSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexParticleSystem.h; sourceTree = "<group>"; };
 		01A203FB18A4308500096698 /* ofxLabFlexQuad.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxLabFlexQuad.h; sourceTree = "<group>"; };
@@ -1328,6 +1329,7 @@
 				0124CF9718A430E300EAB3AF /* TypeParticleSystem.cpp */,
 				0124CF9C18A4312700EAB3AF /* TypeParticle.cpp */,
 				0124CF9D18A4312700EAB3AF /* TypeParticle.h */,
+				0179AD0818B56A0000EDA4AB /* Data.h */,
 			);
 			name = "particle system";
 			sourceTree = "<group>";

@@ -49,6 +49,8 @@ void TypeParticleSystem::setup( string file ){
     behaviors[ MOVE_PUSH ]->setup(NULL);
     behaviors[ MOVE_PUSH ]->camera = &camera;
     
+    // setup data object
+    dataObject.setup();
     
     //MOVE_GRAVITY,
     
@@ -158,7 +160,7 @@ void TypeParticleSystem::threadedFunction(){
                 
                 grid.occupyIndex(index);
                 TypeParticle * t = new TypeParticle(t_gridMesh.getVertex(index));
-                t->velocity = ofVec2f(ofRandom(-100,100));
+                t->velocity = ofVec3f(ofRandom(-100,100),0,0);
                 t->mass = 50.0f;
                 t->damping  = .9f;
                 t->index = i;
@@ -440,6 +442,7 @@ void TypeParticleSystem::update(){
         currentMesh = &outlineMesh;
     }*/
     
+    // update stuff based on grid
 }
 
 //-------------------------------------------------------------------------------------------
@@ -483,7 +486,7 @@ void TypeParticleSystem::draw()
         }
     }
     meshUpdatingFrames++;
-    if ( meshUpdatingFrames > 3 ){
+    if ( meshUpdatingFrames > 10 ){
         ofSetColor(0,50);
         ofRect(0,0,ofGetWidth(), ofGetHeight());
         ofSetColor(255);
@@ -963,7 +966,7 @@ void TypeParticleSystem::mouseMoved( int x, int y ){
     if (!bMeshIsUpdated) return;
     
     ofVec3f mp = ofVec3f(x,y,0);
-    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * .8);
+    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * .3);
     lastMouse = mp;
     lastMass = mouseMass;
     

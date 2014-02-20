@@ -35,6 +35,9 @@ class testApp : public ofBaseApp{
         ofFbo toSavePoster;
         ofPixels pix;
     
+        // poster bg
+        ofMesh posterMesh;
+    
         // type
         ofxSVG type;
     

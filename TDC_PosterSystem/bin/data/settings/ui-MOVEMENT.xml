@@ -22,6 +22,11 @@
 </Widget>
 <Widget>
     <Kind>4</Kind>
+    <Name>intensityZ</Name>
+    <Value>20.231214523</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
     <Name>rate</Name>
     <Value>0.043352600</Value>
 </Widget>

@@ -25,45 +25,7 @@ public:
     void update( TypeParticle * p ){
         (*p) += ofVec2f( ofSignedNoise(p->getSeedPosition().x + p->getOffsetX() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.x, ofSignedNoise(p->getSeedPosition().y + p->getOffsetY() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.y);
     }
-    
-//    virtual void update( TypeParticle * p ){};
-    /*void updateAll( ofxLabFlexParticleSystem::Container * c ){
-        if ( !last.isAllocated()) return;
-        ofxLabFlexParticleSystem::Iterator it = c->begin();
-        ofVec3f lmp(lastMaxLoc.x, lastMaxLoc.y, 0);
-        ofVec3f mp(maxLoc.x, maxLoc.y);
-        mp.x = ofMap( mp.x, 0, last.width, 0, (float) ofGetWidth());
-        mp.y = ofMap( mp.y, 0, last.height, 0, (float) ofGetHeight());
-        lmp.x = ofMap( lmp.x, 0, last.width, 0, (float) ofGetWidth());
-        lmp.y = ofMap( lmp.y, 0, last.height, 0, (float) ofGetHeight());
-        
-        float mouseMass = 100.0f;
-        if ( lmp.distance(mp) < 10 ) return;
-        
-        for( it = c->begin(); it != c->end(); ++it )
-        {
-            TypeParticle * p = (TypeParticle *) it->second;
-            float distance = ofDist(mp.x, mp.y, p->x, p->y);
-            
-            if( distance > 100 ) {
-                continue;
-            }
-            
-            // ofVec2f - ofVec2f
-            ofVec3f diff = mp -( *p );
-            
-            diff.normalize();
-            
-            // http://www.grantchronicles.com/astro09.htm
-            // this is a really lose interpretation.. like not very close
-            float force = mouseMass * p->mass / MAX(1, distance);
-            float accel = force / p->mass;
-            
-            p->acceleration += diff * accel;
-        }
-        lastMinLoc = minLoc;
-        lastMaxLoc = maxLoc;
-    };*/
+
 //    virtual void copyMesh( ofMesh * m ){};
     
     void beginDraw(){

@@ -34,9 +34,17 @@ void TypeParticle::update()
         bSet = true;
         offsetX = ofRandom(10000);
         offsetY = ofRandom(10000);
+        offsetZ = ofRandom(10000);
+        seedPosition.z = ofRandom(-.01, .01);
     }
     ofxLabFlexParticle::update();
     velocity = velocity * .99 + (seedPosition - *this ) * .01;
+    z = z * .99;
+    if ( z > 100 ){
+        z = 100;
+    } else if ( z < -100 ){
+        z = -100;
+    }
 }
 
 //-------------------------------------------------------------------------------------------
@@ -51,9 +59,8 @@ TypeParticle& TypeParticle::operator=( const TypeParticle& p ){
     ofxLabFlexParticle::operator=(p);
     offsetX=p.offsetX;
     offsetY=p.offsetY;
+    offsetZ=p.offsetZ;
     index=p.index;
-    
-    cout << "correct = is called "<<endl;
     
     return *this;
 }
