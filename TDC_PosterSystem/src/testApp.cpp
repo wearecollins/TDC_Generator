@@ -34,7 +34,7 @@ ofFloatColor typeColor;
 
 //--------------------------------------------------------------
 void testApp::setup(){
-    particles.setup("Type4_003.svg");
+    particles.setup();
     toSave.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
     toSavePoster.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
     
@@ -48,7 +48,9 @@ void testApp::setup(){
     
     // load optional type overlay
     
-    type.load("Type4_003.svg");
+    // TO DO FIX ME OH GOD!
+    
+    //type.load("Type4_003.svg");
     
     int n = type.getNumPath();
     
@@ -57,7 +59,7 @@ void testApp::setup(){
     }
     
     lastDrawMode = 0;
-    drawMode = TypeParticleSystem::DRAW_POINTS;
+    drawMode = DRAW_POINTS;
     ofDisableDepthTest();
     //glPointSize(.5f);
     
@@ -71,7 +73,7 @@ void testApp::setup(){
     
     guis.back()->setName("DRAWING");
     guis.back()->addLabel("Drawmode Label", "Draw Points");
-    guis.back()->addIntSlider("Draw Mode", 0, TypeParticleSystem::DRAW_SHAPES + 1, &drawMode);
+    guis.back()->addIntSlider("Draw Mode", 0, DRAW_SHAPES + 1, &drawMode);
     guis.back()->addSpacer();
     guis.back()->addToggle("Use grid or outline", &bUseGrid);
     guis.back()->addSpacer();
@@ -101,7 +103,7 @@ void testApp::setup(){
     ofxUISuperCanvas * guiMovement = new ofxUISuperCanvas("MOVEMENT",0,0,ofGetWidth()-100, ofGetHeight());
     guis.push_back(guiMovement);
     guis.back()->setName("MOVEMENT");
-    guis.back()->addIntSlider("Movement Type", 0, TypeParticleSystem::MOVE_PUSH, TypeParticleSystem::MOVE_NONE);
+    guis.back()->addIntSlider("Movement Type", 0, MOVE_PUSH, MOVE_NONE);
     // this should be separate panels for each behavior
     guis.back()->addSlider("intensityX", 0.0, 100.0, 10.0f);
     guis.back()->addSlider("intensityY", 0.0, 100.0, 50.0f);
@@ -140,7 +142,7 @@ void testApp::setup(){
     setupSpacebrew();
     
     // build poster mesh
-    posterMesh.load("meshes/poster");
+    posterMesh.load("poster");
     if ( posterMesh.getNumVertices() == 0){
         posterMesh.addVertex(ofVec3f(0,0));
         posterMesh.addVertex(ofVec3f(ofGetWidth(),0));
@@ -154,15 +156,15 @@ void testApp::setup(){
         
         posterMesh.addIndex(0); posterMesh.addIndex(1); posterMesh.addIndex(3);
         posterMesh.addIndex(1); posterMesh.addIndex(2); posterMesh.addIndex(3);
-        posterMesh.save("meshes/poster");
+        posterMesh.save("poster");
     }
 }
 
 //--------------------------------------------------------------
 void testApp::update(){
-    if ( lastDrawMode != drawMode || particles.getDrawMode() != ((TypeParticleSystem::DrawMode) drawMode) ){
+    if ( lastDrawMode != drawMode || particles.getDrawMode() != ((DrawMode) drawMode) ){
         lastDrawMode = drawMode;
-        particles.setDrawMode( (TypeParticleSystem::DrawMode) drawMode);
+        particles.setDrawMode( (DrawMode) drawMode);
         //((ofxUILabel*)gui->getActiveCanvas()->getWidget("Drawmode Label"))->setLabel(particles.getDrawModeString());
     }
     if ( lastParticleColor != particleColor ){ 
@@ -213,16 +215,18 @@ void testApp::update(){
     ofLogVerbose() << yesterday << ":" << particles.dataObject.date << ":" << timeMappedSunset << ":" << timeMappedMidday <<":"<<particles.dataObject.time<<endl;
     
     // DATA OBJECT: ENVIRONMENT
-    Behavior * b = particles.getSettingsBehavior();
-    b->intensity.x = particles.dataObject.environmentImmediate * 100.0;
-    b->intensity.y = particles.dataObject.environmentLocal * 100.0;
-    b->intensity.z = particles.dataObject.environmentGlobal * 100.0;
-    
-    // UPDATE GUI BASED ON DATA OBJECT
-    ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(particles.dataObject.environmentImmediate * 100.0);
-    ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(particles.dataObject.environmentLocal * 100.0);
-    ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(particles.dataObject.environmentGlobal * 100.0);
-    
+    bool bUseData = false;
+    if ( bUseData ){
+        Behavior * b = particles.getSettingsBehavior();
+        b->intensity.x = particles.dataObject.environmentImmediate * 100.0;
+        b->intensity.y = particles.dataObject.environmentLocal * 100.0;
+        b->intensity.z = particles.dataObject.environmentGlobal * 100.0;
+        
+        // UPDATE GUI BASED ON DATA OBJECT
+        ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(particles.dataObject.environmentImmediate * 100.0);
+        ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(particles.dataObject.environmentLocal * 100.0);
+        ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(particles.dataObject.environmentGlobal * 100.0);
+    }
 
     particles.setUseGrid(bUseGrid);
     particles.update();
@@ -333,7 +337,7 @@ void testApp::onGui( ofxUIEventArgs & e ){
         }
     } else if ( e.getName() == "Movement Type" ){
         ofxUIIntSlider * s = (ofxUIIntSlider *) e.getSlider();
-        particles.setBehavior( (TypeParticleSystem::MovementType) s->getValue() );
+        particles.setBehavior( (MovementType) s->getValue() );
     } else if ( e.getName() == "mix" ){
         if ( b != NULL ){
             b->mix = e.getSlider()->getValue();

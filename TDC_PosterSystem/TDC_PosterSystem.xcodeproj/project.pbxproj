@@ -521,6 +521,7 @@
 		0148F9C418A974F7007F715A /* TypeMesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TypeMesh.h; path = tdc/TypeMesh.h; sourceTree = "<group>"; };
 		01587BE518B7B061008C46F7 /* TargetMesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetMesh.cpp; path = tdc/geometry/TargetMesh.cpp; sourceTree = "<group>"; };
 		01587BE618B7B061008C46F7 /* TargetMesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetMesh.h; path = tdc/geometry/TargetMesh.h; sourceTree = "<group>"; };
+		01587BE818B7B127008C46F7 /* TDCConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TDCConstants.h; path = tdc/TDCConstants.h; sourceTree = "<group>"; };
 		0179A86418B5223800EDA4AB /* CameraManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CameraManager.h; path = tdc/CameraManager.h; sourceTree = "<group>"; };
 		0179A86618B5286400EDA4AB /* CameraWarp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CameraWarp.h; path = tdc/behaviors/CameraWarp.h; sourceTree = "<group>"; };
 		0179AAB918B5310400EDA4AB /* ETF.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ETF.h; sourceTree = "<group>"; };
@@ -1337,6 +1338,7 @@
 				0124CF9C18A4312700EAB3AF /* TypeParticle.cpp */,
 				0124CF9D18A4312700EAB3AF /* TypeParticle.h */,
 				0179AD0818B56A0000EDA4AB /* Data.h */,
+				01587BE818B7B127008C46F7 /* TDCConstants.h */,
 			);
 			name = "particle system";
 			sourceTree = "<group>";

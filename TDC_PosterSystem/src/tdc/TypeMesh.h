@@ -20,7 +20,7 @@ public:
         SUFFIX = "_shape";
     }
     
-    void load( string svg_to_load ){
+    void load( string svg_to_load, string dir ){
         lastSpeed = 0;
         path.load( svg_to_load );
         
@@ -28,8 +28,10 @@ public:
         
         int inc = 2;
         
-        string file = "meshes/" + svg_to_load.substr(0, svg_to_load.length()-4) + SUFFIX;
-        string xmlFile = "meshes/" + svg_to_load.substr(0, svg_to_load.length()-4) +SUFFIX + ".xml";
+        string file = dir + "/" + svg_to_load.substr(0, svg_to_load.length()-4) + SUFFIX;
+        string xmlFile = dir + "/" + svg_to_load.substr(0, svg_to_load.length()-4) +SUFFIX + ".xml";
+        
+        cout <<"MESH IS? "<<file<<endl;
         
         mesh.load( file );
         

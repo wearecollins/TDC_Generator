@@ -36,9 +36,10 @@ public:
     
     TypeParticle& operator=( const TypeParticle& p );
     
+    ofVec3f seedPosition;
+    
 protected:
     
-    ofVec3f seedPosition;
     int offsetX;
     int offsetY;
     int offsetZ;
