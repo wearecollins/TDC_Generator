@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "WeatherColors.h"
 #include "TypeParticleSystem.h"
 #include "ofxUI.h"
 
@@ -10,6 +11,7 @@ class testApp : public ofBaseApp{
 
 	public:
 		void setup();
+        void setupSpacebrew();
 		void update();
 		void draw();
 

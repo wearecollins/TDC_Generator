@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rss xmlns:yweather="http://xml.weather.yahoo.com/ns/rss/1.0" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#" version="2.0">
+<channel>
+    <title>Yahoo! Weather - New York, NY</title>
+    <link>http://us.rd.yahoo.com/dailynews/rss/weather/New_York__NY/*http://weather.yahoo.com/forecast/USNY0996_f.html</link>
+    <description>Yahoo! Weather for New York, NY</description>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 20 Feb 2014 1:50 pm EST</lastBuildDate>
+    <ttl>60</ttl>
+    <yweather:location city="New York" region="NY" country="United States"/>
+    <yweather:units temperature="F" distance="mi" pressure="in" speed="mph"/>
+    <yweather:wind chill="50" direction="60" speed="3"/>
+    <yweather:atmosphere humidity="35" visibility="10" pressure="30.21" rising="2"/>
+    <yweather:astronomy sunrise="6:41 am" sunset="5:34 pm"/>
+    <image>
+        <title>Yahoo! Weather</title>
+        <width>142</width>
+        <height>18</height>
+        <link>http://weather.yahoo.com</link>
+        <url>http://l.yimg.com/a/i/brand/purplelogo//uh/us/news-wea.gif</url>
+    </image>
+    <item>
+        <title>Conditions for New York, NY at 1:50 pm EST</title>
+        <geo:lat>40.72</geo:lat>
+        <geo:long>-74.01</geo:long>
+        <link>http://us.rd.yahoo.com/dailynews/rss/weather/New_York__NY/*http://weather.yahoo.com/forecast/USNY0996_f.html</link>
+        <pubDate>Thu, 20 Feb 2014 1:50 pm EST</pubDate>
+        <yweather:condition text="Fair" code="34" temp="50" date="Thu, 20 Feb 2014 1:50 pm EST"/>
+        <description>
+            <![CDATA[
+            	<img src="http://l.yimg.com/a/i/us/we/52/34.gif"/>
+            <br />
+            <b>Current Conditions:</b>
+            <br />
+            	Fair, 50 F<BR />
+            <BR />
+            <b>Forecast:</b>
+            <BR />
+            	Thu - Partly Cloudy. High: 45 Low: 39<br />
+            	Fri - PM Thunderstorms. High: 52 Low: 32<br />
+            	Sat - Mostly Sunny. High: 50 Low: 35<br />
+            	Sun - Partly Cloudy. High: 46 Low: 30<br />
+            	Mon - Sunny. High: 38 Low: 23<br />
+            <br />
+            <a href="http://us.rd.yahoo.com/dailynews/rss/weather/New_York__NY/*http://weather.yahoo.com/forecast/USNY0996_f.html">Full Forecast at Yahoo! Weather</a>
+            <BR/>
+            <BR/>
+            	(provided by <a href="http://www.weather.com" >The Weather Channel</a>)<br/>
+            	]]>
+        </description>
+        <yweather:forecast day="Thu" date="20 Feb 2014" low="39" high="45" text="Partly Cloudy" code="30"/>
+        <yweather:forecast day="Fri" date="21 Feb 2014" low="32" high="52" text="PM Thunderstorms" code="38"/>
+        <yweather:forecast day="Sat" date="22 Feb 2014" low="35" high="50" text="Mostly Sunny" code="34"/>
+        <yweather:forecast day="Sun" date="23 Feb 2014" low="30" high="46" text="Partly Cloudy" code="30"/>
+        <yweather:forecast day="Mon" date="24 Feb 2014" low="23" high="38" text="Sunny" code="32"/>
+        <guid isPermaLink="false">USNY0996_2014_02_24_7_00_EST</guid>
+    </item>
+</channel>
+</rss>

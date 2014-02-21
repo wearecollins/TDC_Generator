@@ -1,0 +1,8 @@
+auth/auth*
+auth/credentials*
+auth/credentials/*
+node_modules/*
+temboo_auth.js
+
+*.log
+.DS_Store

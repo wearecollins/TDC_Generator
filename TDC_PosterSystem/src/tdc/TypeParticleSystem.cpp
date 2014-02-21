@@ -27,6 +27,9 @@ void TypeParticleSystem::setup( string file ){
     
     svgFile = file;
     
+    ofDirectory svgSettingsFolder("settings/"+svgFile);
+    if ( !svgSettingsFolder.exists() ) svgSettingsFolder.create();
+    
     // mouse interaction
     lastMass = 10.0f;
     meshUpdatingFrames = 0;
@@ -99,10 +102,10 @@ void TypeParticleSystem::threadedFunction(){
     if (!bIsSetup){
         // setup grid
         ofxXmlSettings gridParticleSettings;
-        bool bLoaded = gridParticleSettings.load("settings/grid_particles.xml");
+        bool bLoaded = gridParticleSettings.load("settings/"+svgFile+"/grid_particles.xml");
         
         ofxXmlSettings gridOutlineSettings;
-        bool bLoaded2 = gridOutlineSettings.load("settings/type_grid_settings.xml");
+        bool bLoaded2 = gridOutlineSettings.load("settings/"+svgFile+"/type_grid_settings.xml");
         int numLetters = 0;
         
         if (!bLoaded2 || !bLoaded || test.getNumVertices() == 0){
@@ -110,7 +113,7 @@ void TypeParticleSystem::threadedFunction(){
             outline.load(svgFile);
             numLetters = outline.getNumLetters();
             gridOutlineSettings.addValue("numLetter", numLetters);
-            gridOutlineSettings.save("settings/type_grid_settings.xml");
+            gridOutlineSettings.save("settings/"+svgFile+"/type_grid_settings.xml");
         } else {
             numLetters = gridOutlineSettings.getValue("numLetter", numLetters);
         }
@@ -146,8 +149,10 @@ void TypeParticleSystem::threadedFunction(){
             // build 10000 particles for grid
             for (int i=0; i<7000; i++){
                 int index = (int) ofRandom(0, t_gridMesh.getNumVertices());
-                while ( grid.isOccupied(index)){
+                int tries = 0;
+                while ( grid.isOccupied(index) && tries < 100){
                     index = (int) ofRandom(0, t_gridMesh.getNumVertices());
+                    tries++;
                 }
                 int letter = grid.getLetterByParticle( index );
                 
@@ -192,7 +197,7 @@ void TypeParticleSystem::threadedFunction(){
                     gridParticleSettings.addValue("b", color.b );
                 } gridParticleSettings.popTag();
             }
-            gridParticleSettings.save("settings/grid_particles.xml");
+            gridParticleSettings.save("settings/"+svgFile+"/grid_particles.xml");
         } else {
             int n = gridParticleSettings.getNumTags("particle");
             for (int i=0; i<n; i++){
@@ -237,7 +242,7 @@ void TypeParticleSystem::threadedFunction(){
         _particles.clear();
         
         ofxXmlSettings outlineParticleSettings;
-        bLoaded = outlineParticleSettings.load("settings/outline_particles.xml");
+        bLoaded = outlineParticleSettings.load("settings/"+svgFile+"/outline_particles.xml");
         
         if ( !bLoaded ){
             
@@ -290,7 +295,7 @@ void TypeParticleSystem::threadedFunction(){
                     outlineParticleSettings.addValue("b", color.b );
                 } outlineParticleSettings.popTag();
             }
-            outlineParticleSettings.save("settings/outline_particles.xml");
+            outlineParticleSettings.save("settings/"+svgFile+"/outline_particles.xml");
         } else {
             int n = outlineParticleSettings.getNumTags("particle");
             for (int i=0; i<n; i++){
@@ -594,7 +599,7 @@ void TypeParticleSystem::buildMesh(DrawMode mode, GridType type ){
     vector<vector <QuickVertex> > * letterParticles = type == GRID_POINTS ? &letterGridParticles : &letterOutlineParticles;
     
     // FIRST: try to load this mesh
-    string folder = "meshes/";
+    string folder = "meshes/" + svgFile.substr(0,svgFile.length()-4)+"/";
     string file = folder + "mesh_" + ofToString( mode ) + "_" + ofToString( type );
     
     mesh->load( file );

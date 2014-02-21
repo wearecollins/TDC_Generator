@@ -8,30 +8,40 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Draw type overlay</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>Draw type in space</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>44</Kind>
     <Name>scale</Name>
-    <Value>0.472543359</Value>
+    <Value>0.648843944</Value>
 </Widget>
 <Widget>
     <Kind>44</Kind>
     <Name>x</Name>
-    <Value>0.109826565</Value>
+    <Value>0.427745700</Value>
 </Widget>
 <Widget>
     <Kind>44</Kind>
     <Name>y</Name>
-    <Value>0.153179169</Value>
+    <Value>0.115606904</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
-    <Name>type color</Name>
-    <Value>0.000000000</Value>
+    <Name>type color r</Name>
+    <Value>0.683526039</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>type color g</Name>
+    <Value>0.812138736</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>type color b</Name>
+    <Value>0.573699415</Value>
 </Widget>

@@ -28,20 +28,22 @@ public:
         
         int inc = 2;
         
-        string file = svg_to_load.substr(0, svg_to_load.length()-4) + SUFFIX;
-        string xmlFile = svg_to_load.substr(0, svg_to_load.length()-4) +SUFFIX + ".xml";
+        string file = "meshes/" + svg_to_load.substr(0, svg_to_load.length()-4) + SUFFIX;
+        string xmlFile = "meshes/" + svg_to_load.substr(0, svg_to_load.length()-4) +SUFFIX + ".xml";
         
         mesh.load( file );
         
         bool bLoad = mesh.getVertices().size() > 0;
         
         if ( !bLoad ){
+            cout << "CREATING MESH "<<endl;
             mesh.setupIndicesAuto();
             
             for ( int i=0; i<path.getNumPath(); i++){
                 letters.push_back( vector<ofVec2f>() );
             }
             regenerateGrid( inc );
+            cout << "SAVING FILE "<<endl;
             mesh.save( file, false );
             ofxXmlSettings lettersXml;
             for (int i=0; i<letters.size(); i++){

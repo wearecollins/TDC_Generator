@@ -33,20 +33,20 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: R</Name>
-    <Value>0.955202341</Value>
+    <Value>0.786127150</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: G</Name>
-    <Value>0.947976887</Value>
+    <Value>0.971098244</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: B</Name>
-    <Value>0.965317905</Value>
+    <Value>0.601156056</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: Hue Randomization</Name>
-    <Value>0.023121387</Value>
+    <Value>0.000000000</Value>
 </Widget>

@@ -18,6 +18,7 @@ public:
         environmentGlobal = 0.0;
         language = 0.0;
         time = 0.0;
+        eiWeight = elWeight = egWeight = langWeight = .25;
     }
     
     void setup(){

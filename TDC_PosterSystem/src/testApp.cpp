@@ -23,16 +23,18 @@ double x = 0;
 double y = 0;
 
 // type color
-float typeColor = 0;
+//float typeColor = 0;
 
 // poster
 ofRectangle poster = ofRectangle(0,0,100,400);
 ofFloatColor posterColor = ofColor(1.0,0,0);
 ofFloatColor posterColorBottom = ofColor(1.0,0,0);
 
+ofFloatColor typeColor;
+
 //--------------------------------------------------------------
 void testApp::setup(){
-    particles.setup("TDC_Type_Sketching_800_600.svg");
+    particles.setup("Type4_003.svg");
     toSave.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
     toSavePoster.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
     
@@ -46,7 +48,7 @@ void testApp::setup(){
     
     // load optional type overlay
     
-    type.load("TDC_Type_Sketching_800_600.svg");
+    type.load("Type4_003.svg");
     
     int n = type.getNumPath();
     
@@ -91,7 +93,9 @@ void testApp::setup(){
     guis.back()->addDoubleSlider("scale", 0.0, 1.0, &particles.scale);
     guis.back()->addDoubleSlider("x", -1.0, 1.0, &x);
     guis.back()->addDoubleSlider("y", -1.0, 1.0, &y);
-    guis.back()->addSlider("type color", 0, 255.0f, &typeColor);
+    guis.back()->addSlider("type color r", 0, 1.0, &typeColor.r);
+    guis.back()->addSlider("type color g", 0, 1.0, &typeColor.g);
+    guis.back()->addSlider("type color b", 0, 1.0, &typeColor.b);
     gui->addCanvas(guis.back());
     
     ofxUISuperCanvas * guiMovement = new ofxUISuperCanvas("MOVEMENT",0,0,ofGetWidth()-100, ofGetHeight());
@@ -132,15 +136,8 @@ void testApp::setup(){
     gui->setTriggerWidgetsUponLoad(true);
     gui->loadSettings("settings/", "ui-");
     
-    // build interaction
-    string host = "sandbox.spacebrew.cc";
-    Spacebrew::Config config;
-    config.addSubscribe("intensityx", "float_normalized");
-    config.addSubscribe("intensityy", "float_normalized");
-    config.addSubscribe("intensityz", "float_normalized");
-    config.addSubscribe("rate", "float_normalized");
-    config.addSubscribe("mix", "float_normalized");
-    spacebrew.connect(host, config);
+    // SPACEBREW
+    setupSpacebrew();
     
     // build poster mesh
     posterMesh.load("meshes/poster");
@@ -157,10 +154,8 @@ void testApp::setup(){
         
         posterMesh.addIndex(0); posterMesh.addIndex(1); posterMesh.addIndex(3);
         posterMesh.addIndex(1); posterMesh.addIndex(2); posterMesh.addIndex(3);
-        posterMesh.save("meshs/poster");
+        posterMesh.save("meshes/poster");
     }
-    
-    Spacebrew::addListener(this, spacebrew);
 }
 
 //--------------------------------------------------------------
@@ -191,18 +186,19 @@ void testApp::update(){
         bReload = false;
     }
     
-    // update poster
+    // DATA OBJECT: TIME/DATE
+    
     float timeMappedSunset = particles.dataObject.time > .6 ? ofMap(particles.dataObject.time, .6, 1.0, 1.0, 0) : ofMap(particles.dataObject.time, 0.0, .6, 0, 1.0);
     float timeMappedMidday = particles.dataObject.time > .5 ? ofMap(particles.dataObject.time, .5, 1.0, 1.0, 0.0) : ofMap(particles.dataObject.time, 0,1.0, 0, 1.0);
     float yesterday = particles.dataObject.date - 1.0/365.0f;
     //osterColor.setHue( yesterday * 1.0 * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time);
-    posterColorBottom.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
-    posterColorBottom.setSaturation( timeMappedSunset );
-    posterColorBottom.setBrightness( timeMappedMidday );
+    //posterColorBottom.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
+    //posterColorBottom.setSaturation( timeMappedSunset );
+    //posterColorBottom.setBrightness( timeMappedMidday );
 
-    posterColor.setHue( particles.dataObject.date  );
-    posterColor.setSaturation( timeMappedSunset );
-    posterColor.setBrightness( timeMappedMidday );
+    ///posterColor.setHue( particles.dataObject.date  );
+    //posterColor.setSaturation( timeMappedSunset );
+    //posterColor.setBrightness( timeMappedMidday );
     
     posterMesh.setVertex(0, ofVec2f(poster.x, poster.y));
     posterMesh.setVertex(1, ofVec2f(poster.x + poster.width, poster.y));
@@ -211,14 +207,27 @@ void testApp::update(){
     
     posterMesh.setColor(0, posterColor );
     posterMesh.setColor(1, posterColor );
-    posterMesh.setColor(2, posterColorBottom );
-    posterMesh.setColor(3, posterColorBottom );
+    posterMesh.setColor(2, posterColor );
+    posterMesh.setColor(3, posterColor );
     
     ofLogVerbose() << yesterday << ":" << particles.dataObject.date << ":" << timeMappedSunset << ":" << timeMappedMidday <<":"<<particles.dataObject.time<<endl;
     
+    // DATA OBJECT: ENVIRONMENT
+    Behavior * b = particles.getSettingsBehavior();
+    b->intensity.x = particles.dataObject.environmentImmediate * 100.0;
+    b->intensity.y = particles.dataObject.environmentLocal * 100.0;
+    b->intensity.z = particles.dataObject.environmentGlobal * 100.0;
+    
+    // UPDATE GUI BASED ON DATA OBJECT
+    ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(particles.dataObject.environmentImmediate * 100.0);
+    ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(particles.dataObject.environmentLocal * 100.0);
+    ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(particles.dataObject.environmentGlobal * 100.0);
+    
+
     particles.setUseGrid(bUseGrid);
     particles.update();
     ofSetWindowTitle(ofToString(ofGetFrameRate(), 2));
+    
 }
 
 //--------------------------------------------------------------
@@ -264,7 +273,7 @@ void testApp::draw(){
     toSavePoster.begin(); {
         ofClear(0,0,0,255);
         ofPushMatrix(); {
-            ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
+            //ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
             posterMesh.draw();
         } ofPopMatrix();
     
@@ -333,6 +342,49 @@ void testApp::onGui( ofxUIEventArgs & e ){
 }
 
 //--------------------------------------------------------------
+void testApp::setupSpacebrew(){
+    // settings
+    string server = "sandbox.spacebrew.cc";
+    string name = "TDC Output";
+    string description = "TDC Output";
+    
+    ofxXmlSettings spacebrewSettings;
+    bool bLoaded = spacebrewSettings.load("settings/spacebrew.xml");
+    if ( bLoaded ){
+        spacebrewSettings.pushTag("settings"); {
+            server = spacebrewSettings.getValue("server", server);
+            name = spacebrewSettings.getValue("name", name);
+            description = spacebrewSettings.getValue("description", description);
+        } spacebrewSettings.popTag();
+    }
+    
+    // basix
+    spacebrew.setAutoReconnect();
+    
+    // interaction settings
+    spacebrew.addSubscribe("intensityx", "float_normalized");
+    spacebrew.addSubscribe("intensityy", "float_normalized");
+    spacebrew.addSubscribe("intensityz", "float_normalized");
+    spacebrew.addSubscribe("rate", "float_normalized");
+    spacebrew.addSubscribe("mix", "float_normalized");
+    
+    // inputs
+    spacebrew.addSubscribe("environmentimmediate", "float_normalized");
+    spacebrew.addSubscribe("environmentlocal", "float_normalized");
+    spacebrew.addSubscribe("environmentglobal", "float_normalized");
+    spacebrew.addSubscribe("language", "float_normalized");
+    
+    // specific stuff...
+    spacebrew.addSubscribe("weather", "range");
+    spacebrew.addSubscribe("condition", "range");
+    
+    
+    spacebrew.connect(server, name, description);
+    
+    Spacebrew::addListener(this, spacebrew);
+}
+
+//--------------------------------------------------------------
 void testApp::onMessage( Spacebrew::Message & m ){
     Behavior * b = particles.getSettingsBehavior();
     m.value = m.value.substr(1,m.value.length()-1);
@@ -356,6 +408,21 @@ void testApp::onMessage( Spacebrew::Message & m ){
             b->mix = ofToFloat(m.value);
             ((ofxUISlider *)gui->getWidget("mix"))->setValue(ofToFloat(m.value));
         }
+    } else if ( m.name == "environmentimmediate" ){
+        particles.dataObject.environmentImmediate = ofToFloat(m.value);
+    } else if ( m.name == "environmentlocal" ){
+        particles.dataObject.environmentLocal = ofToFloat(m.value);
+    } else if ( m.name == "environmentglobal" ){
+        particles.dataObject.environmentGlobal = ofToFloat(m.value);
+    } else if ( m.name == "language" ){
+        particles.dataObject.language = ofToFloat(m.value);
+    } else if ( m.name == "weather" ){
+        particles.dataObject.environmentLocal = ofToFloat(m.value) / 100.0f;
+    } else if ( m.name == "condition" ){
+        //particles.dataObject.language = ofToFloat(m.value);
+        // ?
+        
+        //particleColor.setHue(particles.dataObject.environmentLocal);
     }
 }
 
