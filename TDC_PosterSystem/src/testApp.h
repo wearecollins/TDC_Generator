@@ -7,6 +7,31 @@
 
 #include "ofxSpacebrew.h"
 
+// projection map + sensing
+#include "ofxMaskEditor.h"
+#include "ofxSurf.h"
+
+class TrackingImage : public ofImage
+{
+public:
+    void loadAndScale( ofPixelsRef & pix, float scale = 1.0 ){
+        setUseTexture(false);
+        ofImage tempRgbCvt;
+        tempRgbCvt.setUseTexture(false);
+        tempRgbCvt.setImageType( OF_IMAGE_COLOR );
+        setFromPixels(pix);
+        ofxCv::convertColor(tempRgbCvt, *this, pix.getNumChannels() == 3 ? CV_RGB2GRAY : CV_RGBA2GRAY );
+        resize(width * scale, height * scale);
+    }
+    void loadAndScale( string path, float scale = 1.0 ){
+        cout << "LOADING "<<path<<endl;
+        ofImage tempRgb;
+        tempRgb.loadImage(path);
+        ofxCv::convertColor(tempRgb, *this, CV_RGB2GRAY);
+        resize(width * scale, height * scale);
+    }
+};
+
 class testApp : public ofBaseApp{
 
 	public:
@@ -24,6 +49,8 @@ class testApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+        
+        void renderParticles();
     
         void onGui( ofxUIEventArgs & e );
     
@@ -31,6 +58,13 @@ class testApp : public ofBaseApp{
         TypeParticleSystem particles;
     
         int drawMode;
+    
+        // masking + sensing
+        bool bEditingMask;
+        ofxMaskEditor maskEditor;
+        map<string, ofPtr<ofxSurf> > surfers;
+        map<string, TrackingImage>   surfImages;
+        TrackingImage camera;
     
         // image saving logic
         ofFbo toSave;
@@ -40,8 +74,11 @@ class testApp : public ofBaseApp{
         // poster bg
         ofMesh posterMesh;
     
+        // poster source points
+        ofxSVG posterSrc;
+    
         // type
-        ofxSVG type;
+        map<string, ofxSVG> type;
     
         // tweakin'
         vector<ofxUISuperCanvas *> guis;

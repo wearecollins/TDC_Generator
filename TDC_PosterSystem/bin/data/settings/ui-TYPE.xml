@@ -18,30 +18,55 @@
 <Widget>
     <Kind>44</Kind>
     <Name>scale</Name>
-    <Value>0.648843944</Value>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>44</Kind>
     <Name>x</Name>
-    <Value>0.427745700</Value>
+    <Value>0.002890229</Value>
 </Widget>
 <Widget>
     <Kind>44</Kind>
     <Name>y</Name>
-    <Value>0.115606904</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>type color r</Name>
-    <Value>0.683526039</Value>
+    <Value>0.955202341</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>type color g</Name>
-    <Value>0.812138736</Value>
+    <Value>0.488439292</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>type color b</Name>
-    <Value>0.573699415</Value>
+    <Value>0.414739877</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>type color a</Name>
+    <Value>1.000000000</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>Type4_001</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>Type4_002</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>Type4_003</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>Type4_004</Name>
+    <Value>1</Value>
 </Widget>

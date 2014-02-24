@@ -9,6 +9,11 @@ bool bDrawTypeAsOverlay = true;
 bool bDrawTypeInSpace = true;
 
 bool bUseLiveInput      = true;
+bool bUseHomography     = true;
+bool bDrawFBO           = true;
+
+bool bDrawKinect        = false;
+bool bTracking          = false;
 
 // main layout vars
 int mode = 0;
@@ -24,6 +29,9 @@ float        hueVariance;
 double x = 0;
 double y = 0;
 
+// detection
+int posterThresh = 20;
+
 // type color
 //float typeColor = 0;
 
@@ -31,14 +39,16 @@ double y = 0;
 ofRectangle poster = ofRectangle(0,0,100,400);
 ofFloatColor posterColor = ofColor(1.0,0,0);
 ofFloatColor posterColorBottom = ofColor(1.0,0,0);
+vector<string> posterNames;
+string currentPosterName;
+ofMatrix4x4 matrix;
+ofPoint posterPts[4];
 
 ofFloatColor typeColor;
 
 //--------------------------------------------------------------
 void testApp::setup(){
     particles.setup();
-    toSave.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
-    toSavePoster.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//, 6);
     
     toSave.begin();
     ofClear(0,0,0,0);
@@ -48,16 +58,43 @@ void testApp::setup(){
     ofClear(0,0,0,0);
     toSavePoster.end();
     
+    // projection setup
+    bEditingMask = false;
+    maskEditor.setup();
+    
+    // load SVG for aspect ratio
+    posterSrc.load("paper.svg");
+    ofPath pz = posterSrc.getPathAt(0);
+    pz.setPolyWindingMode(OF_POLY_WINDING_ODD);
+    posterPts[0] = pz.getOutline()[0].getVertices()[0];
+    posterPts[1] = pz.getOutline()[0].getVertices()[1];
+    posterPts[2] = pz.getOutline()[0].getVertices()[2];
+    posterPts[3] = pz.getOutline()[0].getVertices()[3];
+    
+    toSave.allocate(400, 600, GL_RGBA);//, 6);
+    toSavePoster.allocate(400, 600, GL_RGBA);//, 6);
+    
     // load optional type overlay
     
-    // TO DO FIX ME OH GOD!
+    map<string, TargetMesh>::iterator it = particles.meshes.begin();
     
-    //type.load("Type4_003.svg");
+    currentPosterName = it->first;
     
-    int n = type.getNumPath();
-    
-    for (int i=0; i<n; i++){
-        type.getPathAt(i).setUseShapeColor(false);
+    for (it; it != particles.meshes.end(); ++it){
+        posterNames.push_back(it->first);
+        type[it->first] = ofxSVG();
+        type[it->first].load("meshes/" + it->first +"/sources/" + it->first +".svg");
+        
+        int n = type[it->first].getNumPath();
+        
+        for (int i=0; i<n; i++){
+            type[it->first].getPathAt(i).setUseShapeColor(false);
+        }
+        
+        //setup surfers
+        surfers[it->first] = ofPtr<ofxSurf>(new ofxSurf());
+        surfImages[it->first].loadAndScale( "surf/" + it->first + ".png");
+        surfers[it->first]->setSource(surfImages[it->first].getPixelsRef());
     }
     
     lastDrawMode = 0;
@@ -68,10 +105,12 @@ void testApp::setup(){
     // GUI
     gui = new ofxUITabBar(10, 10, ofGetWidth(), ofGetHeight());
     gui->setVisible(false);
+    gui->setColorBack(ofColor(0,0,0,0));
     
     ofxUISuperCanvas * guiDrawing = new ofxUISuperCanvas("DRAWING",0,0,ofGetWidth()-100, ofGetHeight());
     guis.push_back(guiDrawing);
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
     
     guis.back()->setName("DRAWING");
     guis.back()->addLabel("Drawmode Label", "Draw Points");
@@ -91,6 +130,7 @@ void testApp::setup(){
     
     ofxUISuperCanvas * guiTypeOverlay = new ofxUISuperCanvas("TYPE",0,0,ofGetWidth()-100, ofGetHeight());
     guis.push_back(guiTypeOverlay);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("TYPE");
     guis.back()->addToggle("Draw type overlay", &bDrawTypeAsOverlay);
     guis.back()->addToggle("Draw type in space", &bDrawTypeInSpace);
@@ -100,10 +140,18 @@ void testApp::setup(){
     guis.back()->addSlider("type color r", 0, 1.0, &typeColor.r);
     guis.back()->addSlider("type color g", 0, 1.0, &typeColor.g);
     guis.back()->addSlider("type color b", 0, 1.0, &typeColor.b);
+    guis.back()->addSlider("type color a", 0, 1.0, &typeColor.a);
+    
+    guis.back()->addSpacer();
+    guis.back()->addLabel("Poster Label", "Select Poster");
+    guis.back()->addRadio("Poster", posterNames);
+    
     gui->addCanvas(guis.back());
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
     ofxUISuperCanvas * guiMovement = new ofxUISuperCanvas("MOVEMENT",0,0,ofGetWidth()-100, ofGetHeight());
     guis.push_back(guiMovement);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("MOVEMENT");
     guis.back()->addIntSlider("Movement Type", 0, MOVE_PUSH, MOVE_NONE);
     // this should be separate panels for each behavior
@@ -117,6 +165,7 @@ void testApp::setup(){
     
     ofxUISuperCanvas * guiPoster = new ofxUISuperCanvas("POSTER",0,0,ofGetWidth()-100, ofGetHeight());
     guis.push_back(guiPoster);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("POSTER");
     guis.back()->addSlider("Poster X", 0.0, ofGetWidth(), &poster.x);
     guis.back()->addSlider("Poster Y", 0.0, ofGetWidth(), &poster.y);
@@ -125,16 +174,24 @@ void testApp::setup(){
     guis.back()->addSlider("Poster Color: R", 0.0, 1.0, &posterColor.r);
     guis.back()->addSlider("Poster Color: G", 0.0, 1.0, &posterColor.g);
     guis.back()->addSlider("Poster Color: B", 0.0, 1.0, &posterColor.b);
+    guis.back()->addIntSlider("Dectection thresh", 0, 100, &posterThresh);
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
     ofxUISuperCanvas * guiEvents = new ofxUISuperCanvas("EVENTS",0,0,ofGetWidth()-100, ofGetHeight());
     guis.push_back(guiEvents);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("EVENTS");
     guis.back()->addToggle("Save Frame", &bCapture);
     guis.back()->addToggle("Save Settings", &bSave);
     guis.back()->addToggle("Reload Settings", &bReload);
+    guis.back()->addSpacer();
+    guis.back()->addSpacer();
     guis.back()->addToggle("Use Inputs", &bUseLiveInput);
+    guis.back()->addToggle("Use Homography", &bUseHomography);
+    guis.back()->addToggle("Draw Kinect", &bDrawKinect);
+    guis.back()->addToggle("Draw Render Buffer", &bDrawFBO);
+    
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
@@ -165,6 +222,7 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::update(){
+    // CHECK FOR DRAW MODE + PARTICLE UPDATES
     if ( lastDrawMode != drawMode || particles.getDrawMode() != ((DrawMode) drawMode) ){
         lastDrawMode = drawMode;
         particles.setDrawMode( (DrawMode) drawMode);
@@ -174,6 +232,8 @@ void testApp::update(){
         particles.setColor(particleColor, hueVariance / 10.0f);
         lastParticleColor = particleColor;
     }
+    
+    // IMAGE + SETTINGS SAVING
     if ( bCapture ){
         bCapture = false;
         
@@ -208,10 +268,10 @@ void testApp::update(){
         posterColor.setBrightness( timeMappedMidday );
     }
     
-    posterMesh.setVertex(0, ofVec2f(poster.x, poster.y));
-    posterMesh.setVertex(1, ofVec2f(poster.x + poster.width, poster.y));
-    posterMesh.setVertex(2, ofVec2f(poster.x + poster.width, poster.y + poster.height));
-    posterMesh.setVertex(3, ofVec2f(poster.x, poster.y + poster.height));
+    posterMesh.setVertex(0, posterPts[0]);
+    posterMesh.setVertex(1, posterPts[1]);
+    posterMesh.setVertex(2, posterPts[2]);
+    posterMesh.setVertex(3, posterPts[3]);
     
     posterMesh.setColor(0, posterColor );
     posterMesh.setColor(1, posterColor );
@@ -233,65 +293,108 @@ void testApp::update(){
         ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(particles.dataObject.environmentGlobal * 100.0);
     }
 
+    // UPDATE: SURF
+    if ( bTracking ){
+        map<string, ofPtr<ofxSurf> >::iterator it = surfers.begin();
+        if ( particles.camera.getKinect().isFrameNew() && particles.camera.getKinect().getPixelsRef().getWidth() > 0 ){
+            //camera.loadAndScale( particles.camera.colorPixels );
+            for (it; it != surfers.end(); ++it){
+                it->second->detect( particles.camera.getKinect().getPixelsRef() );
+                //it->second->draw(640,480 + colorSmall.height * i);
+                //                cout << surfers[i]->getMatches().size() << " : "<< i << endl;
+                // i need to figure this out!
+                if ( it->second->getMatches().size() < posterThresh && it->first != currentPosterName ){
+                    cout << "we're on poster "<< it->first << endl;
+                    currentPosterName = it->first;
+                    particles.setMesh( currentPosterName );
+                }
+            }
+        }
+    }
+    // UPDATE: PARTICLES
+    
     particles.setUseGrid(bUseGrid);
     particles.update();
     ofSetWindowTitle(ofToString(ofGetFrameRate(), 2));
     
+    // HOMOGRAPHY + MASKING
+    
+	maskEditor.update();
+    maskEditor.findHomography(posterPts, maskEditor.dst, matrix);
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
-    ofBackground(0);
     toSave.begin();
-    ofPushMatrix();
-    
-//    static float scale = fmax( ofGetWidth()/1280.0f, ofGetHeight()/720.0f );
-//    ofScale(scale, scale);
-    
-    if ( bClear ) ofClear(0,0,0,0);
+    if ( bClear) ofClear(0,0,0,0);
     else {
         ofSetColor(0,0,0,bgAlpha);
         ofRect(0,0, toSave.getWidth(), toSave.getHeight());
         ofSetColor(255,255);
     }
-    ofEnableAlphaBlending();
-    ofEnableBlendMode((ofBlendMode) mode);
-    ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
-    if (bDrawTypeInSpace){
-        ofEnableDepthTest();
-        ofPushMatrix();
-        ofSetColor(typeColor);
-        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
-        ofScale(particles.scale, particles.scale);
-        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
-        type.draw();
-        ofPopMatrix();
-    }
-    particles.draw();
-    ofDisableDepthTest();
-    if (bDrawTypeAsOverlay){
-        ofSetColor(typeColor);
-        ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
-        ofScale(particles.scale, particles.scale);
-        ofTranslate(-ofGetWidth()/2.0, -ofGetHeight()/2.0);
-        type.draw();
-    }
-    ofPopMatrix();
+    renderParticles();
     toSave.end();
     
     toSavePoster.begin(); {
         ofClear(0,0,0,255);
-        ofPushMatrix(); {
-            //ofTranslate( ofGetWidth() / 2.0 - (ofGetWidth() / 2.0 * (1- x)), - ofGetHeight() / 2.0 + (ofGetHeight() / 2.0 * (1-y)));
-            posterMesh.draw();
-        } ofPopMatrix();
+        posterMesh.draw();
     
         ofSetColor(255);
         toSave.draw(0, 0);
         
     } toSavePoster.end();
     
-    toSavePoster.draw(0,0);
+    ofPushMatrix();
+    if ( bUseHomography) ofMultMatrix(matrix);
+    if (!bDrawFBO){
+        posterMesh.draw();
+        renderParticles();
+    } else {
+        toSavePoster.draw(0,0);
+    }
+    ofPopMatrix();
+    
+    if ( bDrawKinect ){
+        ofSetColor(255);
+        particles.camera.getKinect().draw(10, 10, 320, 240);
+        map<string, ofPtr<ofxSurf> >::iterator it = surfers.begin();
+        int i=0;
+        for (it; it != surfers.end(); ++it){
+            it->second->draw(640,480 + 320 * i);
+            i++;
+        }
+    }
+    
+    if ( bEditingMask ){
+        maskEditor.draw();
+    }
+}
+
+
+//--------------------------------------------------------------
+void testApp::renderParticles(){
+    ofPushMatrix();
+    
+    //    static float scale = fmax( ofGetWidth()/1280.0f, ofGetHeight()/720.0f );
+    //    ofScale(scale, scale);
+    
+    ofEnableAlphaBlending();
+    ofEnableBlendMode((ofBlendMode) mode);
+    if (bDrawTypeInSpace){
+        ofEnableDepthTest();
+        ofPushMatrix();
+        ofSetColor(typeColor);
+        type[currentPosterName].draw();
+        ofPopMatrix();
+    }
+    if (bDrawTypeAsOverlay){
+        ofSetColor(typeColor);
+        type[currentPosterName].draw();
+    }
+    particles.draw();
+    ofDisableDepthTest();
+    
+    ofPopMatrix();
 }
 
 //--------------------------------------------------------------
@@ -308,6 +411,17 @@ void testApp::keyPressed(int key){
         }
     } else if ( key == 'f' ){
         ofToggleFullscreen();
+    } else if(key == ' ' && bEditingMask){
+		maskEditor.clear();
+	} else if ( key == 'm' ){
+        bEditingMask = !bEditingMask;
+        if (bEditingMask){
+            ofShowCursor();
+        } else if ( !gui->isVisible()){
+            ofHideCursor();
+        }
+    } else if ( key == 't'){
+        bTracking = true;
     }
 }
 
@@ -322,6 +436,7 @@ void testApp::mouseMoved(int x, int y ){
     particles.mouseMoved(x,y);
 }
 
+//--------------------------------------------------------------
 void testApp::onGui( ofxUIEventArgs & e ){
     Behavior * b = particles.getSettingsBehavior();
     if ( e.getName() == "intensityX" ){
@@ -347,6 +462,9 @@ void testApp::onGui( ofxUIEventArgs & e ){
         if ( b != NULL ){
             b->mix = e.getSlider()->getValue();
         }
+    } else if ( e.getName() == "Poster" ){
+        particles.setMesh( posterNames[((ofxUIRadio*)e.widget)->getValue()] );
+        currentPosterName = posterNames[((ofxUIRadio*)e.widget)->getValue()];
     }
 }
 

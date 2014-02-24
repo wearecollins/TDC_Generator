@@ -28,15 +28,20 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Color: R</Name>
-    <Value>0.673410416</Value>
+    <Value>0.618497133</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Color: G</Name>
-    <Value>0.783236980</Value>
+    <Value>0.203757226</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Color: B</Name>
-    <Value>0.145953760</Value>
+    <Value>0.129752949</Value>
+</Widget>
+<Widget>
+    <Kind>42</Kind>
+    <Name>Dectection thresh</Name>
+    <Value>20</Value>
 </Widget>

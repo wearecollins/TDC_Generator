@@ -25,7 +25,7 @@ void TargetMesh::setup( string directory, int num ){
     for (int i=0; i<numFiles; i++){
         subMeshes.push_back( SubMesh());
         string name = dir.getFile(i).getBaseName();
-        cout <<"loading"<<name;
+        cout <<"loading "<<name<<endl;
         subMeshes.back().setup( svgDirectory, name, numPositions);
     }
 }
@@ -220,15 +220,15 @@ void SubMesh::setup( string dir, string n, int num ){
 void SubMesh::createGrid(){
     ofMesh test;
     cout<<"SVG "<<directory + "/sources/" + name + ".svg"<<endl;
-    test.load( directory + "/" + name + "/meshes/mesh_2_0" );
+    test.load( directory + "/" + name + "/meshes/mesh_4_0" );
     
     ofxXmlSettings gridOutlineSettings;
     bool bLoaded2 = gridOutlineSettings.load( directory +"/" + name + "/settings/type_grid_settings.xml");
     
     // need to build main grid
     if ( test.getNumVertices() == 0 ){
-        grid.load( directory + "/sources/" + name +".svg", directory + "/meshes" );
-        outline.load( directory + "/sources/" + name +".svg", directory + "/meshes"  );
+        grid.load( directory + "/sources/" + name +".svg", directory + "/" + name + "/grids" );
+        outline.load( directory + "/sources/" + name +".svg", directory + "/" + name + "/grids"  );
         numLetters = outline.getNumLetters();
         gridOutlineSettings.addValue("numLetter", numLetters);
         gridOutlineSettings.save( directory + "/" + name + "/settings/type_grid_settings.xml");
@@ -268,6 +268,8 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
     string file = folder + "mesh_" + ofToString( mode ) + "_" + ofToString( type );
     
     mesh->load( file );
+    
+    cout <<"LOADED? "<<file<<endl;
     
     bool bLoad = mesh->getVertices().size() > 0;
     
@@ -340,12 +342,13 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
             
             // method 1: randomize
             //if ( type == GRID_OUTLINE ){
-            for (int j=0; j<numPositions; j++){
+            for (int j=0; j<letterParticles->size(); j++){
                 
                 vector <QuickVertex> quickVerts = letterParticles->at(j);
+                cout << quickVerts.size() << endl;
                 
-                for (int k=0; k<(*letterParticles)[j].size(); k++){
-                    mesh->addIndex((*letterParticles)[j][k].index);
+                for (int k=0; k<quickVerts.size(); k++){
+                    mesh->addIndex(quickVerts[k].index);
                     
                     int ind = floor(ofRandom(quickVerts.size()));
                     mesh->addIndex(quickVerts[ind].index);
@@ -353,6 +356,7 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
                     if ( quickVerts.size() == 0 ) break;
                 }
             }
+            cout << "made lines"<<endl;
             /*} else {
              // method 2: attach to anywhere inside letter
              
@@ -562,6 +566,8 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
         default:
             break;
     }
+    
+    cout << "SAVE! "<<file<<endl;
     
     // save that shit
     mesh->save(file, false);

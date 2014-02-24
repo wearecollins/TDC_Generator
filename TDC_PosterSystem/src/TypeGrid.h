@@ -23,6 +23,7 @@ public:
     
     // spacing is in pixels
     void regenerateGrid( int spacing ){
+        int index = 0;
         for ( int x=0; x<ofGetWidth(); x += spacing){
             for ( int y=0; y<ofGetHeight(); y += spacing){
                 ofVec2f p = ofVec2f(x,y);
@@ -39,6 +40,8 @@ public:
                 if ( bGood ){
                     mesh.addVertex(p);
                     mesh.addColor( ofColor(255));
+                    mesh.addIndex( index );
+                    index++;
                 }
             }
         }

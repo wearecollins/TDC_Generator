@@ -64,10 +64,16 @@ public:
     // data object
     Data        dataObject;
     
-    void        setMesh( string name ){ currentMeshName = name; };
+    void        setMesh( string name ){
+        bNeedToChangeMesh = true;
+        currentMeshName = name;
+    };
     
-    // the all important
+    // the all important mesh map
     map< string, TargetMesh> meshes;
+    
+    // interaction
+    CameraManager camera;
     
 protected:
     string      sourceDirectory;
@@ -105,8 +111,6 @@ protected:
     ofVec2f     lastMouse;
     float       lastMass;
     
-    // interaction
-    CameraManager camera;
     
     // movement stuff
     MovementType moveType;

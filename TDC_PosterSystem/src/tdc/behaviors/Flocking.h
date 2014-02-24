@@ -39,8 +39,8 @@ public:
                 
                 int i = textureRes * y + x;
                 
-                livepos[i*3 + 0] = it->second->x / (float) ofGetWidth();
-                livepos[i*3 + 1] = it->second->y / (float) ofGetHeight();
+                livepos[i*3 + 0] = it->second->x / (float) dimensionsX;
+                livepos[i*3 + 1] = it->second->y / (float) dimensionsY;
                 livepos[i*3 + 2] = 0.0;
                 it++;
                 if ( it == particles->end()) break;
@@ -82,8 +82,8 @@ public:
             for (int y = 0; y < textureRes; y++){
                 int i = textureRes * y + x;
                 
-                pos[i*3 + 0] = it->second->x / (float) ofGetWidth();
-                pos[i*3 + 1] = it->second->y / (float) ofGetHeight();
+                pos[i*3 + 0] = it->second->x / (float) dimensionsX;
+                pos[i*3 + 1] = it->second->y / (float) dimensionsY;
                 pos[i*3 + 2] = 0.0;
                 ++it;
             }
@@ -115,7 +115,7 @@ public:
         delete [] vel; // Delete the array
         
         // Allocate the final 
-        renderFBO.allocate(ofGetWidth(), ofGetHeight(), GL_RGBA);//32F);
+        renderFBO.allocate(dimensionsX, dimensionsY, GL_RGBA);//32F);
         renderFBO.begin();
         ofClear(0, 0, 0, 0);
         renderFBO.end();
@@ -160,7 +160,7 @@ public:
         updateVel.setUniformTexture("attractData", attractFbo.getTextureReference(), 2);        // much attractive data
         
         //updateVel.setUniform1i("resolution", (int)textureRes);
-        updateVel.setUniform2f("screen", (float)ofGetWidth(), (float)ofGetHeight());
+        updateVel.setUniform2f("screen", (float)dimensionsX, (float)dimensionsY);
         updateVel.setUniform2f("mouse", mouse.x, mouse.y);
         updateVel.setUniform1f("timestep", (float)timeStep);
         updateVel.setUniform1f("maxspeed", intensity.x / 5000.0f);
@@ -267,7 +267,7 @@ public:
             updateRender.setUniformTexture("posTex", posPingPong.dst->getTextureReference(), 0);
             updateRender.setUniform1i("resolution", (float)textureRes);
             updateRender.setUniform2f("screen", (float)2.0, (float)2.0);
-            updateRender.setUniform2f("screenPos", (float) trans.x / (ofGetWidth()), (float) trans.y / (ofGetHeight()) );
+            updateRender.setUniform2f("screenPos", (float) trans.x / (dimensionsX), (float) trans.y / (dimensionsY) );
             updateRender.setUniform1f("scale", scale );
             //updateRender.setUniform1f("size", (float)particleSize);
             

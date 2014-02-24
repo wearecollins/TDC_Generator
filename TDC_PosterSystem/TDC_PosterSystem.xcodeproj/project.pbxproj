@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		010F20E618BB9ECF005D359D /* ofxMaskEditor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 010F20E418BB9ECF005D359D /* ofxMaskEditor.cpp */; };
+		010F20EC18BBFD1E005D359D /* ofxSurf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 010F20EA18BBFD1E005D359D /* ofxSurf.cpp */; };
 		011C032618AD14880023445F /* jsoncpp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011C015A18AD14860023445F /* jsoncpp.cpp */; };
 		011C032D18AD14880023445F /* libwebsockets.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 011C017618AD14860023445F /* libwebsockets.a */; };
 		011C033618AD14880023445F /* Client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011C018F18AD14860023445F /* Client.cpp */; };
@@ -320,6 +322,10 @@
 		010C130318ABC10B0072A991 /* Noise.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Noise.h; path = tdc/behaviors/Noise.h; sourceTree = "<group>"; };
 		010C130418ABC3390072A991 /* Warp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Warp.h; path = tdc/behaviors/Warp.h; sourceTree = "<group>"; };
 		010C130518ABE83F0072A991 /* Flocking.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Flocking.h; path = tdc/behaviors/Flocking.h; sourceTree = "<group>"; };
+		010F20E418BB9ECF005D359D /* ofxMaskEditor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxMaskEditor.cpp; sourceTree = "<group>"; };
+		010F20E518BB9ECF005D359D /* ofxMaskEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxMaskEditor.h; sourceTree = "<group>"; };
+		010F20EA18BBFD1E005D359D /* ofxSurf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ofxSurf.cpp; sourceTree = "<group>"; };
+		010F20EB18BBFD1E005D359D /* ofxSurf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxSurf.h; sourceTree = "<group>"; };
 		011C015418AD14860023445F /* install.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = install.xml; sourceTree = "<group>"; };
 		011C015818AD14860023445F /* json-forwards.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "json-forwards.h"; sourceTree = "<group>"; };
 		011C015918AD14860023445F /* json.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = json.h; sourceTree = "<group>"; };
@@ -1070,6 +1076,42 @@
 				0179A86618B5286400EDA4AB /* CameraWarp.h */,
 			);
 			name = behaviors;
+			sourceTree = "<group>";
+		};
+		010F20E218BB9ECF005D359D /* ofxMaskEditor */ = {
+			isa = PBXGroup;
+			children = (
+				010F20E318BB9ECF005D359D /* src */,
+			);
+			name = ofxMaskEditor;
+			path = ../../../addons/ofxMaskEditor;
+			sourceTree = "<group>";
+		};
+		010F20E318BB9ECF005D359D /* src */ = {
+			isa = PBXGroup;
+			children = (
+				010F20E418BB9ECF005D359D /* ofxMaskEditor.cpp */,
+				010F20E518BB9ECF005D359D /* ofxMaskEditor.h */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		010F20E818BBFD1E005D359D /* ofxSurf */ = {
+			isa = PBXGroup;
+			children = (
+				010F20E918BBFD1E005D359D /* src */,
+			);
+			name = ofxSurf;
+			path = src/ofxSurf;
+			sourceTree = "<group>";
+		};
+		010F20E918BBFD1E005D359D /* src */ = {
+			isa = PBXGroup;
+			children = (
+				010F20EA18BBFD1E005D359D /* ofxSurf.cpp */,
+				010F20EB18BBFD1E005D359D /* ofxSurf.h */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		011C008618AD14840023445F /* ofxLibwebsockets */ = {
@@ -2466,8 +2508,10 @@
 				01A3E23B18AEBA8C00D4A941 /* ofxKinect */,
 				01A203EA18A4308400096698 /* ofxLabFlexParticleSystem */,
 				011C008618AD14840023445F /* ofxLibwebsockets */,
+				010F20E218BB9ECF005D359D /* ofxMaskEditor */,
 				01D0230918AD38B400BCEAE3 /* ofxNI2 */,
 				011C01E318AD14860023445F /* ofxSpacebrew */,
+				010F20E818BBFD1E005D359D /* ofxSurf */,
 				F5F1F1EF8441E64FD46F07C8 /* ofxSvg */,
 				0148F70518A92F1C007F715A /* ofxUI */,
 				916B8DF9E7519F5BB8A2990B /* ofxVectorGraphics */,
@@ -2689,6 +2733,7 @@
 				0148F96418A92F21007F715A /* ofxUICanvas.cpp in Sources */,
 				0148F98218A92F21007F715A /* ofxUISpectrum.cpp in Sources */,
 				018EDCD618B6B9D40000DD0A /* WeatherColors.cpp in Sources */,
+				010F20E618BB9ECF005D359D /* ofxMaskEditor.cpp in Sources */,
 				0148F96718A92F21007F715A /* ofxUIDropDownList.cpp in Sources */,
 				01587BE718B7B061008C46F7 /* TargetMesh.cpp in Sources */,
 				0148F96F18A92F21007F715A /* ofxUIImageSampler.cpp in Sources */,
@@ -2759,6 +2804,7 @@
 				0148F97E18A92F21007F715A /* ofxUIScrollableCanvas.cpp in Sources */,
 				0179AB3218B5310500EDA4AB /* Calibration.cpp in Sources */,
 				0148F97918A92F21007F715A /* ofxUINumberDialer.cpp in Sources */,
+				010F20EC18BBFD1E005D359D /* ofxSurf.cpp in Sources */,
 				011C033818AD14880023445F /* Events.cpp in Sources */,
 				9D44DC88EF9E7991B4A09951 /* tinyxmlerror.cpp in Sources */,
 				011C033618AD14880023445F /* Client.cpp in Sources */,

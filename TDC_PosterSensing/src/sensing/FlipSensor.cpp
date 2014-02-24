@@ -12,20 +12,9 @@
 //--------------------------------------------------------------
 void FlipSensor::setup()
 {
-    ofxNI2::init();
-    device = new ofxNI2::Device();
-    device->setup();
-    
-    if (depth.setup(*device))
-	{
-		depth.setSize(640, 480);
-		depth.setFps(30);
-		depth.start();
-        
-        ofPtr<ofxNI2::Grayscale> shader = depth.getShader<ofxNI2::Grayscale>();
-        shader->setNear( 50 );
-        shader->setFar( 2000 );
-	}
+    kinect.setRegistration();
+    kinect.init();
+    kinect.open();
     
 	/*if (ir.setup(*device)) // only for xtion device (OpenNI2-FreenectDriver issue)
 	{
@@ -37,13 +26,6 @@ void FlipSensor::setup()
     near = 50;
     far  = 10000;
 	
-   if (color.setup(*device)) // only for kinect device
-   {
-        color.setSize(640, 480);
-        color.setFps(60);
-        color.start();
-   }
-    
     // load images
     ofDirectory dir;
     int n = dir.listDir("posters");
@@ -60,13 +42,11 @@ void FlipSensor::setup()
 //--------------------------------------------------------------
 void FlipSensor::update()
 {
+    kinect.update();
     // scale my pix
-    if ( depth.getWidth() > 0 ){
-        ofxNI2::depthRemapToRange(depth.getPixelsRef(), scaledPixels, near, far, false);
-        toDraw.setFromPixels(scaledPixels);
-        
-        colorSmall.setFromPixels( color.getPixelsRef() );
-        colorSmall.resize(color.getWidth() * .5, color.getHeight() * .5);
+    if ( kinect.isFrameNew()  ){
+        colorSmall.setFromPixels( kinect.getPixelsRef() );
+        colorSmall.resize(kinect.getWidth() * .5, kinect.getHeight() * .5);
     }
 }
 
@@ -74,15 +54,8 @@ void FlipSensor::update()
 void FlipSensor::draw()
 {
     ofPushMatrix();
-    
-    if ( depth.getWidth() > 0 ){
-        depth.draw();
-        //toDraw.setFromPixels(depth.getPixelsRef(near, far));
-        //toDraw.update();
-        toDraw.draw(0, 480);
-    }
-    if ( color.getWidth() > 0 ){
-        color.draw(640,0);
+    if ( colorSmall.getWidth() > 0 ){
+        colorSmall.draw(640,0);
         // uh
         if ( bTrack ){
             ofPushMatrix();
@@ -97,9 +70,6 @@ void FlipSensor::draw()
             }
             ofPopMatrix();
         }
-    }
-    if ( ir.getWidth() > 0 ){
-        ir.draw(640,0);
     }
     ofPopMatrix();
     

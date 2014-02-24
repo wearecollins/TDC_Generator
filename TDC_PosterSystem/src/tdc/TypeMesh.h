@@ -24,12 +24,14 @@ public:
         lastSpeed = 0;
         path.load( svg_to_load );
         
+        ofFile svgFile(svg_to_load);
+        
         // sets up grid
         
         int inc = 2;
         
-        string file = dir + "/" + svg_to_load.substr(0, svg_to_load.length()-4) + SUFFIX;
-        string xmlFile = dir + "/" + svg_to_load.substr(0, svg_to_load.length()-4) +SUFFIX + ".xml";
+        string file = dir + "/" + svgFile.getBaseName() + SUFFIX;
+        string xmlFile = dir + "/" + svgFile.getBaseName() +SUFFIX + ".xml";
         
         cout <<"MESH IS? "<<file<<endl;
         
@@ -225,10 +227,12 @@ public:
     {
         for (int i=0; i<mesh.getNumVertices(); i++)
         {
-            if ( mesh.getVertex(i) == part ){
+            if ( mesh.getVertex(i).distance(part) < 1 ){
                 return i;
             }
         }
+        cout << "DIDNT FIND RET 0 "<<endl;
+        return 0;
     }
     
     void resetColor(){

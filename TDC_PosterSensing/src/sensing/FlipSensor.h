@@ -9,7 +9,8 @@
 #pragma once
 
 #include "ofxNI2.h"
-#include "ofxCv.h"
+//#include "ofxCv.h"
+#include "ofxKinect.h"
 #include "ofxSurf.h"
 
 class TrackingImage : public ofImage
@@ -52,10 +53,12 @@ protected:
     ofImage             toDraw, colorSmall;
     
     ofxCv::ContourFinder contourFinder;
-    ofxNI2::Device      * device;
-    ofxNI2::ColorStream color;
-    ofxNI2::IrStream    ir;
-    ofxNI2::DepthStream depth;
+//    ofxNI2::Device      * device;
+//    ofxNI2::ColorStream color;
+//    ofxNI2::IrStream    ir;
+//    ofxNI2::DepthStream depth;
+
+    ofxKinect kinect;
     
     vector<ofPtr<ofxSurf> > surfers;
     vector<TrackingImage>   images;

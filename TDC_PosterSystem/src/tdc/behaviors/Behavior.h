@@ -9,6 +9,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "TDCConstants.h"
 #include "ofxLabFlexParticleSystem.h"
 #include "CameraManager.h"
 

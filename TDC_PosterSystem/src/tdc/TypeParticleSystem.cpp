@@ -65,6 +65,14 @@ void TypeParticleSystem::setup( string directory ){
     currentBehavior = behaviors[ moveType ];
     gravity  = ofVec2f(0,4.0f);
     
+    // load into names first
+    ofDirectory meshDirectory;
+    int numMeshes = meshDirectory.listDir(sourceDirectory);
+    
+    for ( int i=0; i<numMeshes; i++){
+        meshes[ meshDirectory.getName(i)] = TargetMesh();
+    }
+    
     // lez do it
     startThread();
 }
@@ -107,14 +115,11 @@ void TypeParticleSystem::threadedFunction(){
         lastDrawMode = DRAW_NULL;
         drawMode = DRAW_POINTS;
         
-        
         ofDirectory meshDirectory;
         int numMeshes = meshDirectory.listDir(sourceDirectory);
-        
-        for ( int i=0; i<numMeshes; i++){
-            cout << "LOADING "<<meshDirectory.getPath(i)<<endl;
-            meshes[ meshDirectory.getName(i)] = TargetMesh();
+        for (int i=0; i<numMeshes; i++){
             meshes[ meshDirectory.getName(i)].setup( meshDirectory.getPath(i), numParticles );
+            cout << "LOADING "<<meshDirectory.getPath(i)<<endl;
         }
         
         currentMeshName = meshDirectory.getName(0);

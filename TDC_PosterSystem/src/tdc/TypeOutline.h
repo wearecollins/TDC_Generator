@@ -23,6 +23,7 @@ public:
     // spacing is in pixels
     void regenerateGrid( int spacing ){
         // sample each letter
+        int index = 0;
         for ( int i=0; i<path.getNumPath(); i++){
             
             vector<ofPolyline> letter = getLetter(i);
@@ -33,6 +34,8 @@ public:
                     letters[i].push_back(point);
                     mesh.addVertex(point);
                     mesh.addColor( ofColor(255));
+                    mesh.addIndex( index );
+                    index++;
                 }
             }
         }

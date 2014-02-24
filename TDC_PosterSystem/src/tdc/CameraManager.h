@@ -37,6 +37,8 @@ public:
             toDraw.setFromPixels(kinect.getDepthPixelsRef());
             toDraw.mirror(false, true);
             
+            colorPixels.setFromPixels( kinect.getPixels(), kinect.getWidth(), kinect.getHeight(), kinect.getPixelsRef().getNumChannels());
+            
             double minVal = 0, maxVal = 0;
             cv::Point minLoc, maxLoc;
             static cv::Rect rect;
@@ -74,6 +76,8 @@ public:
     ofxKinect & getKinect(){
         return kinect;
     }
+    
+    ofPixels colorPixels;
     
 protected:
     
