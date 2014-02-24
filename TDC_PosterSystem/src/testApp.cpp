@@ -8,6 +8,8 @@ bool bUseGrid = true;
 bool bDrawTypeAsOverlay = true;
 bool bDrawTypeInSpace = true;
 
+bool bUseLiveInput      = true;
+
 // main layout vars
 int mode = 0;
 int lastDrawMode = -1;
@@ -132,6 +134,7 @@ void testApp::setup(){
     guis.back()->addToggle("Save Frame", &bCapture);
     guis.back()->addToggle("Save Settings", &bSave);
     guis.back()->addToggle("Reload Settings", &bReload);
+    guis.back()->addToggle("Use Inputs", &bUseLiveInput);
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
@@ -194,13 +197,16 @@ void testApp::update(){
     float timeMappedMidday = particles.dataObject.time > .5 ? ofMap(particles.dataObject.time, .5, 1.0, 1.0, 0.0) : ofMap(particles.dataObject.time, 0,1.0, 0, 1.0);
     float yesterday = particles.dataObject.date - 1.0/365.0f;
     //osterColor.setHue( yesterday * 1.0 * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time);
-    //posterColorBottom.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
-    //posterColorBottom.setSaturation( timeMappedSunset );
-    //posterColorBottom.setBrightness( timeMappedMidday );
+    
+    if ( bUseLiveInput ){
+        posterColorBottom.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
+        posterColorBottom.setSaturation( timeMappedSunset );
+        posterColorBottom.setBrightness( timeMappedMidday );
 
-    ///posterColor.setHue( particles.dataObject.date  );
-    //posterColor.setSaturation( timeMappedSunset );
-    //posterColor.setBrightness( timeMappedMidday );
+        posterColor.setHue( particles.dataObject.date  );
+        posterColor.setSaturation( timeMappedSunset );
+        posterColor.setBrightness( timeMappedMidday );
+    }
     
     posterMesh.setVertex(0, ofVec2f(poster.x, poster.y));
     posterMesh.setVertex(1, ofVec2f(poster.x + poster.width, poster.y));
@@ -215,8 +221,7 @@ void testApp::update(){
     ofLogVerbose() << yesterday << ":" << particles.dataObject.date << ":" << timeMappedSunset << ":" << timeMappedMidday <<":"<<particles.dataObject.time<<endl;
     
     // DATA OBJECT: ENVIRONMENT
-    bool bUseData = false;
-    if ( bUseData ){
+    if ( bUseLiveInput ){
         Behavior * b = particles.getSettingsBehavior();
         b->intensity.x = particles.dataObject.environmentImmediate * 100.0;
         b->intensity.y = particles.dataObject.environmentLocal * 100.0;
