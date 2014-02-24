@@ -64,11 +64,14 @@ public:
     // data object
     Data        dataObject;
     
-protected:
-    string      sourceDirectory;
+    void        setMesh( string name ){ currentMeshName = name; };
     
     // the all important
     map< string, TargetMesh> meshes;
+    
+protected:
+    string      sourceDirectory;
+    
     string currentMeshName;
     
     // threadzzz
