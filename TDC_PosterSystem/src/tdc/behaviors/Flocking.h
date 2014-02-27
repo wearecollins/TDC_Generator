@@ -50,7 +50,7 @@ public:
     }
     
     void setup( ofxLabFlexParticleSystem::Container * particles ){
-        
+        bNeedToReload = false;
         maxspeed = 3;
         maxforce = 0.05;
         
@@ -64,7 +64,11 @@ public:
         // Loading the Shaders
         updatePos.load("",shadersFolder+"/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels
         updateVel.load("",shadersFolder+"/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels
-        updateRender.load(shadersFolder+"/render.vert","");//shadersFolder+"/render.frag");
+        
+        updateRender.setGeometryInputType(GL_POINTS);
+        updateRender.setGeometryOutputType(GL_TRIANGLES);
+        updateRender.setGeometryOutputCount(36);
+        updateRender.load(shadersFolder+"/render.vert","","shaders/render.geom");
         
         //TODO: this should be dynamic
         numParticles = particles->size();
@@ -141,6 +145,14 @@ public:
     }
     
     void beginDraw(){
+        if ( bNeedToReload){
+            bNeedToReload = false;
+            updateRender.unload();
+            updateRender.setGeometryInputType(GL_POINTS);
+            updateRender.setGeometryOutputType(GL_TRIANGLES);
+            updateRender.setGeometryOutputCount(36);
+            updateRender.load("shaders/render.vert","","shaders/render.geom");
+        }
         if ( bNeedToRefreshAttract ){
             bNeedToRefreshAttract = false;
             // load into attract zone
@@ -269,8 +281,12 @@ public:
             updateRender.setUniform2f("screen", (float)2.0, (float)2.0);
             updateRender.setUniform2f("screenPos", (float) trans.x / (dimensionsX), (float) trans.y / (dimensionsY) );
             updateRender.setUniform1f("scale", scale );
+            updateRender.setUniformMatrix4f("homography", homography);
+        
+            updateRender.setUniform1f("pointSize", pointSize);
+            updateRender.setUniform1f("pointRandomization", pointRandomization);
             //updateRender.setUniform1f("size", (float)particleSize);
-            
+        
             ofPushStyle();
             ofSetColor(255);
             
@@ -282,7 +298,12 @@ public:
         ofPopMatrix();
     }
     
+    void reload(){
+        bNeedToReload = true;
+    }
+    
 protected:
+    bool bNeedToReload;
     bool bNeedToRefreshAttract;
     float * livepos;
     

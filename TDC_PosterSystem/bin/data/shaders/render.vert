@@ -17,15 +17,15 @@ void main() {
     // Maps the position from the texture (from 0.0 to 1.0) to
     // the screen position (0 - screenWidth/screenHeight)
     //
-    pixPos.x -= .5;
-    pixPos.y -= .5;
-    pixPos.x *= scale;
-    pixPos.y *= scale;
-    pixPos.x += .5;
-    pixPos.y += .5;
-    pixPos.x   += screenPos.x;
-    pixPos.y   += screenPos.y;
-    pixPos.x *= screen.x;
+//    pixPos.x -= .5;
+//    pixPos.y -= .5;
+//    pixPos.x *= scale;
+//    pixPos.y *= scale;
+//    pixPos.x += .5;
+//    pixPos.y += .5;
+    pixPos.x += screenPos.x;
+    pixPos.y += screenPos.y;
+    pixPos.x *= 1.0;
     pixPos.y *= screen.y;
     
     gl_Position = pixPos;

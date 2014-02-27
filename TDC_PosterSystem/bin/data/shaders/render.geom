@@ -2,34 +2,42 @@
 #extension GL_EXT_geometry_shader4 : enable
 #extension GL_EXT_gpu_shader4 : enable
 
-uniform float size;
-uniform float imgWidth, imgHeight;
+uniform float pointSize;
+uniform float pointRandomization;
+uniform mat4 homography;
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+const float PI = 3.1415926;
 
 void main(void){
-
-    // For each vertex moved to the right position on the vertex shader
-    // it makes 6 more vertex that makes 2 GL_TRIANGLE_STRIP
-    // that´s going to be the frame for the pixels of the sparkImg texture
-    //
-    for(int i = 0; i < gl_VerticesIn; i++){
-        gl_Position = gl_ModelViewProjectionMatrix * ( gl_PositionIn[i] + vec4(-size,-size,0.0,0.0));
+    
+    float size = (pointSize + (rand(gl_PositionIn[0].xy)*pointSize * pointRandomization))/600.0;
+    
+    float circleRes = 12.0;
+    
+    for ( float a = 0; a < circleRes; a++ ){
+        // Angle between each side in radians
+        float ang = (PI * 2.0 / circleRes) * a;
+        
+        vec4 offset = vec4(cos(ang) * size, -sin(ang) * size, 0.0, 0.0);
+        gl_Position = gl_PositionIn[0] + offset;
+        gl_FrontColor = gl_FrontColorIn[0];
         EmitVertex();
         
-        gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(size,-size,0.0,0.0));
+        ang = (PI * 2.0 / circleRes) * (a + 1);
+        offset = vec4(cos(ang) * size, -sin(ang) * size, 0.0, 0.0);
+        gl_Position = gl_PositionIn[0] + offset;
+        gl_FrontColor = gl_FrontColorIn[0];
         EmitVertex();
         
-        gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(size,size,0.0,0.0));
+        gl_Position = gl_PositionIn[0];
+        gl_FrontColor = gl_FrontColorIn[0];
         EmitVertex();
-        EndPrimitive();
-
-        gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(-size,-size,0.0,0.0));
-        EmitVertex();
-        
-        gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(-size,size,0.0,0.0));
-        EmitVertex();
-        
-        gl_Position = gl_ModelViewProjectionMatrix * (gl_PositionIn[i] + vec4(size,size,0.0,0.0));
-        EmitVertex();
-        EndPrimitive();
     }
+    
+    EndPrimitive();
+    
 }

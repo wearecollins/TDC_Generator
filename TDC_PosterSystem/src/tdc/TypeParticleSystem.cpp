@@ -24,7 +24,7 @@ void TypeParticleSystem::setup( string directory ){
     pointShader.setGeometryInputType(GL_POINTS);
 	pointShader.setGeometryOutputType(GL_TRIANGLES);
 	pointShader.setGeometryOutputCount(36);
-    pointShader.load("shaders/particleShapes.vert", "", "shaders/particleShapes.geom");
+    pointShader.load("shaders/particleShapes.vert", "shaders/particleShapes.frag", "shaders/particleShapes.geom");
     
     // setup ourselves based on window size
     setupSquare(ofVec2f(ofGetWidth(), ofGetHeight()));
@@ -108,7 +108,7 @@ void TypeParticleSystem::threadedFunction(){
         
         ofColor color(255);
         
-        int numParticles = 10000;
+        int numParticles = 5000;
         
         // build particles for grid
         for (int i=0; i<numParticles; i++){
@@ -314,6 +314,9 @@ void TypeParticleSystem::update(){
 void TypeParticleSystem::draw()
 {
     bool bShading = drawMode == DRAW_POINTS;
+    if ( currentBehavior != NULL ){
+        bShading = bShading ? currentBehavior->getName() != "flocking" : false;
+    }
     
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
         if ( bShading ){
@@ -329,6 +332,8 @@ void TypeParticleSystem::draw()
             currentMesh->draw();
             ofPopMatrix();
         } else {
+            currentBehavior->pointSize = pointSize;
+            currentBehavior->pointRandomization = pointRandomization;
             ofSetColor(255);
             if ( currentMesh && currentMesh->getNumVertices() > 0 ){
                 if ( currentBehavior->getName() != "flocking" ){

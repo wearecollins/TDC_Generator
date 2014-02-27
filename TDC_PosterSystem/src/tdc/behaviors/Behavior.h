@@ -87,6 +87,7 @@ public:
     virtual void beginDraw(){}
     virtual void endDraw(){}
     virtual void draw(){}
+    virtual void reload(){};
     
     // settings
     ofVec3f intensity;
@@ -95,7 +96,10 @@ public:
     float   scale;
     
     // yeesh
+    ofMatrix4x4 homography;
     CameraManager * camera;
+    float pointSize;
+    float pointRandomization;
     
 protected:
     

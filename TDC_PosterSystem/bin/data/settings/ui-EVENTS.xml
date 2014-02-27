@@ -28,5 +28,5 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Draw Render Buffer</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>

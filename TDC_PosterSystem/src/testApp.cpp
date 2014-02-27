@@ -65,14 +65,6 @@ void testApp::exit(){
 void testApp::setup(){
     particles.setup();
     
-    toSave.begin();
-    ofClear(0,0,0,0);
-    toSave.end();
-    
-    toSavePoster.begin();
-    ofClear(0,0,0,0);
-    toSavePoster.end();
-    
     // projection setup
     bEditingMask = false;
     maskEditor.setup();
@@ -86,9 +78,18 @@ void testApp::setup(){
     posterPts[2] = pz.getOutline()[0].getVertices()[2];
     posterPts[3] = pz.getOutline()[0].getVertices()[3];
     
-    toSave.allocate(400, 600);//, GL_RGBA32F, 8);
-    toSavePoster.allocate(400, 600);//, GL_RGBA32F, 8);
+    ofEnableAntiAliasing();
     
+    toSave.allocate(800, 600 );//, GL_RGBA32F, 8);
+    toSavePoster.allocate(800, 600 );//, GL_RGBA32F, 8);
+    
+    toSave.begin();
+    ofClear(0,0,0,0);
+    toSave.end();
+    
+    toSavePoster.begin();
+    ofClear(0,0,0,0);
+    toSavePoster.end();
     // load optional type overlay
     
     map<string, TargetMesh>::iterator it = particles.meshes.begin();
@@ -423,24 +424,20 @@ void testApp::update(){
     
 	maskEditor.update();
     maskEditor.findHomography(posterPts, maskEditor.dst, matrix);
+    if ( particles.getCurrentBehavior() != NULL && particles.getCurrentBehavior()->getName() == "flocking" )
+        particles.getCurrentBehavior()->homography = matrix;
 }
 
 //--------------------------------------------------------------
 void testApp::draw(){
     toSave.begin();
-    if ( bClear){
-        ofDisableDepthTest();
-        posterMesh.draw();
-    } else {
-        ofSetColor(posterColor.r,posterColor.g,posterColor.b,bgAlpha);
-        ofRect(0,0, toSave.getWidth(), toSave.getHeight());
-        ofSetColor(255,255);
-    }
-//    ofDisableDepthTest();
+    ofClear(0,0,0,0);
+//    renderBackground();
     renderParticles();
     toSave.end();
     
     toSavePoster.begin(); {
+        ofPushMatrix();
         ofClear(0,0,0,255);
         posterMesh.draw();
     
@@ -449,20 +446,27 @@ void testApp::draw(){
         
     } toSavePoster.end();
     
-    ofPushMatrix();
-    if ( bUseHomography) ofMultMatrix(matrix);
-    else {
-        ofTranslate(poster.x, poster.y);
-        ofScale(scale, scale);
-    }
-    if (!bDrawFBO){
-        posterMesh.draw();
-        renderParticles();
-        //toSave.draw(0, 0);
-    } else {
-        toSavePoster.draw(0,0);
-    }
-    ofPopMatrix();
+    ofPushMatrix(); {
+        if ( bUseHomography){
+            
+        } else {
+            ofTranslate(poster.x, poster.y);
+            ofScale(scale, scale);
+        }
+        if (!bDrawFBO){
+            ofPushMatrix(); {
+                if ( bUseHomography ) ofMultMatrix(matrix);
+                posterMesh.draw();
+            } ofPopMatrix();
+            //renderParticles();
+            if ( bUseHomography && (particles.getCurrentBehavior() != NULL && particles.getCurrentBehavior()->getName() == "flocking" )){
+                ofMultMatrix(matrix);
+            }
+            toSave.draw(0, 0);
+        } else {
+            toSavePoster.draw(0,0);
+        }
+    } ofPopMatrix();
     
     if ( bDrawKinect ){
         ofSetColor(255);
@@ -483,30 +487,63 @@ void testApp::draw(){
     }
 }
 
+//--------------------------------------------------------------
+void testApp::renderBackground(){
+    ofPushMatrix();
+    if ( bUseHomography){
+        ofMultMatrix(matrix);
+    }
+    if ( bClear){
+        ofDisableDepthTest();
+        posterMesh.draw();
+    } else {
+        ofDisableDepthTest();
+        posterColor.a = bgAlpha  / 255.0f;
+        posterColorBottom.a = bgAlpha / 255.0f;
+        
+        posterMesh.setColor(0, posterColor );
+        posterMesh.setColor(1, posterColor );
+        posterMesh.setColor(2, posterColorBottom );
+        posterMesh.setColor(3, posterColorBottom );
+        
+        posterMesh.draw();
+        
+        posterColor.a = 1.0;
+        posterColorBottom.a = 1.0;
+        
+        posterMesh.setColor(0, posterColor );
+        posterMesh.setColor(1, posterColor );
+        posterMesh.setColor(2, posterColorBottom );
+        posterMesh.setColor(3, posterColorBottom );
+    }
+    ofPopMatrix();
+}
 
 //--------------------------------------------------------------
 void testApp::renderParticles(){
     ofPushMatrix();
+    if ( bUseHomography  && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" )) ofMultMatrix(matrix);
     
     //    static float scale = fmax( ofGetWidth()/1280.0f, ofGetHeight()/720.0f );
     //    ofScale(scale, scale);
-    
+    ofPushStyle();
     ofEnableAlphaBlending();
     ofEnableBlendMode((ofBlendMode) mode);
     if (bDrawTypeInSpace){
         ofEnableDepthTest();
         ofPushMatrix();
         ofSetColor(typeColor);
+        ofTranslate(0,0,1);
         type[currentPosterName].draw();
         ofPopMatrix();
     }
+    particles.draw();
+    ofDisableDepthTest();
     if (bDrawTypeAsOverlay){
         ofSetColor(typeColor);
         type[currentPosterName].draw();
     }
-    particles.draw();
-    ofDisableDepthTest();
-    
+    ofPopStyle();
     ofPopMatrix();
 }
 
@@ -537,6 +574,8 @@ void testApp::keyPressed(int key){
         bTracking = true;
     } else if ( key == 'c'){
         particles.camera.tracker.bDraw = !particles.camera.tracker.bDraw;
+    } else if ( key == 'r' ){
+        particles.getCurrentBehavior()->reload();
     }
 }
 
