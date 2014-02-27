@@ -24,7 +24,7 @@ WeatherColors::WeatherColors(){
 
 
 ofPoint WeatherColors::getIntensity( int condition ){
-    ofPoint toRet;
+    ofPoint toRet = ofPoint(0,0,0);
     
     switch (condition) {
         case 0:  //tornado
@@ -127,8 +127,6 @@ ofPoint WeatherColors::getIntensity( int condition ){
         case 47:  //isolated thundershowers:
             toRet.set(0.1,0.1,0.0);
             break;
-        default:
-        break;
     }
     
     return toRet;

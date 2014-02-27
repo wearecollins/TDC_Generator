@@ -20,6 +20,11 @@ TypeParticleSystem::~TypeParticleSystem(){
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::setup( string directory ){
+    // load geometry shader
+    pointShader.setGeometryInputType(GL_POINTS);
+	pointShader.setGeometryOutputType(GL_TRIANGLES);
+	pointShader.setGeometryOutputCount(36);
+    pointShader.load("shaders/particleShapes.vert", "", "shaders/particleShapes.geom");
     
     // setup ourselves based on window size
     setupSquare(ofVec2f(ofGetWidth(), ofGetHeight()));
@@ -184,8 +189,6 @@ void TypeParticleSystem::threadedFunction(){
                 ofFloatColor currentColor = particleColor;
                 float currentVariance = colorVariance;
                 
-                
-                
                 // loop through each letter
                 int bigIndex = 0;
                 for ( int l=0; l<letters->size(); l++){
@@ -214,6 +217,7 @@ void TypeParticleSystem::threadedFunction(){
                         bigIndex++;
                     }
                 }
+                cout << bigIndex << ":" << indices.size() << endl;
                 bIndicesCreated = true;
                 
                 bNeedToChangeColor = false;
@@ -271,6 +275,15 @@ void TypeParticleSystem::threadedFunction(){
     }
 }
 
+
+//-------------------------------------------------------------------------------------------
+void TypeParticleSystem::setMesh( string name ){
+    indices.clear();
+    bIndicesCreated = false;
+    bNeedToChangeMesh = true;
+    currentMeshName = name;
+};
+
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::update(){
     // leave the mesh alone until it's done
@@ -300,8 +313,14 @@ void TypeParticleSystem::update(){
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::draw()
 {
+    bool bShading = drawMode == DRAW_POINTS;
+    
     if ( currentMesh && currentMesh->getNumVertices() > 0 ){
-        
+        if ( bShading ){
+            pointShader.begin();
+            pointShader.setUniform1f("pointSize", pointSize);
+            pointShader.setUniform1f("pointRandomization", pointRandomization);
+        }
         if ( currentBehavior == NULL ){
             ofPushMatrix();
             ofTranslate(ofGetWidth()/2.0, ofGetHeight()/2.0);
@@ -336,7 +355,12 @@ void TypeParticleSystem::draw()
         if ( currentBehavior != NULL ){
             currentBehavior->draw();
         }
+        
+        if ( bShading ){
+            pointShader.end();
+        }
     }
+    
     meshUpdatingFrames++;
     if ( meshUpdatingFrames > 10 ){
         ofSetColor(0,50);

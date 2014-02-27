@@ -52,6 +52,11 @@
 </Widget>
 <Widget>
     <Kind>2</Kind>
-    <Name>1</Name>
+    <Name>circumstance</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>simple</Name>
     <Value>0</Value>
 </Widget>

@@ -2,7 +2,7 @@
 
 //--------------------------------------------------------------
 void testApp::setup(){
-	ofSetVerticalSync(true);
+    ofSetFrameRate(60);
     
     string host = "localhost";
     string name = "TDC_LocalInput";

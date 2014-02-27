@@ -151,7 +151,7 @@ void SubMesh::setup( string dir, string n, int num ){
     if ( !bLoaded ){
         
         // add lookups for outline
-        for (int i=0; i<20000; i++){
+        for (int i=0; i<numPositions; i++){
             int index = (int) ofRandom(0, t_outlineMesh.getNumVertices());
             while ( outline.isOccupied(index) && !outline.isFull() ){
                 index = (int) ofRandom(0, t_outlineMesh.getNumVertices());

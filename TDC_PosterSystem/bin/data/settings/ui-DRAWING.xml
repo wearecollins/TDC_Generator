@@ -23,35 +23,45 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Auto Clear Background</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Background Alpha Clear</Name>
-    <Value>2.153716087</Value>
+    <Value>14.645270348</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: R</Name>
-    <Value>0.422476888</Value>
+    <Value>0.878310084</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: G</Name>
-    <Value>0.294724405</Value>
+    <Value>0.402027041</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: B</Name>
-    <Value>0.199368477</Value>
+    <Value>0.057317149</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: Hue Randomization</Name>
-    <Value>0.400311530</Value>
+    <Value>0.474662155</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Density</Name>
     <Value>1.000000000</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>Point size</Name>
+    <Value>1.530118227</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>Point randomization</Name>
+    <Value>4.273648739</Value>
 </Widget>

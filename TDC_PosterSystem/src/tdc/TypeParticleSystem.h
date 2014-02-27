@@ -57,21 +57,17 @@ public:
     // grid vs outline
     void setUseGrid( bool useGrid );
     
-    double       scale;
-    
     // set colors
     void setColor( ofFloatColor color, float variance = 0.0 );
     
     // data object
-    Data        dataObject;
-    
-    void        setMesh( string name ){
-        bNeedToChangeMesh = true;
-        currentMeshName = name;
-    };
+    Data dataObject;
     
     // the all important mesh map
     map< string, TargetMesh> meshes;
+    
+    // set which mesh we're rendering
+    void setMesh( string name );
     
     // interaction
     CameraManager camera;
@@ -79,7 +75,14 @@ public:
     // density is 0-1, wipes out some of the mesh
     float density;
     
+    float pointSize;
+    float pointRandomization;
+    
+    // ?
+    double scale;
+    
 protected:
+    ofShader pointShader;
     string      sourceDirectory;
     
     string currentMeshName;

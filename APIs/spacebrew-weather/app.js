@@ -82,7 +82,7 @@ function getWeatherByWOEID( id ){
 			  		console.log(item['yweather:condition']['@']['temp']);
 					sb.send("temperature", "range", parseInt(item['yweather:condition']['@']['temp']) );
 					sb.send("conditions", "string", item['yweather:condition']['@']['text'] );
-					sb.send("condition_coded", "range", parseInt(item['yweather:condition']['@']['code']) );
+					sb.send("condition_coded", "range", parseInt(item['yweather:condition']['@']['code']).toString() );
 			  		break;
 			  	}
 			  }
@@ -121,7 +121,7 @@ var main = function() {
 	var lon = -74.00597299999998;
 	setInterval(function(){
 		getWeather(lat, lon);
-	}, 30000 );
+	}, 60000 );
 	getWeather(40.714352999999996, -74.00597299999998);
 }
 

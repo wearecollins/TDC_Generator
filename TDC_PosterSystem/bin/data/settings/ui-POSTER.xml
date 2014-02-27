@@ -8,12 +8,12 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Poster X</Name>
-    <Value>800.000000000</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Y</Name>
-    <Value>35.838150024</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -28,12 +28,12 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Color: R</Name>
-    <Value>1.000000000</Value>
+    <Value>0.557964683</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Color: G</Name>
-    <Value>0.000000000</Value>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -43,7 +43,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Color: S</Name>
-    <Value>1.000000000</Value>
+    <Value>0.542229712</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -53,10 +53,10 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Dectection thresh</Name>
-    <Value>20</Value>
+    <Value>6</Value>
 </Widget>
 <Widget>
     <Kind>44</Kind>
     <Name>scale</Name>
-    <Value>2.352601051</Value>
+    <Value>1.000000000</Value>
 </Widget>

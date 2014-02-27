@@ -1,59 +1,59 @@
 #include "testApp.h"
 #include "WeatherColors.h"
 
+// GUI events
 bool bClear = true;
 bool bCapture = false;
 bool bSave    = false;
 bool bReload    = false;
+
+// Particle settings
 bool bUseGrid = true;
-bool bDrawTypeAsOverlay = true;
-bool bDrawTypeInSpace = true;
-
-bool bUseLiveInput      = true;
-bool bUseHomography     = true;
-bool bDrawFBO           = true;
-
-bool bDrawKinect        = false;
-bool bTracking          = false;
-
-// main layout vars
 int mode = 0;
 int lastDrawMode = -1;
 float bgAlpha = 255.0f;
-double scale = 1.0;
-
-// particle settings
 ofFloatColor particleColor, lastParticleColor;
-float        hueVariance;
+float hueVariance;
 
-// positioning
+// Type settings
+bool bDrawTypeAsOverlay = true;
+bool bDrawTypeInSpace = true;
+ofFloatColor typeColor;
+
+// Data settings
+bool bUseLiveInput      = true;
+
+// Projection settings
+bool bUseHomography     = true;
+bool bDrawFBO           = true;
+double scale = 1.0;
 double x = 0;
 double y = 0;
+ofMatrix4x4 matrix;
+ofPoint posterPts[4];
 
-// detection
+// tracking settings
+bool bDrawKinect        = false;
+bool bTracking          = false;
+
+// SURF settings
 int posterThresh = 20;
 
-ofPoint currentIntensity;
-
-// type color
-//float typeColor = 0;
-
-// poster
+// Poster settings
 ofRectangle poster = ofRectangle(0,0,100,400);
 ofFloatColor posterColor = ofColor(1.0,0,0);
 ofFloatColor posterColorBottom = ofColor(1.0,0,0);
+vector<string> posterNames;
+string currentPosterName;
+
+// Community settings (background color)
+ofPoint currentIntensity = ofPoint(0,0,0);
 float currentHue = ofRandom(0,1.0);
 float liveHueTop = ofRandom(0,1.0);
 float liveHueBottom = ofRandom(0,1.0);
 float posterSat = 1.0, posterBright = 1.0;
 float lastChanged = 0.0;
 
-vector<string> posterNames;
-string currentPosterName;
-ofMatrix4x4 matrix;
-ofPoint posterPts[4];
-
-ofFloatColor typeColor;
 
 
 //--------------------------------------------------------------
@@ -86,14 +86,16 @@ void testApp::setup(){
     posterPts[2] = pz.getOutline()[0].getVertices()[2];
     posterPts[3] = pz.getOutline()[0].getVertices()[3];
     
-    toSave.allocate(400, 600, GL_RGBA);//, 6);
-    toSavePoster.allocate(400, 600, GL_RGBA);//, 6);
+    toSave.allocate(400, 600);//, GL_RGBA32F, 8);
+    toSavePoster.allocate(400, 600);//, GL_RGBA32F, 8);
     
     // load optional type overlay
     
     map<string, TargetMesh>::iterator it = particles.meshes.begin();
     
     currentPosterName = it->first;
+    
+    bool bUseSurf = false;
     
     for (it; it != particles.meshes.end(); ++it){
         posterNames.push_back(it->first);
@@ -106,10 +108,12 @@ void testApp::setup(){
             type[it->first].getPathAt(i).setUseShapeColor(false);
         }
         
-        //setup surfers
-        surfers[it->first] = ofPtr<ofxSurf>(new ofxSurf());
-        surfImages[it->first].loadAndScale( "surf/" + it->first + ".png");
-        surfers[it->first]->setSource(surfImages[it->first].getPixelsRef());
+        if ( bUseSurf ){
+            //setup surfers
+            surfers[it->first] = ofPtr<ofxSurf>(new ofxSurf());
+            surfImages[it->first].loadAndScale( "surf/" + it->first + ".png");
+            surfers[it->first]->setSource(surfImages[it->first].getPixelsRef());
+        }
     }
     
     lastDrawMode = 0;
@@ -142,6 +146,8 @@ void testApp::setup(){
     guis.back()->addSlider("Particle Color: B", 0.0, 1.0, &particleColor.b);
     guis.back()->addSlider("Particle Color: Hue Randomization", 0.0, 1.0, &hueVariance);
     guis.back()->addSlider("Particle Density", 0.0, 1.0, &particles.density);
+    guis.back()->addSlider("Point size", 0.01, 100.0f, &particles.pointSize);
+    guis.back()->addSlider("Point randomization", 0.0, 10.0, &particles.pointRandomization);
     gui->addCanvas(guis.back());
     
     ofxUISuperCanvas * guiTypeOverlay = new ofxUISuperCanvas("TYPE",0,0,ofGetWidth()-200, ofGetHeight());
@@ -325,26 +331,22 @@ void testApp::update(){
     
     // DATA OBJECT: TIME/DATE
     
-    float timeMappedSunset = particles.dataObject.time > .6 ? ofMap(particles.dataObject.time, .6, 1.0, 1.0, 0) : ofMap(particles.dataObject.time, 0.0, .6, 0, 1.0);
+    /*float timeMappedSunset = particles.dataObject.time > .6 ? ofMap(particles.dataObject.time, .6, 1.0, 1.0, 0) : ofMap(particles.dataObject.time, 0.0, .6, 0, 1.0);
     float timeMappedMidday = particles.dataObject.time > .5 ? ofMap(particles.dataObject.time, .5, 1.0, 1.0, 0.0) : ofMap(particles.dataObject.time, 0,1.0, 0, 1.0);
     float yesterday = particles.dataObject.date - 1.0/365.0f;
     
     if ( bUseLiveInput ){
-        particleColor.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
-        particleColor.setSaturation( timeMappedSunset );
-        particleColor.setBrightness( timeMappedMidday );
-
         particleColor.setHue( particles.dataObject.date  );
         particleColor.setSaturation( timeMappedSunset );
         particleColor.setBrightness( timeMappedMidday );
-    }
+    }*/
+    
+    // yes OK
     
     posterMesh.setVertex(0, posterPts[0]);
     posterMesh.setVertex(1, posterPts[1]);
     posterMesh.setVertex(2, posterPts[2]);
     posterMesh.setVertex(3, posterPts[3]);
-    
-    ofLogVerbose() << yesterday << ":" << particles.dataObject.date << ":" << timeMappedSunset << ":" << timeMappedMidday <<":"<<particles.dataObject.time<<endl;
     
     // DATA OBJECT: ENVIRONMENT
     if ( bUseLiveInput ){
@@ -353,7 +355,8 @@ void testApp::update(){
         //b->intensity.y = particles.dataObject.environmentLocal * particles.dataObject.elWeight * 500.0;
         //b->intensity.z = particles.dataObject.language * particles.dataObject.langWeight * 500.0;
         
-        ofPoint intense = currentIntensity * (100 * particles.dataObject.elWeight);
+        ofPoint intense = currentIntensity;
+        intense *= (100 * particles.dataObject.elWeight);
         b->intensity.set( intense );
         
         // UPDATE GUI BASED ON DATA OBJECT
@@ -425,12 +428,15 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::draw(){
     toSave.begin();
-    if ( bClear) ofClear(0,0,0,0);
-    else {
-        ofSetColor(0,0,0,bgAlpha);
+    if ( bClear){
+        ofDisableDepthTest();
+        posterMesh.draw();
+    } else {
+        ofSetColor(posterColor.r,posterColor.g,posterColor.b,bgAlpha);
         ofRect(0,0, toSave.getWidth(), toSave.getHeight());
         ofSetColor(255,255);
     }
+//    ofDisableDepthTest();
     renderParticles();
     toSave.end();
     
@@ -452,6 +458,7 @@ void testApp::draw(){
     if (!bDrawFBO){
         posterMesh.draw();
         renderParticles();
+        //toSave.draw(0, 0);
     } else {
         toSavePoster.draw(0,0);
     }
@@ -659,8 +666,6 @@ void testApp::onMessage( Spacebrew::Message & m ){
         
         //particleColor.setHue(particles.dataObject.environmentLocal);
         currentIntensity = weather().getIntensity( ofToInt(m.value) );
-        ofPoint intense = currentIntensity * (100 * particles.dataObject.elWeight);
-        b->intensity.set( intense );
     }
 }
 
