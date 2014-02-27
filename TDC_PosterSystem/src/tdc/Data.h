@@ -45,6 +45,13 @@ public:
         
         // update weights
         // ?
+        
+        eiWeight = ofClamp(eiWeight, 0.0, 1.0);
+        elWeight = ofClamp(elWeight, 0.0, 1.0);
+        egWeight = ofClamp(egWeight, 0.0, 1.0);
+        langWeight = ofClamp(langWeight, 0.0, 1.0);
+        timeWeight = ofClamp(timeWeight, 0.0, 1.0);
+        dateWeight = ofClamp(dateWeight, 0.0, 1.0);
     }
     
     float getWeightedEI(){

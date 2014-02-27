@@ -39,6 +39,7 @@ class testApp : public ofBaseApp{
         void setupSpacebrew();
 		void update();
 		void draw();
+        void exit();
 
 		void keyPressed(int key);
 		void keyReleased(int key);

@@ -42,6 +42,7 @@ public:
     void update();
     void draw();
     void mouseMoved( int x, int y );
+    void kinectMoved( ofPoint & p );
     
     // draw mode
     DrawMode getDrawMode();
@@ -74,6 +75,9 @@ public:
     
     // interaction
     CameraManager camera;
+    
+    // density is 0-1, wipes out some of the mesh
+    float density;
     
 protected:
     string      sourceDirectory;
@@ -108,8 +112,8 @@ protected:
     map<MovementType, Behavior *> behaviors;
     
     TypeIterator it;
-    ofVec2f     lastMouse;
-    float       lastMass;
+    ofVec2f     lastMouse, lastKinect;
+    float       lastMass, lastKinectMass;
     
     
     // movement stuff

@@ -2,7 +2,7 @@
     <Kind>40</Kind>
     <Name>EVENTS</Name>
     <IsMinified>0</IsMinified>
-    <XPosition>110.000000000</XPosition>
+    <XPosition>155.000000000</XPosition>
     <YPosition>10.000000000</YPosition>
 </Canvas>
 <Widget>
@@ -22,21 +22,11 @@
 </Widget>
 <Widget>
     <Kind>2</Kind>
-    <Name>Use Inputs</Name>
-    <Value>0</Value>
-</Widget>
-<Widget>
-    <Kind>2</Kind>
     <Name>Use Homography</Name>
     <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
-    <Name>Draw Kinect</Name>
-    <Value>0</Value>
-</Widget>
-<Widget>
-    <Kind>2</Kind>
     <Name>Draw Render Buffer</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>

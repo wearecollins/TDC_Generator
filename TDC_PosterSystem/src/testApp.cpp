@@ -1,4 +1,5 @@
 #include "testApp.h"
+#include "WeatherColors.h"
 
 bool bClear = true;
 bool bCapture = false;
@@ -32,6 +33,8 @@ double y = 0;
 // detection
 int posterThresh = 20;
 
+ofPoint currentIntensity;
+
 // type color
 //float typeColor = 0;
 
@@ -39,12 +42,24 @@ int posterThresh = 20;
 ofRectangle poster = ofRectangle(0,0,100,400);
 ofFloatColor posterColor = ofColor(1.0,0,0);
 ofFloatColor posterColorBottom = ofColor(1.0,0,0);
+float currentHue = ofRandom(0,1.0);
+float liveHueTop = ofRandom(0,1.0);
+float liveHueBottom = ofRandom(0,1.0);
+float posterSat = 1.0, posterBright = 1.0;
+float lastChanged = 0.0;
+
 vector<string> posterNames;
 string currentPosterName;
 ofMatrix4x4 matrix;
 ofPoint posterPts[4];
 
 ofFloatColor typeColor;
+
+
+//--------------------------------------------------------------
+void testApp::exit(){
+    particles.camera.getKinect().close();
+}
 
 //--------------------------------------------------------------
 void testApp::setup(){
@@ -107,7 +122,7 @@ void testApp::setup(){
     gui->setVisible(false);
     gui->setColorBack(ofColor(0,0,0,0));
     
-    ofxUISuperCanvas * guiDrawing = new ofxUISuperCanvas("DRAWING",0,0,ofGetWidth()-100, ofGetHeight());
+    ofxUISuperCanvas * guiDrawing = new ofxUISuperCanvas("DRAWING",0,0,ofGetWidth()-200, ofGetHeight());
     guis.push_back(guiDrawing);
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     guis.back()->setColorBack(ofColor(0,0,0,0));
@@ -126,9 +141,10 @@ void testApp::setup(){
     guis.back()->addSlider("Particle Color: G", 0.0, 1.0, &particleColor.g);
     guis.back()->addSlider("Particle Color: B", 0.0, 1.0, &particleColor.b);
     guis.back()->addSlider("Particle Color: Hue Randomization", 0.0, 1.0, &hueVariance);
+    guis.back()->addSlider("Particle Density", 0.0, 1.0, &particles.density);
     gui->addCanvas(guis.back());
     
-    ofxUISuperCanvas * guiTypeOverlay = new ofxUISuperCanvas("TYPE",0,0,ofGetWidth()-100, ofGetHeight());
+    ofxUISuperCanvas * guiTypeOverlay = new ofxUISuperCanvas("TYPE",0,0,ofGetWidth()-200, ofGetHeight());
     guis.push_back(guiTypeOverlay);
     guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("TYPE");
@@ -149,7 +165,7 @@ void testApp::setup(){
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
-    ofxUISuperCanvas * guiMovement = new ofxUISuperCanvas("MOVEMENT",0,0,ofGetWidth()-100, ofGetHeight());
+    ofxUISuperCanvas * guiMovement = new ofxUISuperCanvas("MOVEMENT",0,0,ofGetWidth()-200, ofGetHeight());
     guis.push_back(guiMovement);
     guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("MOVEMENT");
@@ -163,7 +179,7 @@ void testApp::setup(){
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
-    ofxUISuperCanvas * guiPoster = new ofxUISuperCanvas("POSTER",0,0,ofGetWidth()-100, ofGetHeight());
+    ofxUISuperCanvas * guiPoster = new ofxUISuperCanvas("POSTER",0,0,ofGetWidth()-200, ofGetHeight());
     guis.push_back(guiPoster);
     guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("POSTER");
@@ -174,11 +190,14 @@ void testApp::setup(){
     guis.back()->addSlider("Poster Color: R", 0.0, 1.0, &posterColor.r);
     guis.back()->addSlider("Poster Color: G", 0.0, 1.0, &posterColor.g);
     guis.back()->addSlider("Poster Color: B", 0.0, 1.0, &posterColor.b);
+    guis.back()->addSlider("Poster Color: S", 0.0, 1.0, &posterSat);
+    guis.back()->addSlider("Poster Color: B", 0.0, 1.0, &posterBright);
     guis.back()->addIntSlider("Dectection thresh", 0, 100, &posterThresh);
+    guis.back()->addDoubleSlider("scale", 0.0, 4.0, &scale);
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
-    ofxUISuperCanvas * guiEvents = new ofxUISuperCanvas("EVENTS",0,0,ofGetWidth()-100, ofGetHeight());
+    ofxUISuperCanvas * guiEvents = new ofxUISuperCanvas("EVENTS",0,0,ofGetWidth()-200, ofGetHeight());
     guis.push_back(guiEvents);
     guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("EVENTS");
@@ -187,10 +206,57 @@ void testApp::setup(){
     guis.back()->addToggle("Reload Settings", &bReload);
     guis.back()->addSpacer();
     guis.back()->addSpacer();
-    guis.back()->addToggle("Use Inputs", &bUseLiveInput);
     guis.back()->addToggle("Use Homography", &bUseHomography);
-    guis.back()->addToggle("Draw Kinect", &bDrawKinect);
     guis.back()->addToggle("Draw Render Buffer", &bDrawFBO);
+    gui->addCanvas(guis.back());
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
+    
+    ofxUISuperCanvas * guiKinect = new ofxUISuperCanvas("KINECT",0,0,ofGetWidth()-200, ofGetHeight() * 2);
+    guis.push_back(guiKinect);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
+    guis.back()->setName("KINECT");
+    guis.back()->addIntSlider("Near thresh", 0.0, 10000.0, &particles.camera.near );
+    guis.back()->addIntSlider("Far thresh", 0.0, 10000.0, &particles.camera.far );
+    guis.back()->addSpacer();
+    guis.back()->addToggle("Draw Kinect", &bDrawKinect);
+    guis.back()->addToggle("Flip Horiz", &particles.camera.bFlipHoriz);
+    guis.back()->addToggle("Flip Vert", &particles.camera.bFlipVert);
+    guis.back()->addToggle("Flip LR + TB", &particles.camera.bFlipAxes);
+    guis.back()->addSlider("Threshold", 0, 255, &particles.camera.thresh );
+    guis.back()->add2DPad("Crop: TL", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[0], 160, 120, 0, 0);
+    guis.back()->add2DPad("Crop: TR", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[1], 160, 120, 200, 0);
+    guis.back()->add2DPad("Crop: BL", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[2], 160, 120, 0, 140);
+    guis.back()->add2DPad("Crop: BR", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[3], 160, 120, 200, 140);
+    guis.back()->addSpacer();
+    
+    gui->addCanvas(guis.back());
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
+    
+    ofxUISuperCanvas * guiTracking = new ofxUISuperCanvas("COLOR TRACKING",0,0,ofGetWidth()-200, ofGetHeight());
+    guis.push_back(guiTracking);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
+    guis.back()->setName("COLOR TRACKING");
+    guis.back()->addIntSlider("Edit which color", 0, 2, &particles.camera.tracker.currentColor );
+    guis.back()->addSlider("Threshold", 0, 255, &particles.camera.tracker.threshold );
+    guis.back()->addSlider("Min Radius", 0, 255, &particles.camera.tracker.minRad );
+    guis.back()->addSlider("Max Radius", 0, 255, &particles.camera.tracker.maxRad );
+    guis.back()->addSpacer();
+    guis.back()->addToggle("Draw Tracker", &particles.camera.tracker.bDraw);
+    guis.back()->addToggle("Enable Color Selection", &particles.camera.tracker.bChoose);
+    guis.back()->add2DPad("ROI: XY", ofPoint(0,640), ofPoint(0,480), &particles.camera.tracker.rectXY, 160, 120, 0, 140);
+    guis.back()->add2DPad("ROI: WH", ofPoint(0,640), ofPoint(0,480), &particles.camera.tracker.rectWH, 160, 120, 200, 140);
+    
+    gui->addCanvas(guis.back());
+    ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
+    
+    ofxUISuperCanvas * guiData = new ofxUISuperCanvas("DATA",0,0,ofGetWidth()-200, ofGetHeight());
+    guis.push_back(guiData);
+    guis.back()->setColorBack(ofColor(0,0,0,0));
+    guis.back()->setName("DATA");
+    guis.back()->addSlider("Local Weight", 0.0, 1.0, &particles.dataObject.eiWeight );
+    guis.back()->addSlider("Env Weight", 0.0, 1.0, &particles.dataObject.elWeight );
+    guis.back()->addSlider("Lang Weight", 0.0, 1.0, &particles.dataObject.langWeight );
+    guis.back()->addToggle("Use Inputs", &bUseLiveInput);
     
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
@@ -218,6 +284,7 @@ void testApp::setup(){
         posterMesh.addIndex(1); posterMesh.addIndex(2); posterMesh.addIndex(3);
         posterMesh.save("poster");
     }
+    
 }
 
 //--------------------------------------------------------------
@@ -229,7 +296,7 @@ void testApp::update(){
         //((ofxUILabel*)gui->getActiveCanvas()->getWidget("Drawmode Label"))->setLabel(particles.getDrawModeString());
     }
     if ( lastParticleColor != particleColor ){ 
-        particles.setColor(particleColor, hueVariance / 10.0f);
+        particles.setColor(particleColor, hueVariance);
         lastParticleColor = particleColor;
     }
     
@@ -251,21 +318,25 @@ void testApp::update(){
         bReload = false;
     }
     
+    // DATA OBJECT: UPDATE WEIGHTS
+    particles.dataObject.eiWeight   = (float) particles.camera.tracker.getNumberByColor(0) / 3.0;
+    particles.dataObject.elWeight   = (float) particles.camera.tracker.getNumberByColor(1) / 3.0;
+    particles.dataObject.langWeight = (float) particles.camera.tracker.getNumberByColor(2) / 3.0;
+    
     // DATA OBJECT: TIME/DATE
     
     float timeMappedSunset = particles.dataObject.time > .6 ? ofMap(particles.dataObject.time, .6, 1.0, 1.0, 0) : ofMap(particles.dataObject.time, 0.0, .6, 0, 1.0);
     float timeMappedMidday = particles.dataObject.time > .5 ? ofMap(particles.dataObject.time, .5, 1.0, 1.0, 0.0) : ofMap(particles.dataObject.time, 0,1.0, 0, 1.0);
     float yesterday = particles.dataObject.date - 1.0/365.0f;
-    //osterColor.setHue( yesterday * 1.0 * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time);
     
     if ( bUseLiveInput ){
-        posterColorBottom.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
-        posterColorBottom.setSaturation( timeMappedSunset );
-        posterColorBottom.setBrightness( timeMappedMidday );
+        particleColor.setHue( yesterday * (1.0-particles.dataObject.time) + particles.dataObject.date * 1.0 * particles.dataObject.time );
+        particleColor.setSaturation( timeMappedSunset );
+        particleColor.setBrightness( timeMappedMidday );
 
-        posterColor.setHue( particles.dataObject.date  );
-        posterColor.setSaturation( timeMappedSunset );
-        posterColor.setBrightness( timeMappedMidday );
+        particleColor.setHue( particles.dataObject.date  );
+        particleColor.setSaturation( timeMappedSunset );
+        particleColor.setBrightness( timeMappedMidday );
     }
     
     posterMesh.setVertex(0, posterPts[0]);
@@ -273,24 +344,52 @@ void testApp::update(){
     posterMesh.setVertex(2, posterPts[2]);
     posterMesh.setVertex(3, posterPts[3]);
     
-    posterMesh.setColor(0, posterColor );
-    posterMesh.setColor(1, posterColor );
-    posterMesh.setColor(2, posterColor );
-    posterMesh.setColor(3, posterColor );
-    
     ofLogVerbose() << yesterday << ":" << particles.dataObject.date << ":" << timeMappedSunset << ":" << timeMappedMidday <<":"<<particles.dataObject.time<<endl;
     
     // DATA OBJECT: ENVIRONMENT
     if ( bUseLiveInput ){
         Behavior * b = particles.getSettingsBehavior();
-        b->intensity.x = particles.dataObject.environmentImmediate * 100.0;
-        b->intensity.y = particles.dataObject.environmentLocal * 100.0;
-        b->intensity.z = particles.dataObject.environmentGlobal * 100.0;
+        //b->intensity.x = particles.dataObject.environmentImmediate * particles.dataObject.eiWeight * 500.0;
+        //b->intensity.y = particles.dataObject.environmentLocal * particles.dataObject.elWeight * 500.0;
+        //b->intensity.z = particles.dataObject.language * particles.dataObject.langWeight * 500.0;
+        
+        ofPoint intense = currentIntensity * (100 * particles.dataObject.elWeight);
+        b->intensity.set( intense );
         
         // UPDATE GUI BASED ON DATA OBJECT
-        ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(particles.dataObject.environmentImmediate * 100.0);
-        ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(particles.dataObject.environmentLocal * 100.0);
-        ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(particles.dataObject.environmentGlobal * 100.0);
+        ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(b->intensity.x);
+        ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(b->intensity.y);
+        ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(b->intensity.z);
+        
+        liveHueTop = liveHueTop * .9 + (currentHue + ofMap(particles.dataObject.environmentImmediate * particles.dataObject.eiWeight, 0.0, 1.0, -currentHue * .75, currentHue, true));
+        
+        liveHueBottom = liveHueBottom * .9 + (currentHue + ofMap(particles.dataObject.environmentImmediate * particles.dataObject.eiWeight, 0.0, 1.0, -currentHue * .5, currentHue * .5, true));
+        
+        posterColor.setHue(liveHueTop);
+        posterColorBottom.setHue(liveHueBottom);
+        
+        if ( particles.dataObject.environmentImmediate * particles.dataObject.eiWeight > .2 && ofGetElapsedTimef() - lastChanged > 2.0 ){
+            lastChanged = ofGetElapsedTimef();
+            currentHue = ofRandom(1.0);
+            cout << "CHNG"<<endl;
+        }
+        
+        posterColor.setSaturation(posterSat);
+        posterColor.setBrightness(posterBright);
+        
+        posterColorBottom.setBrightness(posterBright);
+        posterColorBottom.setSaturation(posterSat);
+        
+        posterMesh.setColor(0, posterColor );
+        posterMesh.setColor(1, posterColor );
+        posterMesh.setColor(2, posterColorBottom );
+        posterMesh.setColor(3, posterColorBottom );
+        
+    } else {
+        posterMesh.setColor(0, posterColor );
+        posterMesh.setColor(1, posterColor );
+        posterMesh.setColor(2, posterColor );
+        posterMesh.setColor(3, posterColor );
     }
 
     // UPDATE: SURF
@@ -346,6 +445,10 @@ void testApp::draw(){
     
     ofPushMatrix();
     if ( bUseHomography) ofMultMatrix(matrix);
+    else {
+        ofTranslate(poster.x, poster.y);
+        ofScale(scale, scale);
+    }
     if (!bDrawFBO){
         posterMesh.draw();
         renderParticles();
@@ -356,7 +459,8 @@ void testApp::draw(){
     
     if ( bDrawKinect ){
         ofSetColor(255);
-        particles.camera.getKinect().draw(10, 10, 320, 240);
+        //particles.camera.getKinect().draw(10, 10, 320, 240);
+        particles.camera.draw(10, 250, 320, 240);//getKinect().drawDepth (10, 250, 320, 240);
         map<string, ofPtr<ofxSurf> >::iterator it = surfers.begin();
         int i=0;
         for (it; it != surfers.end(); ++it){
@@ -367,6 +471,8 @@ void testApp::draw(){
     
     if ( bEditingMask ){
         maskEditor.draw();
+    } else {
+        particles.camera.tracker.draw();
     }
 }
 
@@ -422,6 +528,8 @@ void testApp::keyPressed(int key){
         }
     } else if ( key == 't'){
         bTracking = true;
+    } else if ( key == 'c'){
+        particles.camera.tracker.bDraw = !particles.camera.tracker.bDraw;
     }
 }
 
@@ -519,21 +627,21 @@ void testApp::onMessage( Spacebrew::Message & m ){
         if ( b != NULL ){
             b->intensity.x = ofToFloat(m.value) * 100.0f;
         }
-        ((ofxUISlider *)gui->getWidget("intensityX"))->setValue(ofToFloat(m.value) * 100.0f);
+        ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(ofToFloat(m.value) * 100.0f);
     } else if ( m.name == "intensityy"){
         if ( b != NULL ){
             b->intensity.y = ofToFloat(m.value) * 100.0f;
-            ((ofxUISlider *)gui->getWidget("intensityY"))->setValue(ofToFloat(m.value) * 100.0f);
+            ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(ofToFloat(m.value) * 100.0f);
         }
     } else if ( m.name == "rate"){
         if ( b != NULL ){
             b->timeFactor = ofToFloat(m.value) * 0.01;
-            ((ofxUISlider *)gui->getWidget("rate"))->setValue(ofToFloat(m.value) * 10.0f);
+            ((ofxUISlider *)guis[2]->getWidget("rate"))->setValue(ofToFloat(m.value) * 10.0f);
         }
     } else if ( m.name == "mix"){
         if ( b != NULL ){
             b->mix = ofToFloat(m.value);
-            ((ofxUISlider *)gui->getWidget("mix"))->setValue(ofToFloat(m.value));
+            ((ofxUISlider *)guis[2]->getWidget("mix"))->setValue(ofToFloat(m.value));
         }
     } else if ( m.name == "environmentimmediate" ){
         particles.dataObject.environmentImmediate = ofToFloat(m.value);
@@ -550,6 +658,9 @@ void testApp::onMessage( Spacebrew::Message & m ){
         // ?
         
         //particleColor.setHue(particles.dataObject.environmentLocal);
+        currentIntensity = weather().getIntensity( ofToInt(m.value) );
+        ofPoint intense = currentIntensity * (100 * particles.dataObject.elWeight);
+        b->intensity.set( intense );
     }
 }
 

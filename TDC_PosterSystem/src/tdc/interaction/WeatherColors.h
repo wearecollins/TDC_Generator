@@ -18,8 +18,10 @@ public:
     
     ofColor& operator[]( int n ){ return colors[n];}
     
+    ofPoint getIntensity( int condition );
+    
 protected:
     map<int,ofColor> colors;
 };
 
-static const WeatherColors weather;
+WeatherColors & weather();

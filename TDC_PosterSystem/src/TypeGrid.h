@@ -24,8 +24,29 @@ public:
     // spacing is in pixels
     void regenerateGrid( int spacing ){
         int index = 0;
-        for ( int x=0; x<ofGetWidth(); x += spacing){
-            for ( int y=0; y<ofGetHeight(); y += spacing){
+        int x = 0, y = 0;
+        int w = ofGetWidth(), h = ofGetHeight();
+        
+        int minx = 10000, maxx = -10000;
+        int miny = 10000, maxy = -10000;
+        
+        for ( int i=0; i<path.getNumPath(); i++){
+            ofPath pz = path.getPathAt(i);
+            pz.setPolyWindingMode(OF_POLY_WINDING_ODD);
+            ofRectangle r = pz.getOutline()[0].getBoundingBox();
+            if ( r.x < minx ) minx = r.x;
+            if ( r.x + r.width > maxx ) maxx = r.x + r.width;
+            if ( r.y < miny ) miny = r.y;
+            if ( r.y + r.height > maxy ) maxy = r.y + r.height;
+        }
+        
+        x = minx - 10;
+        w = maxx + 10;
+        y = miny - 10;
+        h = maxy + 10;
+        
+        for ( x; x<w; x += spacing){
+            for ( y = miny - 10; y<h; y += spacing){
                 ofVec2f p = ofVec2f(x,y);
                 
                 bool bGood = false;

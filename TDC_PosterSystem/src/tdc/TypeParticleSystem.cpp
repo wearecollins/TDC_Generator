@@ -9,6 +9,8 @@
 #include "TypeParticleSystem.h"
 
 ofMesh test;
+vector<int> indices;
+bool bIndicesCreated = false;
 
 //-------------------------------------------------------------------------------------------
 TypeParticleSystem::~TypeParticleSystem(){
@@ -29,6 +31,7 @@ void TypeParticleSystem::setup( string directory ){
     
     // mouse interaction
     lastMass = 10.0f;
+    lastKinectMass = 50.0f;
     meshUpdatingFrames = 0;
     bNeedToChangeMesh = false;
     bUseGrid = true;
@@ -52,7 +55,7 @@ void TypeParticleSystem::setup( string directory ){
     // setup data object
     dataObject.setup();
     
-    //MOVE_GRAVITY,
+    density = 1.0;
     
     // null till we builds them
     currentMesh = new ofMesh();
@@ -72,6 +75,9 @@ void TypeParticleSystem::setup( string directory ){
     for ( int i=0; i<numMeshes; i++){
         meshes[ meshDirectory.getName(i)] = TargetMesh();
     }
+    
+    // attach camera interaction
+    ofAddListener(camera.cameraMove, this, &TypeParticleSystem::kinectMoved);
     
     // lez do it
     startThread();
@@ -97,7 +103,7 @@ void TypeParticleSystem::threadedFunction(){
         
         ofColor color(255);
         
-        int numParticles = 7000;
+        int numParticles = 10000;
         
         // build particles for grid
         for (int i=0; i<numParticles; i++){
@@ -168,18 +174,62 @@ void TypeParticleSystem::threadedFunction(){
         }
         
         // Colors
+        bool bColorByLetter = true;
         if ( bNeedToChangeColor ){
             lock();
-            ofFloatColor currentColor = particleColor;
-            float currentVariance = colorVariance;
-            
-            for (int i=0; i<currentMeshBuffer->getNumColors(); i++){
-                ofFloatColor localColor = currentColor;
-                currentColor.setHue( localColor.getHue() + ofRandom(-currentVariance,currentVariance));
-                currentMeshBuffer->setColor(i, localColor);
+            if ( bColorByLetter ){
+                SubMesh & s = meshes[currentMeshName].getSubMesh(0);
+                vector<vector <QuickVertex> > * letters = bUseGrid ? &s.letterGridParticles : &s.letterOutlineParticles;
+                
+                ofFloatColor currentColor = particleColor;
+                float currentVariance = colorVariance;
+                
+                
+                
+                // loop through each letter
+                int bigIndex = 0;
+                for ( int l=0; l<letters->size(); l++){
+                    float ind = (float) l / (float) letters->size();
+                    
+                    // loop through particles in each letter
+                    vector <QuickVertex> verts = letters->at(l);
+                    ofFloatColor localColor = currentColor;
+                    localColor.setHue( currentColor.getHue() + (ind * currentVariance) );
+                    for ( int i=0; i<verts.size(); i++){
+                        int index = verts[i].index;
+                        
+                        // build vector of particle indices
+                        if ( !bIndicesCreated ){
+                            for( it = _particles.begin(); it != _particles.end(); ++it ){
+                                if ( ((TypeParticle*)it->second)->seedPosition.distance(verts[i].pos) <= 1 ){
+                                    index = ((TypeParticle*)it->second)->index;
+                                    break;
+                                }
+                            }
+                            indices.push_back(index);
+                        } else {
+                            index = indices[bigIndex];
+                        }
+                        currentMeshBuffer->setColor( index, localColor);
+                        bigIndex++;
+                    }
+                }
+                bIndicesCreated = true;
+                
+                bNeedToChangeColor = false;
+                if ( behaviors[ MOVE_FLOCK ] != NULL ) behaviors[ MOVE_FLOCK ]->copyMesh(currentMesh);
+            } else {
+                ofFloatColor currentColor = particleColor;
+                float currentVariance = colorVariance;
+                
+                for (int i=0; i<currentMeshBuffer->getNumColors(); i++){
+                    ofFloatColor localColor = currentColor;
+                    currentColor.setHue( localColor.getHue() + ofRandom(-currentVariance,currentVariance));
+                    currentMeshBuffer->setColor(i, localColor);
+                }
+                bNeedToChangeColor = false;
+                if ( behaviors[ MOVE_FLOCK ] != NULL ) behaviors[ MOVE_FLOCK ]->copyMesh(currentMesh);
             }
-            bNeedToChangeColor = false;
-            if ( behaviors[ MOVE_FLOCK ] != NULL ) behaviors[ MOVE_FLOCK ]->copyMesh(currentMesh);
             unlock();
         }
         
@@ -189,6 +239,8 @@ void TypeParticleSystem::threadedFunction(){
         bMeshIsUpdated = false;
         
         // update mesh based on positionsIterator it;
+        int lastIndex = _particles.size() * density;
+        int ind       = 0;
         
         for( it = _particles.begin(); it != _particles.end(); ++it )
         {
@@ -198,6 +250,16 @@ void TypeParticleSystem::threadedFunction(){
                 currentBehavior->update(p);
             }
             currentMeshBuffer->setVertex(p->index, *p);
+            ind++;
+            if ( ind > lastIndex ){
+                ofFloatColor color = currentMeshBuffer->getColor(p->index);
+                color.a *= .75;
+                currentMeshBuffer->setColor(p->index, color);
+            } else {
+                ofFloatColor color = currentMeshBuffer->getColor(p->index);
+                color.a -= (color.a - 1.0)/100.0f;
+                currentMeshBuffer->setColor(p->index, color);
+            }
         }
         
         bMeshIsUpdated = true;
@@ -400,6 +462,46 @@ Behavior *  TypeParticleSystem::getSettingsBehavior(){
  |___|_| \_| |_| |_____|_| \_\/_/   \_\____| |_| |___\___/|_| \_|
  
  ********************************************************************************************/
+
+//-------------------------------------------------------------------------------------------
+void TypeParticleSystem::kinectMoved( ofPoint & p ){
+    float x = p.x;
+    float y = p.y;
+    if (!bMeshIsUpdated) return;
+    
+    ofVec3f mp = ofVec3f(x,y,0);
+    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * 5.0);
+    lastKinect = mp;
+    lastKinectMass = mouseMass;
+    
+    lock();
+    if ( currentBehavior != NULL ){
+        currentBehavior->setMouse( lastMouse );
+    }
+    
+    for( it = _particles.begin(); it != _particles.end(); ++it )
+    {
+        TypeParticle * p = (TypeParticle *) it->second;
+        float distance = ofDist(x, y, p->x, p->y);
+        
+        if( distance > 100 ) {
+            continue;
+        }
+        
+        // ofVec2f - ofVec2f
+        ofVec3f diff = mp -( *p );
+        
+        diff.normalize();
+        
+        // http://www.grantchronicles.com/astro09.htm
+        // this is a really lose interpretation.. like not very close
+        float force = mouseMass * p->mass / MAX(1, distance);
+        float accel = force / p->mass;
+        
+        p->acceleration += diff * accel;
+    }
+    unlock();
+}
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::mouseMoved( int x, int y ){

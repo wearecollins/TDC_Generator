@@ -151,7 +151,7 @@ void SubMesh::setup( string dir, string n, int num ){
     if ( !bLoaded ){
         
         // add lookups for outline
-        for (int i=0; i<7000; i++){
+        for (int i=0; i<20000; i++){
             int index = (int) ofRandom(0, t_outlineMesh.getNumVertices());
             while ( outline.isOccupied(index) && !outline.isFull() ){
                 index = (int) ofRandom(0, t_outlineMesh.getNumVertices());
@@ -226,9 +226,11 @@ void SubMesh::createGrid(){
     bool bLoaded2 = gridOutlineSettings.load( directory +"/" + name + "/settings/type_grid_settings.xml");
     
     // need to build main grid
-    if ( test.getNumVertices() == 0 ){
-        grid.load( directory + "/sources/" + name +".svg", directory + "/" + name + "/grids" );
-        outline.load( directory + "/sources/" + name +".svg", directory + "/" + name + "/grids"  );
+    grid.load( directory + "/sources/" + name +".svg", directory + "/" + name + "/grids" );
+    outline.load( directory + "/sources/" + name +".svg", directory + "/" + name + "/grids"  );
+    numLetters = outline.getNumLetters();
+    
+    if ( test.getNumVertices() == 0 && bLoaded2 ){
         numLetters = outline.getNumLetters();
         gridOutlineSettings.addValue("numLetter", numLetters);
         gridOutlineSettings.save( directory + "/" + name + "/settings/type_grid_settings.xml");
@@ -315,6 +317,9 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
             for ( int i=0; i< gridMesh.getNumVertices(); i++){
                 meshes[ mode ][ type ].addVertex(gridMesh.getVertex(i));
                 meshes[ mode ][ type ].addColor(gridMesh.getColor(i));
+                if ( gridMesh.getNumIndices() < i ){
+                    gridMesh.addIndex(i);
+                }
             }
             break;
             
@@ -324,6 +329,9 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
             for ( int i=0; i< outlineMesh.getNumVertices(); i++){
                 meshes[ mode ][ type ].addVertex(outlineMesh.getVertex(i));
                 meshes[ mode ][ type ].addColor(outlineMesh.getColor(i));
+                if ( outlineMesh.getNumIndices() < i ){
+                    outlineMesh.addIndex(i);
+                }
             }
             break;
             

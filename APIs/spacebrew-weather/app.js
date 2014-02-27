@@ -121,8 +121,8 @@ var main = function() {
 	var lon = -74.00597299999998;
 	setInterval(function(){
 		getWeather(lat, lon);
-	}, 10000 );
-	//getWeather(40.714352999999996, -74.00597299999998);
+	}, 30000 );
+	getWeather(40.714352999999996, -74.00597299999998);
 }
 
 /**
