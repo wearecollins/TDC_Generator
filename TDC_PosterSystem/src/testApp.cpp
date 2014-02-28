@@ -52,6 +52,10 @@ string currentCondition = "";
 float currentHue = ofRandom(0,1.0);
 float liveHueTop = ofRandom(0,1.0);
 float liveHueBottom = ofRandom(0,1.0);
+
+float liveSat = 0;
+float liveBright = 0;
+
 float posterSat = 1.0, posterBright = 1.0;
 float lastChanged = 0.0;
 
@@ -353,7 +357,7 @@ void testApp::update(){
     
     // DATA OBJECT: ENVIRONMENT
     
-    particles.dataObject.elString = "Temperature: "+ofToString(particles.dataObject.environmentLocal * 100.0)+"\nCondition: "+currentCondition;
+    particles.dataObject.elString = ofToString(particles.dataObject.environmentLocal * 100.0);//+"\nCondition: "+currentCondition;
     particles.dataObject.eiString = "Sound: "+ofToString(particles.dataObject.environmentImmediate * 100.0);
     
     if ( bUseLiveInput ){
@@ -371,6 +375,11 @@ void testApp::update(){
         ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(b->intensity.y);
         ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(b->intensity.z);
         
+        if ( particles.dataObject.environmentImmediate * particles.dataObject.eiWeight > .2 && ofGetElapsedTimef() - lastChanged > 2.0 ){
+            lastChanged = ofGetElapsedTimef();
+            currentHue = ofRandom(1.0);
+        }
+        
         liveHueTop = liveHueTop * .9 + (currentHue + ofMap(particles.dataObject.environmentImmediate * particles.dataObject.eiWeight, 0.0, 1.0, -currentHue * .75, currentHue, true));
         
         liveHueBottom = liveHueBottom * .9 + (currentHue + ofMap(particles.dataObject.environmentImmediate * particles.dataObject.eiWeight, 0.0, 1.0, -currentHue * .5, currentHue * .5, true));
@@ -378,17 +387,12 @@ void testApp::update(){
         posterColor.setHue(liveHueTop);
         posterColorBottom.setHue(liveHueBottom);
         
-        if ( particles.dataObject.environmentImmediate * particles.dataObject.eiWeight > .2 && ofGetElapsedTimef() - lastChanged > 2.0 ){
-            lastChanged = ofGetElapsedTimef();
-            currentHue = ofRandom(1.0);
-            cout << "CHNG"<<endl;
-        }
+        liveSat = liveSat * .9 + particles.dataObject.eiWeight * .1;
         
-        posterColor.setSaturation(posterSat);
-        posterColor.setBrightness(posterBright);
-        
-        posterColorBottom.setBrightness(posterBright);
-        posterColorBottom.setSaturation(posterSat);
+        posterColor.setSaturation( liveSat );
+        posterColorBottom.setSaturation( liveSat );
+        posterColor.setBrightness( liveSat );
+        posterColorBottom.setBrightness( liveSat );
         
         posterMesh.setColor(0, posterColor );
         posterMesh.setColor(1, posterColor );
@@ -396,6 +400,12 @@ void testApp::update(){
         posterMesh.setColor(3, posterColorBottom );
         
     } else {
+        posterColor.setSaturation(posterSat);
+        posterColor.setBrightness(posterBright);
+        
+        posterColorBottom.setBrightness(posterBright);
+        posterColorBottom.setSaturation(posterSat);
+        
         posterMesh.setColor(0, posterColor );
         posterMesh.setColor(1, posterColor );
         posterMesh.setColor(2, posterColor );
@@ -422,8 +432,6 @@ void testApp::update(){
     }
     
     // set stupid data objects
-    
-    cout << particles.dataObject.elString << endl;
     
     ((ofxUILabel *)envGui->getWidget("data"))->setLabel(particles.dataObject.elString);
     ((ofxUILabel *)commGui->getWidget("data"))->setLabel(particles.dataObject.langString);
@@ -722,6 +730,7 @@ void testApp::onMessage( Spacebrew::Message & m ){
     } else if ( m.name == "language" ){
         particles.dataObject.language = ofToFloat(m.value);
     } else if ( m.name == "weather" ){
+        cout <<"GOT WEATHER"<<endl;
         particles.dataObject.environmentLocal = ofToFloat(m.value) / 100.0f;
     } else if ( m.name == "condition" ){
         //particles.dataObject.language = ofToFloat(m.value);
@@ -795,7 +804,7 @@ void testApp::setupDataBar(){
         
         //            envGui->addLabel("Environment");
         envGui->addSlider("Influence", 0,1.0, &particles.dataObject.elWeight);
-        envGui->addLabel("data", "Temp: 100 Conditions: Sunny", OFX_UI_FONT_SMALL)->setAutoSize(false);
+        envGui->addLabel("data", "Temp: 100", OFX_UI_FONT_SMALL)->setAutoSize(false);
         //            commGui->addLabel("Communication");
         commGui->addSlider("Influence", 0,1.0, &particles.dataObject.langWeight);
         commGui->addLabel("data", "Trending Topics", OFX_UI_FONT_SMALL)->setAutoSize(false);
