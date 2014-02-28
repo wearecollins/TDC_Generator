@@ -357,7 +357,7 @@ void testApp::update(){
     
     // DATA OBJECT: ENVIRONMENT
     
-    particles.dataObject.elString = ofToString(particles.dataObject.environmentLocal * 100.0);//+"\nCondition: "+currentCondition;
+    particles.dataObject.elString = "Temp: "+ofToString(particles.dataObject.environmentLocal * 100.0);// + "\nCondition: "+currentCondition;
     particles.dataObject.eiString = "Sound: "+ofToString(particles.dataObject.environmentImmediate * 100.0);
     
     if ( bUseLiveInput ){
@@ -367,8 +367,12 @@ void testApp::update(){
         //b->intensity.z = particles.dataObject.language * particles.dataObject.langWeight * 500.0;
         
         ofPoint intense = currentIntensity;
-        intense *= (100 * particles.dataObject.elWeight);
+        intense *= (50. * particles.dataObject.elWeight);
+        intense.x = intense.x * .5 + particles.dataObject.getWeightedEL() * 50.;
+        intense.y = intense.y * .5 + particles.dataObject.getWeightedEL() * 50.;
+        intense.z = intense.z * .5 + particles.dataObject.getWeightedEL() * 50.;
         b->intensity.set( intense );
+        b->timeFactor = particles.dataObject.getWeightedEL() / 1000.0;
         
         // UPDATE GUI BASED ON DATA OBJECT
         ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(b->intensity.x);
@@ -730,7 +734,6 @@ void testApp::onMessage( Spacebrew::Message & m ){
     } else if ( m.name == "language" ){
         particles.dataObject.language = ofToFloat(m.value);
     } else if ( m.name == "weather" ){
-        cout <<"GOT WEATHER"<<endl;
         particles.dataObject.environmentLocal = ofToFloat(m.value) / 100.0f;
     } else if ( m.name == "condition" ){
         //particles.dataObject.language = ofToFloat(m.value);

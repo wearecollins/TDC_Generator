@@ -80,7 +80,7 @@ function getWeatherByWOEID( id ){
 			  	if ( item['yweather:condition']){
 			  		console.log(item['yweather:condition']['@']['text']);
 			  		console.log(item['yweather:condition']['@']['temp']);
-					sb.send("temperature", "range", parseInt(item['yweather:condition']['@']['temp']) );
+					sb.send("temperature", "range", parseInt(item['yweather:condition']['@']['temp']).toString() );
 					sb.send("conditions", "string", item['yweather:condition']['@']['text'] );
 					sb.send("condition_coded", "range", parseInt(item['yweather:condition']['@']['code']).toString() );
 			  		break;

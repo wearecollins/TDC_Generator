@@ -53,6 +53,7 @@ public:
             colorTrackers[i].setTargetColor( trackingColors[i], ofxCv::TRACK_COLOR_RGB );
             colorTrackers[i].setMinAreaRadius(10);
             colorTrackers[i].setMaxAreaRadius(200);
+            colorTrackers[i].getTracker().setPersistence(120);
             numBlobsBuff.push_back(0);
         }
         
