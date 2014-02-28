@@ -26,6 +26,7 @@ bool bUseLiveInput      = true;
 // Projection settings
 bool bUseHomography     = true;
 bool bDrawFBO           = true;
+bool bDrawPoster        = true;
 double scale = 1.0;
 double x = 0;
 double y = 0;
@@ -221,6 +222,8 @@ void testApp::setup(){
     guis.back()->addSpacer();
     guis.back()->addToggle("Use Homography", &bUseHomography);
     guis.back()->addToggle("Draw Render Buffer", &bDrawFBO);
+    guis.back()->addToggle("Draw Poster", &bDrawPoster);
+    
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
     
@@ -317,9 +320,13 @@ void testApp::update(){
     if ( bCapture ){
         bCapture = false;
         
-        toSavePoster.readToPixels(pix);
-        ofImage save; save.setFromPixels(pix);
-        save.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
+        //toSavePoster.readToPixels(pix);
+//        ofImage save; save.setFromPixels();
+        ofImage screen;
+        ofRectangle view = ofGetCurrentViewport();
+        screen.allocate(view.width, view.height, OF_IMAGE_COLOR);
+        screen.grabScreen(0, 0, 400, 600);
+        screen.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
     }
     if ( bSave ){
         gui->saveSettings("settings/", "ui-");
@@ -358,7 +365,7 @@ void testApp::update(){
     // DATA OBJECT: COMMUNICATION
     
     if ( bUseLiveInput ){
-        particles.density = particles.density * .9 + (fmin(1.0,.1 + particles.dataObject.langWeight)) * .1;
+        particles.density = particles.density * .9 + (fmin(1.0,.3 + particles.dataObject.langWeight)) * .1;
     }
     
     // DATA OBJECT: ENVIRONMENT
@@ -464,19 +471,20 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::draw(){
     toSave.begin();
-    ofClear(0,0,0,0);
-//    renderBackground();
-    renderParticles();
+    if ( bClear ) ofClear(posterColor.r,posterColor.g, posterColor.b,0);
+    else renderBackground();
+    renderParticles( bUseHomography );
     toSave.end();
     
     toSavePoster.begin(); {
         ofPushMatrix();
         ofClear(0,0,0,255);
-        posterMesh.draw();
+        renderBackground();
+        renderParticles( false );
     
         ofSetColor(255);
         toSave.draw(0, 0);
-        if ( particles.getCurrentBehavior() != NULL ) drawDataBar();
+        drawDataBar( true );
         ofPopMatrix();
         
     } toSavePoster.end();
@@ -488,25 +496,28 @@ void testApp::draw(){
             ofTranslate(poster.x, poster.y);
             ofScale(scale, scale);
         }
-        if (!bDrawFBO){
+        if (!bDrawFBO ){
             ofPushMatrix(); {
                 if ( bUseHomography ) ofMultMatrix(matrix);
                 posterMesh.draw();
             } ofPopMatrix();
             //renderParticles();
-            if ( bUseHomography && (particles.getCurrentBehavior() != NULL && particles.getCurrentBehavior()->getName() == "flocking" )){
-                ofMultMatrix(matrix);
-            }
-            toSave.draw(0, 0);
+            ofPushMatrix(); {
+                if ( bUseHomography && (particles.getCurrentBehavior() != NULL && particles.getCurrentBehavior()->getName() == "flocking" )){
+                    ofMultMatrix(matrix);
+                }
+                if ( bDrawPoster ) toSave.draw(0, 0);
+                else renderParticles(false);
+            } ofPopMatrix();
             ofPushMatrix(); {
                 if ( bUseHomography ) ofMultMatrix(matrix);
-                if ( particles.getCurrentBehavior() != NULL ) drawDataBar();
+                if ( particles.getCurrentBehavior() != NULL ) drawDataBar( !bUseHomography );
             } ofPopMatrix();
         } else {
             toSavePoster.draw(0,0);
         }
     } ofPopMatrix();
-    mask.draw(0,0);
+    if ( bUseHomography ) mask.draw(0,0);
     
     if ( bDrawKinect ){
         ofSetColor(255);
@@ -530,14 +541,13 @@ void testApp::draw(){
 //--------------------------------------------------------------
 void testApp::renderBackground(){
     ofPushMatrix();
-    if ( bUseHomography){
+    ofEnableAlphaBlending();
+    if ( bUseHomography && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" ) ){
         ofMultMatrix(matrix);
     }
     if ( bClear){
-        ofDisableDepthTest();
         posterMesh.draw();
     } else {
-        ofDisableDepthTest();
         posterColor.a = bgAlpha  / 255.0f;
         posterColorBottom.a = bgAlpha / 255.0f;
         
@@ -560,9 +570,10 @@ void testApp::renderBackground(){
 }
 
 //--------------------------------------------------------------
-void testApp::renderParticles(){
+void testApp::renderParticles( bool bHomography ){
     ofPushMatrix();
-    if ( bUseHomography  && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" )) ofMultMatrix(matrix);
+    if ( bHomography  && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" ))
+        ofMultMatrix(matrix);
     
     //    static float scale = fmax( ofGetWidth()/1280.0f, ofGetHeight()/720.0f );
     //    ofScale(scale, scale);
@@ -576,6 +587,8 @@ void testApp::renderParticles(){
         ofTranslate(0,0,1);
         type[currentPosterName].draw();
         ofPopMatrix();
+    } else {
+        ofDisableDepthTest();
     }
     particles.draw();
     ofDisableDepthTest();
@@ -618,6 +631,8 @@ void testApp::keyPressed(int key){
         particles.getCurrentBehavior()->reload();
     } else if ( key == 's' ){
         mask.loadImage("mask.png");
+    } else if (key == 'S'){
+        bCapture = true;
     }
 }
 
@@ -752,12 +767,13 @@ void testApp::onMessage( Spacebrew::Message & m ){
 }
 
 //--------------------------------------------------------------
-void testApp::drawDataBar(){
+void testApp::drawDataBar( bool bBottom ){
     ofPushStyle();
-    ofSetColor(255,150);
-    ofRect(0,465,400,50);
+//    ofSetColor(255,150);
+//    ofRect(0,465,400,50);
     ofPushMatrix();
-    ofTranslate(0,465);
+    if (!bBottom) ofTranslate(0,465);
+    else ofTranslate(0,500);
     envGui->draw();
     commGui->draw();
     collabGui->draw();

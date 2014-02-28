@@ -52,7 +52,7 @@ class testApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
     
         void renderBackground();
-        void renderParticles();
+        void renderParticles( bool bHomography );
     
         void onGui( ofxUIEventArgs & e );
     
@@ -61,7 +61,7 @@ class testApp : public ofBaseApp{
         ofxUICanvas * commGui;
         ofxUICanvas * collabGui;
         void setupDataBar();
-        void drawDataBar();
+        void drawDataBar( bool bBottom = false );
     
         ofImage mask;
     

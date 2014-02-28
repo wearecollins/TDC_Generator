@@ -18,6 +18,7 @@ public:
     Flocking() : Behavior(){
         name = "flocking";
         bNeedToRefreshAttract = false;
+        maxParticles = 5000;
     }
     
     Flocking( ofxLabFlexParticleSystem::Container * particles ) : Behavior(){
@@ -26,12 +27,14 @@ public:
         mix = 0.0;
         intensity.set(1,1);
         bNeedToRefreshAttract = false;
+        maxParticles = 5000;
     }
     
     float maxspeed;
     float maxforce;
     
     void setLetters( ofxLabFlexParticleSystem::Container * particles ){
+        cout << "SET LETTERS"<<endl;
         ofxLabFlexParticleSystem::Iterator it = particles->begin();
         for (int x = 0; x < textureRes; x++){
             for (int y = 0; y < textureRes; y++){
@@ -53,8 +56,7 @@ public:
         bNeedToReload = false;
         maxspeed = 3;
         maxforce = 0.05;
-        
-        // setup shaders
+        maxParticles = 4000;        // setup shaders
         string shadersFolder;
         shadersFolder="shaders";
         
@@ -70,8 +72,8 @@ public:
         updateRender.setGeometryOutputCount(36);
         updateRender.load(shadersFolder+"/render.vert","","shaders/render.geom");
         
-        //TODO: this should be dynamic
-        numParticles = particles->size();
+        numParticles = fmin(maxParticles, particles->size());
+        
         livepos = new float[numParticles*3];
         
         // Seting the textures where the information ( position and velocity ) will be
@@ -146,6 +148,7 @@ public:
     
     void beginDraw(){
         if ( bNeedToReload){
+            cout <<"refresh"<<endl;
             bNeedToReload = false;
             updateRender.unload();
             updateRender.setGeometryInputType(GL_POINTS);
@@ -154,6 +157,7 @@ public:
             updateRender.load("shaders/render.vert","","shaders/render.geom");
         }
         if ( bNeedToRefreshAttract ){
+            cout <<"refresh"<<endl;
             bNeedToRefreshAttract = false;
             // load into attract zone
             attractFbo.getTextureReference().loadData(livepos, textureRes, textureRes, GL_RGB);
@@ -253,8 +257,8 @@ public:
     
     
     void updateAll( ofxLabFlexParticleSystem::Container * c ){
-        ofxLabFlexParticleSystem::Iterator it = c->begin();
-        /*for (int x = 0; x < textureRes; x++){
+        /*ofxLabFlexParticleSystem::Iterator it = c->begin();
+        for (int x = 0; x < textureRes; x++){
             for (int y = 0; y < textureRes; y++){
                 int i = textureRes * y + x;
                 
@@ -299,6 +303,7 @@ public:
     }
     
     void reload(){
+        cout << "reload?"<<endl;
         bNeedToReload = true;
     }
     
@@ -306,6 +311,8 @@ protected:
     bool bNeedToReload;
     bool bNeedToRefreshAttract;
     float * livepos;
+    
+    int maxParticles;
     
     ofShader    updatePos;
     ofShader    updateVel;
