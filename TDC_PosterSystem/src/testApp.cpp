@@ -355,6 +355,12 @@ void testApp::update(){
     posterMesh.setVertex(2, posterPts[2]);
     posterMesh.setVertex(3, posterPts[3]);
     
+    // DATA OBJECT: COMMUNICATION
+    
+    if ( bUseLiveInput ){
+        particles.density = particles.density * .9 + (fmin(1.0,.1 + particles.dataObject.langWeight)) * .1;
+    }
+    
     // DATA OBJECT: ENVIRONMENT
     
     particles.dataObject.elString = "Temp: "+ofToString(particles.dataObject.environmentLocal * 100.0);// + "\nCondition: "+currentCondition;
