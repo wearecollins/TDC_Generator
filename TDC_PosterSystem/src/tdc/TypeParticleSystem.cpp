@@ -217,7 +217,7 @@ void TypeParticleSystem::threadedFunction(){
                         bigIndex++;
                     }
                 }
-                bIndicesCreated = true;g
+                bIndicesCreated = true;
                 
                 bNeedToChangeColor = false;
                 if ( behaviors[ MOVE_FLOCK ] != NULL ) behaviors[ MOVE_FLOCK ]->copyMesh(currentMesh);

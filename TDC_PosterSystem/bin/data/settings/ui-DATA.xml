@@ -13,12 +13,12 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Env Weight</Name>
-    <Value>0.666666687</Value>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Lang Weight</Name>
-    <Value>1.000000000</Value>
+    <Value>0.000000000</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>

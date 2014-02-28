@@ -69,6 +69,9 @@ void testApp::exit(){
 
 //--------------------------------------------------------------
 void testApp::setup(){
+    
+    dimensionsX = ofGetWidth();
+    dimensionsY = ofGetHeight();
     particles.setup();
     
     // projection setup
@@ -87,8 +90,11 @@ void testApp::setup(){
     
 //    ofEnableAntiAliasing();
     
-    toSave.allocate(800, 600 );//, GL_RGBA32F, 8);
-    toSavePoster.allocate(800, 600 );//, GL_RGBA32F, 8);
+    toSave.allocate(ofGetWidth(), ofGetHeight() );//, GL_RGBA32F, 8);
+    toSavePoster.setUseTexture(false);
+    toSavePoster.allocate(7200, 10800 );//, GL_RGBA32F, 8);
+    
+    pixelDPI = (toSavePoster.getWidth()*2.0)/toSave.getWidth();
     
     toSave.begin();
     ofClear(0,0,0,0);
@@ -301,6 +307,7 @@ void testApp::setup(){
         posterMesh.save("poster");
     }
     setupDataBar();
+    setupDataBarRetina();
     
     // randomize
     randomize();
@@ -337,13 +344,7 @@ void testApp::update(){
     if ( bCapture ){
         bCapture = false;
         
-        //toSavePoster.readToPixels(pix);
-//        ofImage save; save.setFromPixels();
-        ofImage screen;
-        ofRectangle view = ofGetCurrentViewport();
-        screen.allocate(view.width, view.height, OF_IMAGE_COLOR);
-        screen.grabScreen(0, 0, 400, 600);
-        screen.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
+        renderPoster();
     }
     if ( bSave ){
         gui->saveSettings("settings/", "ui-");
@@ -489,23 +490,12 @@ void testApp::update(){
 //--------------------------------------------------------------
 void testApp::draw(){
     toSave.begin();
+    ofPushMatrix();
     if ( bClear ) ofClear(posterColor.r,posterColor.g, posterColor.b,0);
-    else renderBackground();
+    else renderBackground( bUseHomography );
     renderParticles( bUseHomography );
+    ofPopMatrix();
     toSave.end();
-    
-    toSavePoster.begin(); {
-        ofPushMatrix();
-        ofClear(0,0,0,255);
-        renderBackground();
-        renderParticles( false );
-    
-        ofSetColor(255);
-        toSave.draw(0, 0);
-        drawDataBar( true );
-        ofPopMatrix();
-        
-    } toSavePoster.end();
     
     ofPushMatrix(); {
         if ( bUseHomography){
@@ -514,7 +504,7 @@ void testApp::draw(){
             ofTranslate(poster.x, poster.y);
             ofScale(scale, scale);
         }
-        if (!bDrawFBO ){
+        //if (!bDrawFBO ){
             ofPushMatrix(); {
                 if ( bUseHomography ) ofMultMatrix(matrix);
                 posterMesh.draw();
@@ -524,16 +514,17 @@ void testApp::draw(){
                 if ( bUseHomography && (particles.getCurrentBehavior() != NULL && particles.getCurrentBehavior()->getName() == "flocking" )){
                     ofMultMatrix(matrix);
                 }
-                if ( bDrawPoster ) toSave.draw(0, 0);
-                else renderParticles(false);
+                if ( bDrawPoster ){
+                    toSave.draw(0, 0);
+                } else {
+                    renderParticles(false);
+                }
             } ofPopMatrix();
             ofPushMatrix(); {
                 if ( bUseHomography ) ofMultMatrix(matrix);
                 if ( particles.getCurrentBehavior() != NULL ) drawDataBar( !bUseHomography );
             } ofPopMatrix();
-        } else {
-            toSavePoster.draw(0,0);
-        }
+        //}
     } ofPopMatrix();
     if ( bUseHomography ) mask.draw(0,0);
     
@@ -557,10 +548,10 @@ void testApp::draw(){
 }
 
 //--------------------------------------------------------------
-void testApp::renderBackground(){
+void testApp::renderBackground( bool bHomography ){
     ofPushMatrix();
     ofEnableAlphaBlending();
-    if ( bUseHomography && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" ) ){
+    if ( bHomography && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" ) ){
         ofMultMatrix(matrix);
     }
     if ( bClear){
@@ -585,6 +576,42 @@ void testApp::renderBackground(){
         posterMesh.setColor(3, posterColorBottom );
     }
     ofPopMatrix();
+}
+
+//--------------------------------------------------------------
+void testApp::renderPoster(){
+    
+    float oldSize = particles.pointSize;
+    
+    particles.pointSize *= pixelDPI;
+    
+    toSavePoster.begin(); {
+        ofClear(0,0,0,255);
+        ofPushMatrix();
+        ofScale(pixelDPI, pixelDPI);
+        if ( !bClear ){
+            toSave.draw(0,0);
+        }
+        renderBackground( false );
+        renderParticles( false );
+        ofPopMatrix();
+        
+        ofPushMatrix();
+        ofSetColor(255);
+        //drawDataBarRetina( true );
+        ofPopMatrix();
+        
+    } toSavePoster.end();
+    
+    particles.pointSize = oldSize;
+    
+    toSavePoster.readToPixels(pix);
+    ofImage screen;
+    screen.setUseTexture(false);
+    screen.setFromPixels(pix);
+    //screen.allocate(ofGetWidth()/2.0, ofGetHeight(), OF_IMAGE_COLOR);
+    //screen.grabScreen(0, 0, ofGetWidth()/2.0, ofGetHeight());
+    screen.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
 }
 
 //--------------------------------------------------------------
@@ -790,13 +817,87 @@ void testApp::drawDataBar( bool bBottom ){
 //    ofSetColor(255,150);
 //    ofRect(0,465,400,50);
     ofPushMatrix();
-    if (!bBottom) ofTranslate(0,465);
+    if (!bBottom) ofTranslate(0,465 );
     else ofTranslate(0,500);
     envGui->draw();
     commGui->draw();
     collabGui->draw();
     ofPopMatrix();
     ofPopStyle();
+}
+//--------------------------------------------------------------
+void testApp::drawDataBarRetina( bool bBottom ){
+    ofPushStyle();
+    //    ofSetColor(255,150);
+    //    ofRect(0,465,400,50);
+    ofPushMatrix();
+    if (!bBottom) ofTranslate(0,465 * pixelDPI);
+    else ofTranslate(0,500 * pixelDPI);
+    envGuiRetina->draw();
+    commGuiRetina->draw();
+    collabGuiRetina->draw();
+    ofPopMatrix();
+    ofPopStyle();
+}
+
+
+//--------------------------------------------------------------
+void testApp::setupDataBarRetina(){
+    if ( envGuiRetina == NULL ){
+        envGuiRetina = new ofxUICanvas(0,0,100* pixelDPI,50* pixelDPI);
+        envGuiRetina->disableAppEventCallbacks();
+        envGuiRetina->setWidgetFontSize(OFX_UI_FONT_SMALL);
+        envGuiRetina->enableAppUpdateCallback();
+        envGuiRetina->setGlobalSliderHeight(5.0* pixelDPI);
+        envGuiRetina->setWidgetSpacing(4* pixelDPI);
+        
+        commGuiRetina = new ofxUICanvas(100* pixelDPI,0,100* pixelDPI,50* pixelDPI);
+        commGuiRetina->setWidgetFontSize(OFX_UI_FONT_SMALL);
+        commGuiRetina->disableAppEventCallbacks();
+        commGuiRetina->enableAppUpdateCallback();
+        commGuiRetina->setGlobalSliderHeight(5.0* pixelDPI);
+        commGuiRetina->setWidgetSpacing(4* pixelDPI);
+        
+        collabGuiRetina = new ofxUICanvas(200* pixelDPI,0,100* pixelDPI,50* pixelDPI);
+        collabGuiRetina->setWidgetFontSize(OFX_UI_FONT_SMALL);
+        collabGuiRetina->disableAppEventCallbacks();
+        collabGuiRetina->enableAppUpdateCallback();
+        collabGuiRetina->setGlobalSliderHeight(5.0* pixelDPI);
+        collabGuiRetina->setWidgetSpacing(4* pixelDPI);
+        
+        static bool bLoadedFonts = false;
+        if ( !bLoadedFonts ){
+            bLoadedFonts = commGuiRetina->setFont("fonts/monaco.ttf");
+            commGuiRetina->setFontSize(OFX_UI_FONT_SMALL, 3* pixelDPI);
+            commGuiRetina->setFontSize(OFX_UI_FONT_MEDIUM, 5* pixelDPI);
+            commGuiRetina->setFontSize(OFX_UI_FONT_LARGE, 4* pixelDPI);
+            commGuiRetina->addLabel("Communication");
+            
+            bLoadedFonts = collabGuiRetina->setFont("fonts/monaco.ttf");
+            collabGuiRetina->setFontSize(OFX_UI_FONT_SMALL, 3* pixelDPI);
+            collabGuiRetina->setFontSize(OFX_UI_FONT_MEDIUM, 5* pixelDPI);
+            collabGuiRetina->setFontSize(OFX_UI_FONT_LARGE, 4* pixelDPI);
+            collabGuiRetina->addLabel("Community");
+            
+            
+            bLoadedFonts = envGuiRetina->setFont("fonts/monaco.ttf");
+            envGuiRetina->setFontSize(OFX_UI_FONT_SMALL, 3* pixelDPI);
+            envGuiRetina->setFontSize(OFX_UI_FONT_MEDIUM, 5* pixelDPI);
+            envGuiRetina->setFontSize(OFX_UI_FONT_LARGE, 4* pixelDPI);
+            envGuiRetina->addLabel("Environment");
+        }
+        
+        //            envGuiRetina->addLabel("Environment");
+        envGuiRetina->addSlider("Influence", 0,1.0, &particles.dataObject.elWeight);
+        envGuiRetina->addLabel("data", "Temp: 100", OFX_UI_FONT_SMALL)->setAutoSize(false);
+        //            commGuiRetina->addLabel("Communication");
+        commGuiRetina->addSlider("Influence", 0,1.0, &particles.dataObject.langWeight);
+        commGuiRetina->addLabel("data", "Trending Topics", OFX_UI_FONT_SMALL)->setAutoSize(false);
+        //cout << "FONT LOADED? "<<bFontLoaded << " LOADED?"<<endl;
+        //            collabGuiRetina->addLabel("Community");
+        collabGuiRetina->addSlider("Influence", 0,1.0, &particles.dataObject.eiWeight);
+        collabGuiRetina->addLabel("data", "Local Sound Level: 0", OFX_UI_FONT_SMALL)->setAutoSize(false);
+    }
 }
 
 //--------------------------------------------------------------
@@ -839,7 +940,7 @@ void testApp::setupDataBar(){
             
             
             bLoadedFonts = envGui->setFont("fonts/monaco.ttf");
-            envGui->setFontSize(OFX_UI_FONT_SMALL, 3 );
+            envGui->setFontSize(OFX_UI_FONT_SMALL, 3);
             envGui->setFontSize(OFX_UI_FONT_MEDIUM, 5);
             envGui->setFontSize(OFX_UI_FONT_LARGE, 4);
             envGui->addLabel("Environment");

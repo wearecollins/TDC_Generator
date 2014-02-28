@@ -32,6 +32,8 @@ public:
     }
 };
 
+static float pixelDPI = 9;
+
 class testApp : public ofBaseApp{
 
 	public:
@@ -51,11 +53,13 @@ class testApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
     
-        void renderBackground();
+        void renderBackground( bool bHomography );
         void renderParticles( bool bHomography );
     
         bool bRandomize;
         void randomize();
+    
+        void renderPoster();
     
         void onGui( ofxUIEventArgs & e );
     
@@ -63,8 +67,15 @@ class testApp : public ofBaseApp{
         ofxUICanvas * envGui;
         ofxUICanvas * commGui;
         ofxUICanvas * collabGui;
+    
+        ofxUICanvas * envGuiRetina;
+        ofxUICanvas * commGuiRetina;
+        ofxUICanvas * collabGuiRetina;
+        
         void setupDataBar();
+        void setupDataBarRetina();
         void drawDataBar( bool bBottom = false );
+        void drawDataBarRetina( bool bBottom = false );
     
         ofImage mask;
     

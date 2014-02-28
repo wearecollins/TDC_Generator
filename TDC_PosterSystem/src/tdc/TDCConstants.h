@@ -41,5 +41,5 @@ enum MovementType {
     MOVE_GRAVITY
 };
 
-static const float dimensionsX = 400;
-static const float dimensionsY = 600;
+static float dimensionsX = 400;
+static float dimensionsY = 600;
