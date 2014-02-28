@@ -8,12 +8,12 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Edit which color</Name>
-    <Value>2</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Threshold</Name>
-    <Value>37.043918610</Value>
+    <Value>42.643581390</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -38,12 +38,12 @@
 <Widget>
     <Kind>11</Kind>
     <Name>ROI: XY</Name>
-    <XValue>380.000000000</XValue>
-    <YValue>88.000000000</YValue>
+    <XValue>456.000000000</XValue>
+    <YValue>56.000000000</YValue>
 </Widget>
 <Widget>
     <Kind>11</Kind>
     <Name>ROI: WH</Name>
-    <XValue>112.000000000</XValue>
-    <YValue>240.000000000</YValue>
+    <XValue>144.000000000</XValue>
+    <YValue>300.000000000</YValue>
 </Widget>

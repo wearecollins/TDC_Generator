@@ -5,6 +5,7 @@
 uniform float pointSize;
 uniform float pointRandomization;
 uniform mat4 homography;
+uniform vec2 screen;
 
 float rand(vec2 co){
     return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -13,8 +14,9 @@ float rand(vec2 co){
 const float PI = 3.1415926;
 
 void main(void){
-    
-    float size = (pointSize + (rand(gl_PositionIn[0].xy)*pointSize * pointRandomization))/600.0;
+    float m = screen.x == 1.0 ? 1.0 : 20.0;
+    float mult = 600.0 * m;
+    float size = (pointSize + (rand(gl_PositionIn[0].xy)*pointSize * pointRandomization))/mult;
     
     float circleRes = 12.0;
     

@@ -12,6 +12,11 @@
 </Widget>
 <Widget>
     <Kind>2</Kind>
+    <Name>Start Highres Render</Name>
+    <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
     <Name>Save Settings</Name>
     <Value>1</Value>
 </Widget>

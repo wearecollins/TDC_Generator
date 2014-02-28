@@ -25,7 +25,7 @@ void main() {
 //    pixPos.y += .5;
     pixPos.x += screenPos.x;
     pixPos.y += screenPos.y;
-    pixPos.x *= 1.0;
+    pixPos.x *= screen.x;
     pixPos.y *= screen.y;
     
     gl_Position = pixPos;

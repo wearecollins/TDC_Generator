@@ -24,7 +24,7 @@ int main( int argc, char * const argv[] ){
     ofAppGLFWWindow window;
     window.setNumSamples(8);
     window.setDepthBits(32);
-    window.setDoubleBuffering(true);
+    //window.setDoubleBuffering(true);
 	ofSetupOpenGL(&window, width,height,OF_WINDOW);			// <-------- setup the GL context
 
 	// this kicks off the running of my app

@@ -4,8 +4,15 @@
 // GUI events
 bool bClear = true;
 bool bCapture = false;
+bool bRendering = false;
+bool bStartedRendering = false;
 bool bSave    = false;
 bool bReload    = false;
+
+// COLORS
+ofColor communicationColor = ofColor(255,125,5);
+ofColor communityColor = ofColor(255,216,0);
+ofColor envColor = ofColor(59,107,239);
 
 // Particle settings
 bool bUseGrid = true;
@@ -93,6 +100,8 @@ void testApp::setup(){
     toSave.allocate(ofGetWidth(), ofGetHeight() );//, GL_RGBA32F, 8);
     toSavePoster.setUseTexture(false);
     toSavePoster.allocate(7200, 10800 );//, GL_RGBA32F, 8);
+    toSavePosterPing.setUseTexture(false);
+//    toSavePosterPing.allocate(7200, 10800 );
     
     pixelDPI = (toSavePoster.getWidth()*2.0)/toSave.getWidth();
     
@@ -103,6 +112,10 @@ void testApp::setup(){
     toSavePoster.begin();
     ofClear(0,0,0,0);
     toSavePoster.end();
+    
+//    toSavePosterPing.begin();
+//    ofClear(0,0,0,0);
+//    toSavePosterPing.end();
     // load optional type overlay
     
     map<string, TargetMesh>::iterator it = particles.meshes.begin();
@@ -222,6 +235,7 @@ void testApp::setup(){
     guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("EVENTS");
     guis.back()->addToggle("Save Frame", &bCapture);
+    guis.back()->addToggle("Start Highres Render", &bRendering);
     guis.back()->addToggle("Save Settings", &bSave);
     guis.back()->addToggle("Reload Settings", &bReload);
     guis.back()->addSpacer();
@@ -341,11 +355,6 @@ void testApp::update(){
     }
     
     // IMAGE + SETTINGS SAVING
-    if ( bCapture ){
-        bCapture = false;
-        
-        renderPoster();
-    }
     if ( bSave ){
         gui->saveSettings("settings/", "ui-");
         bSave = false;
@@ -497,6 +506,14 @@ void testApp::draw(){
     ofPopMatrix();
     toSave.end();
     
+    if ( bCapture ){
+        bCapture = false;
+        renderPoster(false);
+        renderPoster();
+    } else if ( bRendering ){
+        renderPoster(false);
+    }
+    
     ofPushMatrix(); {
         if ( bUseHomography){
             
@@ -579,46 +596,91 @@ void testApp::renderBackground( bool bHomography ){
 }
 
 //--------------------------------------------------------------
-void testApp::renderPoster(){
+void testApp::renderPoster( bool bSave ){
+    if ( !bSave ){
+        float oldSize = particles.pointSize;
+        
+        particles.pointSize *= pixelDPI;
+        particles.getCurrentBehavior()->pointSize = particles.pointSize;
+        particles.getCurrentBehavior()->screen.x  = 2.0;
+        particles.getCurrentBehavior()->screen.y  = 2.0;
+        
+        toSavePoster.begin(); {
+            ofPushMatrix();
+            ofScale(pixelDPI, pixelDPI);
+            if ( bClear || (!bStartedRendering && bRendering) ){
+                ofClear(0,0,0,255);
+                posterMesh.draw();
+            }
+            renderBackground( false );
+            renderParticles( false );
+            ofPopMatrix();
+            
+            ofPushMatrix();
+            ofSetColor(255);
+            //drawDataBarRetina( true );
+            ofPopMatrix();
+            
+        } toSavePoster.end();
+        
+        if ( bRendering ) bStartedRendering = true;
+        particles.pointSize = oldSize;
+        particles.getCurrentBehavior()->pointSize = particles.pointSize;
+        particles.getCurrentBehavior()->screen.x  = 1.0;
+        particles.getCurrentBehavior()->screen.y  = 2.0;
+    }
     
-    float oldSize = particles.pointSize;
-    
-    particles.pointSize *= pixelDPI;
-    
-    toSavePoster.begin(); {
-        ofClear(0,0,0,255);
-        ofPushMatrix();
-        ofScale(pixelDPI, pixelDPI);
-        if ( !bClear ){
-            toSave.draw(0,0);
+    if ( bSave ){
+        if ( bRendering ){
+//            toSavePosterPing.begin();
+//                ofClear(0,0,0,0);
+//                ofDisableDepthTest();
+//                ofPushMatrix();
+//                ofScale(pixelDPI, pixelDPI);
+//                posterColor.a = 1.0;
+//                posterColorBottom.a = 1.0;
+//                
+//                posterMesh.setColor(0, posterColor );
+//                posterMesh.setColor(1, posterColor );
+//                posterMesh.setColor(2, posterColorBottom );
+//                posterMesh.setColor(3, posterColorBottom );
+//                posterMesh.draw();
+//                ofPopMatrix();
+//                toSavePoster.draw(0,0);
+//            toSavePosterPing.end();
+//            toSavePosterPing.readToPixels(pix);
+        } else {
         }
-        renderBackground( false );
-        renderParticles( false );
-        ofPopMatrix();
+        string name = ofToString(ofGetFrameNum())+"_" + ofGetTimestampString();
+        toSavePoster.readToPixels(pix);
+        ofImage screen;
+        screen.setUseTexture(false);
+        screen.setFromPixels(pix);
+        screen.saveImage("captures/cap_"+ name+ ".png");
+        bRendering = false;
+        bStartedRendering = false;
         
-        ofPushMatrix();
-        ofSetColor(255);
-        //drawDataBarRetina( true );
-        ofPopMatrix();
+        toSavePoster.begin(); {
+            ofPushMatrix();
+            ofScale(pixelDPI, pixelDPI);
+            ofClear(0,0,0,255);
+            posterMesh.draw();
+            ofPopMatrix();
+        } toSavePoster.end();
         
-    } toSavePoster.end();
-    
-    particles.pointSize = oldSize;
-    
-    toSavePoster.readToPixels(pix);
-    ofImage screen;
-    screen.setUseTexture(false);
-    screen.setFromPixels(pix);
-    //screen.allocate(ofGetWidth()/2.0, ofGetHeight(), OF_IMAGE_COLOR);
-    //screen.grabScreen(0, 0, ofGetWidth()/2.0, ofGetHeight());
-    screen.saveImage("cap_"+ofToString(ofGetFrameNum())+"_" + ofGetTimestampString() + ".png");
+        toSavePoster.readToPixels(pix);
+        
+        screen.setFromPixels(pix);
+        screen.saveImage("backgrounds/cap_"+ name+ ".png");
+    }
 }
 
 //--------------------------------------------------------------
 void testApp::renderParticles( bool bHomography ){
     ofPushMatrix();
-    if ( bHomography  && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" ))
+    if ( bHomography  && (particles.getCurrentBehavior() == NULL || particles.getCurrentBehavior()->getName() != "flocking" )){
         ofMultMatrix(matrix);
+    }
     
     //    static float scale = fmax( ofGetWidth()/1280.0f, ofGetHeight()/720.0f );
     //    ofScale(scale, scale);
@@ -819,9 +881,13 @@ void testApp::drawDataBar( bool bBottom ){
     ofPushMatrix();
     if (!bBottom) ofTranslate(0,465 );
     else ofTranslate(0,500);
-    envGui->draw();
-    commGui->draw();
-    collabGui->draw();
+
+    ofSetColor(envColor);
+    ofSetColor(communityColor);
+    ofSetColor(communicationColor);
+//    envGui->draw();
+//    commGui->draw();
+//    collabGui->draw();
     ofPopMatrix();
     ofPopStyle();
 }

@@ -28,6 +28,8 @@ public:
         intensity.set(1,1);
         bNeedToRefreshAttract = false;
         maxParticles = 5000;
+        screen.x = 1.0;
+        screen.y = 2.0;
     }
     
     float maxspeed;
@@ -59,6 +61,9 @@ public:
         maxParticles = 4000;        // setup shaders
         string shadersFolder;
         shadersFolder="shaders";
+        
+        screen.x = 1.0;
+        screen.y = 2.0;
         
         timeStep = 0.005f;
         particleSize = 30.0f;
@@ -282,8 +287,10 @@ public:
             updateRender.begin();
             updateRender.setUniformTexture("posTex", posPingPong.dst->getTextureReference(), 0);
             updateRender.setUniform1i("resolution", (float)textureRes);
-            updateRender.setUniform2f("screen", (float)2.0, (float)2.0);
-            updateRender.setUniform2f("screenPos", (float) trans.x / (dimensionsX), (float) trans.y / (dimensionsY) );
+            updateRender.setUniform2f("screen", (float)screen.x, (float)screen.y);
+            float screenPosX = screen.x == 1.0 ? (float) trans.x / (dimensionsX) : -.5;
+            float screenPosY = screen.x == 1.0 ? (float) trans.y / (dimensionsY) : -.5;
+            updateRender.setUniform2f("screenPos", screenPosX, screenPosY );
             updateRender.setUniform1f("scale", scale );
             updateRender.setUniformMatrix4f("homography", homography);
         

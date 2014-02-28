@@ -59,7 +59,7 @@ class testApp : public ofBaseApp{
         bool bRandomize;
         void randomize();
     
-        void renderPoster();
+        void renderPoster( bool bSave = true );
     
         void onGui( ofxUIEventArgs & e );
     
@@ -94,6 +94,7 @@ class testApp : public ofBaseApp{
         // image saving logic
         ofFbo toSave;
         ofFbo toSavePoster;
+        ofFbo toSavePosterPing;
         ofPixels pix;
     
         // poster bg

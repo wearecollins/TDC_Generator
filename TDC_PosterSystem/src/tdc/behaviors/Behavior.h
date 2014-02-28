@@ -100,6 +100,7 @@ public:
     CameraManager * camera;
     float pointSize;
     float pointRandomization;
+    ofVec2f screen;
     
 protected:
     

@@ -18,7 +18,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Width</Name>
-    <Value>400.000061035</Value>
+    <Value>401.351348877</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -28,22 +28,22 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Poster Color: R</Name>
-    <Value>0.809294045</Value>
-</Widget>
-<Widget>
-    <Kind>4</Kind>
-    <Name>Poster Color: G</Name>
-    <Value>0.348191768</Value>
-</Widget>
-<Widget>
-    <Kind>4</Kind>
-    <Name>Poster Color: B</Name>
     <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
+    <Name>Poster Color: G</Name>
+    <Value>0.000000000</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
+    <Name>Poster Color: B</Name>
+    <Value>0.857811928</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
     <Name>Poster Color: S</Name>
-    <Value>0.542229712</Value>
+    <Value>0.393581092</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

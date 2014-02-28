@@ -1,6 +1,6 @@
 <Mask_Settings>
     <mask_width>800</mask_width>
-    <mask_height>556</mask_height>
+    <mask_height>600</mask_height>
     <stretch_points>
         <top_left>
             <x>0.000000000</x>
@@ -95,20 +95,20 @@
     </fuzzy_outlines>
     <masked_crop>
         <point>
-            <x>787.000000000</x>
-            <y>88.000000000</y>
+            <x>781.000000000</x>
+            <y>80.000000000</y>
         </point>
         <point>
-            <x>798.000000000</x>
-            <y>575.000000000</y>
+            <x>792.000000000</x>
+            <y>570.000000000</y>
         </point>
         <point>
-            <x>-118.000000000</x>
-            <y>484.000000000</y>
+            <x>-119.000000000</x>
+            <y>475.000000000</y>
         </point>
         <point>
-            <x>-22.000000000</x>
-            <y>-11.000000000</y>
+            <x>-23.000000000</x>
+            <y>-19.000000000</y>
         </point>
     </masked_crop>
     <masked_shape>

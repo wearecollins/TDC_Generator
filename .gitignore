@@ -2,3 +2,5 @@
 *.app
 xcuserdata
 */bin/data/*.png
+*/bin/data/captures
+*/bin/data/backgrounds
