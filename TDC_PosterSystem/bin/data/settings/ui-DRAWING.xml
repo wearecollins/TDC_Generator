@@ -8,12 +8,12 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Draw Mode</Name>
-    <Value>3</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>Use grid or outline</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
@@ -33,22 +33,22 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: R</Name>
-    <Value>1.000000000</Value>
+    <Value>0.034182772</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: G</Name>
-    <Value>1.000000000</Value>
+    <Value>0.509834290</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: B</Name>
-    <Value>1.000000000</Value>
+    <Value>0.785033703</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: Hue Randomization</Name>
-    <Value>0.551950872</Value>
+    <Value>0.708873332</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

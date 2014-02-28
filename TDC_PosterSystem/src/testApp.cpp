@@ -308,7 +308,7 @@ void testApp::setup(){
 
 //--------------------------------------------------------------
 void testApp::randomize(){
-    drawMode = ofRandom(DRAW_SHAPES+1);
+    drawMode = ofRandom(DRAW_SHAPES);
     particles.setBehavior( (MovementType) ofRandom(MOVE_BUMP) );
     currentHue = ofRandom(.5);
     

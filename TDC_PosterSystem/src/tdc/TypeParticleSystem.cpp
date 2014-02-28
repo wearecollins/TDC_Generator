@@ -179,8 +179,8 @@ void TypeParticleSystem::threadedFunction(){
         }
         
         // Colors
-        bool bColorByLetter = true;
-        if ( bNeedToChangeColor ){
+        bool bColorByLetter = false;
+        if ( true ){
             lock();
             if ( bColorByLetter ){
                 SubMesh & s = meshes[currentMeshName].getSubMesh(0);
@@ -217,8 +217,7 @@ void TypeParticleSystem::threadedFunction(){
                         bigIndex++;
                     }
                 }
-                cout << bigIndex << ":" << indices.size() << endl;
-                bIndicesCreated = true;
+                bIndicesCreated = true;g
                 
                 bNeedToChangeColor = false;
                 if ( behaviors[ MOVE_FLOCK ] != NULL ) behaviors[ MOVE_FLOCK ]->copyMesh(currentMesh);
@@ -228,7 +227,9 @@ void TypeParticleSystem::threadedFunction(){
                 
                 for (int i=0; i<currentMeshBuffer->getNumColors(); i++){
                     ofFloatColor localColor = currentColor;
-                    currentColor.setHue( localColor.getHue() + ofRandom(-currentVariance,currentVariance));
+                    float ind = currentMeshBuffer->getVertex(i).x / ofGetWidth();
+                    localColor.setHue( currentColor.getHue() + (ind * currentVariance) );
+                    localColor.a = currentMeshBuffer->getColor(i).a;
                     currentMeshBuffer->setColor(i, localColor);
                 }
                 bNeedToChangeColor = false;
@@ -261,7 +262,7 @@ void TypeParticleSystem::threadedFunction(){
                 currentMeshBuffer->setColor(p->index, color);
             } else {
                 ofFloatColor color = currentMeshBuffer->getColor(p->index);
-                color.a -= (color.a - 1.0)/100.0f;
+                color.a -= (color.a - 1.0)/10.0f;
                 currentMeshBuffer->setColor(p->index, color);
             }
         }
