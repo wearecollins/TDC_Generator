@@ -8,7 +8,7 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Draw Mode</Name>
-    <Value>0</Value>
+    <Value>3</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
@@ -48,12 +48,12 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: Hue Randomization</Name>
-    <Value>0.086148649</Value>
+    <Value>0.551950872</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Density</Name>
-    <Value>0.633333087</Value>
+    <Value>0.973890603</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

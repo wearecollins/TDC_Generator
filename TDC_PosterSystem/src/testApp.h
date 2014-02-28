@@ -54,6 +54,9 @@ class testApp : public ofBaseApp{
         void renderBackground();
         void renderParticles( bool bHomography );
     
+        bool bRandomize;
+        void randomize();
+    
         void onGui( ofxUIEventArgs & e );
     
         // UI canvas to render data bar

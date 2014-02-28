@@ -301,6 +301,23 @@ void testApp::setup(){
         posterMesh.save("poster");
     }
     setupDataBar();
+    
+    // randomize
+    randomize();
+}
+
+//--------------------------------------------------------------
+void testApp::randomize(){
+    drawMode = ofRandom(DRAW_SHAPES+1);
+    particles.setBehavior( (MovementType) ofRandom(MOVE_BUMP) );
+    currentHue = ofRandom(.5);
+    
+    bUseGrid = floor(ofRandom(2));
+    hueVariance = ofRandom(1.0);
+    particleColor.r = ofRandom(1.0);
+    particleColor.g = ofRandom(1.0);
+    particleColor.b = ofRandom(1.0);
+    lastParticleColor = ofColor(0,0,0,0);
 }
 
 //--------------------------------------------------------------
@@ -368,6 +385,12 @@ void testApp::update(){
         particles.density = particles.density * .9 + (fmin(1.0,.3 + particles.dataObject.langWeight)) * .1;
     }
     
+    // CLAP TO RANDOMIZE
+    if ( particles.dataObject.environmentImmediate > .2 && ofGetElapsedTimef() - lastChanged > 2.0 ){
+        randomize();
+        lastChanged = ofGetElapsedTimef();
+    }
+    
     // DATA OBJECT: ENVIRONMENT
     
     particles.dataObject.elString = "Temp: "+ofToString(particles.dataObject.environmentLocal * 100.0);// + "\nCondition: "+currentCondition;
@@ -391,11 +414,6 @@ void testApp::update(){
         ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(b->intensity.x);
         ((ofxUISlider *)guis[2]->getWidget("intensityY"))->setValue(b->intensity.y);
         ((ofxUISlider *)guis[2]->getWidget("intensityZ"))->setValue(b->intensity.z);
-        
-        if ( particles.dataObject.environmentImmediate * particles.dataObject.eiWeight > .2 && ofGetElapsedTimef() - lastChanged > 2.0 ){
-            lastChanged = ofGetElapsedTimef();
-            currentHue = ofRandom(1.0);
-        }
         
         liveHueTop = liveHueTop * .9 + (currentHue + ofMap(particles.dataObject.environmentImmediate * particles.dataObject.eiWeight, 0.0, 1.0, -currentHue * .75, currentHue, true));
         
