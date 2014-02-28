@@ -48,6 +48,7 @@ string currentPosterName;
 
 // Community settings (background color)
 ofPoint currentIntensity = ofPoint(0,0,0);
+string currentCondition = "";
 float currentHue = ofRandom(0,1.0);
 float liveHueTop = ofRandom(0,1.0);
 float liveHueBottom = ofRandom(0,1.0);
@@ -68,6 +69,7 @@ void testApp::setup(){
     // projection setup
     bEditingMask = false;
     maskEditor.setup();
+    mask.loadImage("mask.png");
     
     // load SVG for aspect ratio
     posterSrc.load("paper.svg");
@@ -78,7 +80,7 @@ void testApp::setup(){
     posterPts[2] = pz.getOutline()[0].getVertices()[2];
     posterPts[3] = pz.getOutline()[0].getVertices()[3];
     
-    ofEnableAntiAliasing();
+//    ofEnableAntiAliasing();
     
     toSave.allocate(800, 600 );//, GL_RGBA32F, 8);
     toSavePoster.allocate(800, 600 );//, GL_RGBA32F, 8);
@@ -291,7 +293,7 @@ void testApp::setup(){
         posterMesh.addIndex(1); posterMesh.addIndex(2); posterMesh.addIndex(3);
         posterMesh.save("poster");
     }
-    
+    setupDataBar();
 }
 
 //--------------------------------------------------------------
@@ -350,6 +352,10 @@ void testApp::update(){
     posterMesh.setVertex(3, posterPts[3]);
     
     // DATA OBJECT: ENVIRONMENT
+    
+    particles.dataObject.elString = "Temperature: "+ofToString(particles.dataObject.environmentLocal * 100.0)+"\nCondition: "+currentCondition;
+    particles.dataObject.eiString = "Sound: "+ofToString(particles.dataObject.environmentImmediate * 100.0);
+    
     if ( bUseLiveInput ){
         Behavior * b = particles.getSettingsBehavior();
         //b->intensity.x = particles.dataObject.environmentImmediate * particles.dataObject.eiWeight * 500.0;
@@ -414,6 +420,15 @@ void testApp::update(){
             }
         }
     }
+    
+    // set stupid data objects
+    
+    cout << particles.dataObject.elString << endl;
+    
+    ((ofxUILabel *)envGui->getWidget("data"))->setLabel(particles.dataObject.elString);
+    ((ofxUILabel *)commGui->getWidget("data"))->setLabel(particles.dataObject.langString);
+    ((ofxUILabel *)collabGui->getWidget("data"))->setLabel(particles.dataObject.eiString);
+    
     // UPDATE: PARTICLES
     
     particles.setUseGrid(bUseGrid);
@@ -443,6 +458,8 @@ void testApp::draw(){
     
         ofSetColor(255);
         toSave.draw(0, 0);
+        if ( particles.getCurrentBehavior() != NULL ) drawDataBar();
+        ofPopMatrix();
         
     } toSavePoster.end();
     
@@ -463,10 +480,15 @@ void testApp::draw(){
                 ofMultMatrix(matrix);
             }
             toSave.draw(0, 0);
+            ofPushMatrix(); {
+                if ( bUseHomography ) ofMultMatrix(matrix);
+                if ( particles.getCurrentBehavior() != NULL ) drawDataBar();
+            } ofPopMatrix();
         } else {
             toSavePoster.draw(0,0);
         }
     } ofPopMatrix();
+    mask.draw(0,0);
     
     if ( bDrawKinect ){
         ofSetColor(255);
@@ -576,6 +598,8 @@ void testApp::keyPressed(int key){
         particles.camera.tracker.bDraw = !particles.camera.tracker.bDraw;
     } else if ( key == 'r' ){
         particles.getCurrentBehavior()->reload();
+    } else if ( key == 's' ){
+        mask.loadImage("mask.png");
     }
 }
 
@@ -705,6 +729,80 @@ void testApp::onMessage( Spacebrew::Message & m ){
         
         //particleColor.setHue(particles.dataObject.environmentLocal);
         currentIntensity = weather().getIntensity( ofToInt(m.value) );
+        currentCondition = weather().getCondition( ofToInt(m.value) );
+    }
+}
+
+//--------------------------------------------------------------
+void testApp::drawDataBar(){
+    ofPushStyle();
+    ofSetColor(255,150);
+    ofRect(0,465,400,50);
+    ofPushMatrix();
+    ofTranslate(0,465);
+    envGui->draw();
+    commGui->draw();
+    collabGui->draw();
+    ofPopMatrix();
+    ofPopStyle();
+}
+
+//--------------------------------------------------------------
+void testApp::setupDataBar(){
+    if ( envGui == NULL ){
+        envGui = new ofxUICanvas(0,0,100,50);
+        envGui->disableAppEventCallbacks();
+        envGui->setWidgetFontSize(OFX_UI_FONT_SMALL);
+        envGui->enableAppUpdateCallback();
+        envGui->setGlobalSliderHeight(5.0);
+        envGui->setWidgetSpacing(4);
+        
+        commGui = new ofxUICanvas(100,0,100,50);
+        commGui->setWidgetFontSize(OFX_UI_FONT_SMALL);
+        commGui->disableAppEventCallbacks();
+        commGui->enableAppUpdateCallback();
+        commGui->setGlobalSliderHeight(5.0);
+        commGui->setWidgetSpacing(4);
+        
+        collabGui = new ofxUICanvas(200,0,100,50);
+        collabGui->setWidgetFontSize(OFX_UI_FONT_SMALL);
+        collabGui->disableAppEventCallbacks();
+        collabGui->enableAppUpdateCallback();
+        collabGui->setGlobalSliderHeight(5.0);
+        collabGui->setWidgetSpacing(4);
+        
+        static bool bLoadedFonts = false;
+        if ( !bLoadedFonts ){
+            bLoadedFonts = commGui->setFont("fonts/monaco.ttf");
+            commGui->setFontSize(OFX_UI_FONT_SMALL, 3);
+            commGui->setFontSize(OFX_UI_FONT_MEDIUM, 5);
+            commGui->setFontSize(OFX_UI_FONT_LARGE, 4);
+            commGui->addLabel("Communication");
+            
+            bLoadedFonts = collabGui->setFont("fonts/monaco.ttf");
+            collabGui->setFontSize(OFX_UI_FONT_SMALL, 3);
+            collabGui->setFontSize(OFX_UI_FONT_MEDIUM, 5);
+            collabGui->setFontSize(OFX_UI_FONT_LARGE, 4);
+            collabGui->addLabel("Community");
+            
+            
+            bLoadedFonts = envGui->setFont("fonts/monaco.ttf");
+            envGui->setFontSize(OFX_UI_FONT_SMALL, 3 );
+            envGui->setFontSize(OFX_UI_FONT_MEDIUM, 5);
+            envGui->setFontSize(OFX_UI_FONT_LARGE, 4);
+            envGui->addLabel("Environment");
+        }
+        
+        //            envGui->addLabel("Environment");
+        envGui->addSlider("Influence", 0,1.0, &particles.dataObject.elWeight);
+        envGui->addLabel("data", "Temp: 100 Conditions: Sunny", OFX_UI_FONT_SMALL)->setAutoSize(false);
+        //            commGui->addLabel("Communication");
+        commGui->addSlider("Influence", 0,1.0, &particles.dataObject.langWeight);
+        commGui->addLabel("data", "Trending Topics", OFX_UI_FONT_SMALL)->setAutoSize(false);
+        //cout << "FONT LOADED? "<<bFontLoaded << " LOADED?"<<endl;
+        //            collabGui->addLabel("Community");
+        collabGui->addSlider("Influence", 0,1.0, &particles.dataObject.eiWeight);
+        collabGui->addLabel("data", "Local Sound Level: 0", OFX_UI_FONT_SMALL)->setAutoSize(false);
     }
 }
 

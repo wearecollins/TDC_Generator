@@ -19,6 +19,7 @@ public:
     ofColor& operator[]( int n ){ return colors[n];}
     
     ofPoint getIntensity( int condition );
+    string  getCondition( int condition );
     
 protected:
     map<int,ofColor> colors;

@@ -56,6 +56,15 @@ class testApp : public ofBaseApp{
     
         void onGui( ofxUIEventArgs & e );
     
+        // UI canvas to render data bar
+        ofxUICanvas * envGui;
+        ofxUICanvas * commGui;
+        ofxUICanvas * collabGui;
+        void setupDataBar();
+        void drawDataBar();
+    
+        ofImage mask;
+    
         // particle system
         TypeParticleSystem particles;
     

@@ -8,22 +8,22 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Edit which color</Name>
-    <Value>2</Value>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Threshold</Name>
-    <Value>32.736484528</Value>
+    <Value>58.150341034</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Min Radius</Name>
-    <Value>9.907094002</Value>
+    <Value>12.491554260</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Max Radius</Name>
-    <Value>60.304050446</Value>
+    <Value>34.459457397</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>

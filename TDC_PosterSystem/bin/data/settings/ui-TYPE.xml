@@ -13,7 +13,7 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Draw type in space</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>44</Kind>
@@ -38,7 +38,7 @@
 <Widget>
     <Kind>4</Kind>
     <Name>type color g</Name>
-    <Value>0.973988414</Value>
+    <Value>1.000000000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -54,9 +54,4 @@
     <Kind>2</Kind>
     <Name>circumstance</Name>
     <Value>1</Value>
-</Widget>
-<Widget>
-    <Kind>2</Kind>
-    <Name>simple</Name>
-    <Value>0</Value>
 </Widget>

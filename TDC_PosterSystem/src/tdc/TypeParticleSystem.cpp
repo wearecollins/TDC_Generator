@@ -20,6 +20,9 @@ TypeParticleSystem::~TypeParticleSystem(){
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::setup( string directory ){
+    // setup data object
+    dataObject.setup();
+    
     // load geometry shader
     pointShader.setGeometryInputType(GL_POINTS);
 	pointShader.setGeometryOutputType(GL_TRIANGLES);
@@ -56,9 +59,6 @@ void TypeParticleSystem::setup( string directory ){
     behaviors[ MOVE_BUMP ]->camera = &camera;
     behaviors[ MOVE_PUSH ]->setup(NULL);
     behaviors[ MOVE_PUSH ]->camera = &camera;
-    
-    // setup data object
-    dataObject.setup();
     
     density = 1.0;
     
@@ -108,7 +108,7 @@ void TypeParticleSystem::threadedFunction(){
         
         ofColor color(255);
         
-        int numParticles = 5000;
+        int numParticles = 9000;
         
         // build particles for grid
         for (int i=0; i<numParticles; i++){
@@ -499,7 +499,7 @@ void TypeParticleSystem::kinectMoved( ofPoint & p ){
     if (!bMeshIsUpdated) return;
     
     ofVec3f mp = ofVec3f(x,y,0);
-    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * 5.0);
+    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * 1.0);
     lastKinect = mp;
     lastKinectMass = mouseMass;
     

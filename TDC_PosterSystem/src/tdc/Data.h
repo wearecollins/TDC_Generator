@@ -7,6 +7,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxUI.h"
 
 class Data
 {
@@ -22,6 +23,7 @@ public:
     }
     
     void setup(){
+        elString = langString = eiString = "test";
         ofAddListener( ofEvents().update, this, &Data::update);
     }
     
@@ -52,6 +54,7 @@ public:
         langWeight = ofClamp(langWeight, 0.0, 1.0);
         timeWeight = ofClamp(timeWeight, 0.0, 1.0);
         dateWeight = ofClamp(dateWeight, 0.0, 1.0);
+        
     }
     
     float getWeightedEI(){
@@ -118,4 +121,7 @@ public:
     float langWeight;
     float timeWeight;
     float dateWeight;
+    
+    // data to render as strings
+    string eiString, elString, langString;
 };
