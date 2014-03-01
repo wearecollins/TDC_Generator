@@ -259,8 +259,9 @@ void testApp::setup(){
     guis.back()->addToggle("Flip Vert", &particles.camera.bFlipVert);
     guis.back()->addToggle("Flip LR + TB", &particles.camera.bFlipAxes);
     guis.back()->addSlider("Threshold", 0, 255, &particles.camera.thresh );
-    guis.back()->add2DPad("Crop: TL", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[0], 160, 120, 0, 0);
-    guis.back()->add2DPad("Crop: TR", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[1], 160, 120, 200, 0);
+    guis.back()->addSlider("Skew Colors", -1.0, 1.0, &particles.camera.cameraSkew);
+    guis.back()->add2DPad("Crop: TL", ofPoint(-800,800), ofPoint(-800,800), &particles.camera.quad[0], 160, 120, 0, 0);
+    guis.back()->add2DPad("Crop: TR", ofPoint(-800,800), ofPoint(-800,800), &particles.camera.quad[1], 160, 120, 200, 0);
     guis.back()->add2DPad("Crop: BL", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[2], 160, 120, 0, 140);
     guis.back()->add2DPad("Crop: BR", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[3], 160, 120, 200, 140);
     guis.back()->addSpacer();
@@ -540,6 +541,7 @@ void testApp::draw(){
             ofPushMatrix(); {
                 if ( bUseHomography ) ofMultMatrix(matrix);
                 if ( particles.getCurrentBehavior() != NULL ) drawDataBar( !bUseHomography );
+                if ( bDrawKinect ) ofEllipse(particles.camera.lastPoint, 10, 10);
             } ofPopMatrix();
         //}
     } ofPopMatrix();
@@ -548,13 +550,14 @@ void testApp::draw(){
     if ( bDrawKinect ){
         ofSetColor(255);
         //particles.camera.getKinect().draw(10, 10, 320, 240);
-        particles.camera.draw(10, 250, 320, 240);//getKinect().drawDepth (10, 250, 320, 240);
-        map<string, ofPtr<ofxSurf> >::iterator it = surfers.begin();
-        int i=0;
-        for (it; it != surfers.end(); ++it){
-            it->second->draw(640,480 + 320 * i);
-            i++;
-        }
+        particles.camera.draw(10, 250, 320, 240);
+        particles.camera.getKinect().drawDepth (330, 250, 320, 240);
+//        map<string, ofPtr<ofxSurf> >::iterator it = surfers.begin();
+//        int i=0;
+//        for (it; it != surfers.end(); ++it){
+//            it->second->draw(640,480 + 320 * i);
+//            i++;
+//        }
     }
     
     if ( bEditingMask ){
