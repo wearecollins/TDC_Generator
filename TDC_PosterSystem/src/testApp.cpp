@@ -14,6 +14,9 @@ bool bTurnOff = false;
 bool bWasOff = false;
 bool bExplode = false;
 
+ofVec3f randomIntensity;
+float randomMix;
+
 // COLORS
 ofColor communicationColor = ofColor(255,125,5);
 ofColor communityColor = ofColor(255,216,0);
@@ -346,15 +349,79 @@ void testApp::setup(){
 //--------------------------------------------------------------
 void testApp::randomize(){
     drawMode = ofRandom(DRAW_SHAPES);
-    particles.setBehavior( (MovementType) ofRandom(MOVE_BUMP) );
+    MovementType move = (MovementType) floor(ofRandom(1,MOVE_BUMP));
+    particles.setBehavior( move );
     currentHue = ofRandom(.5);
     
-    bUseGrid = floor(ofRandom(2));
+    bUseGrid = !bUseGrid;//floor(ofRandom(2));
     hueVariance = ofRandom(1.0);
     particleColor.r = ofRandom(1.0);
     particleColor.g = ofRandom(1.0);
     particleColor.b = ofRandom(1.0);
     lastParticleColor = ofColor(0,0,0,0);
+    randomIntensity.set(ofRandom(0,1), ofRandom(0,1), ofRandom(0,1));
+    randomMix = ofRandom(0,1.0);
+    
+    DrawMode m = (DrawMode) drawMode;
+    
+    /*
+    DRAW_POINTS = 0,
+    DRAW_LINES,
+    DRAW_LINES_RANDOMIZED,
+    DRAW_LINES_ARBITARY
+    */
+    
+    switch (m) {
+        case DRAW_POINTS:
+            bDrawTypeInSpace = false;
+            switch (move) {
+                case MOVE_NOISE:
+                case MOVE_WARP:
+                    bClear = floor(ofRandom(2));
+                    break;
+                case MOVE_FLOCK:
+                    bClear = false;
+                    randomIntensity.set(ofRandom(.2,.5), ofRandom(.1,.3), ofRandom(0,1));
+                    randomMix = ofRandom(.5,1.0);
+                    break;
+            }
+            break;
+            
+        case DRAW_LINES:
+            bDrawTypeInSpace = false;
+            bClear = floor(ofRandom(2));
+            switch (move) {
+                case MOVE_NOISE:
+                    
+                case MOVE_WARP:
+                    break;
+                    
+                case MOVE_FLOCK:
+                    break;
+            }
+            break;
+            
+        case DRAW_LINES_RANDOMIZED:
+            bClear = true;
+            bDrawTypeInSpace = true;
+            break;
+            
+        case DRAW_LINES_ARBITARY:
+            bClear = true;
+            bDrawTypeInSpace = true;
+            randomIntensity.z = 0;
+            break;
+    }
+    switch (move) {
+        case MOVE_NOISE:
+            
+        case MOVE_WARP:
+            break;
+            
+        case MOVE_FLOCK:
+            bDrawTypeInSpace = false;
+            break;
+    }
 }
 
 //--------------------------------------------------------------
@@ -363,8 +430,8 @@ void testApp::update(){
         maxSaturation *= .75;
         particles.home *= .75;
     } else {
-        maxSaturation = maxSaturation * .95 + .05;
-        if ( maxSaturation >= .9){
+        maxSaturation = maxSaturation * .99 + .01;
+        if ( maxSaturation >= .75){
             if ( bExplode ){
                 bExplode = false;
                 particles.explode();
@@ -400,9 +467,9 @@ void testApp::update(){
     }
     
     // DATA OBJECT: UPDATE WEIGHTS
-    particles.dataObject.eiWeight   = (float) particles.camera.tracker.getNumberByColor(0) / 3.0;
-    particles.dataObject.elWeight   = (float) particles.camera.tracker.getNumberByColor(1) / 3.0;
-    particles.dataObject.langWeight = (float) particles.camera.tracker.getNumberByColor(2) / 3.0;
+    particles.dataObject.eiWeight   = particles.dataObject.eiWeight * .75 + ((float) particles.camera.tracker.getNumberByColor(0) / 3.0) *.25;
+    particles.dataObject.elWeight   = particles.dataObject.elWeight * .75 + ((float) particles.camera.tracker.getNumberByColor(1) / 3.0) * .25;
+    particles.dataObject.langWeight = particles.dataObject.langWeight * .75 + ((float) particles.camera.tracker.getNumberByColor(2) / 3.0) * .25;
     
     // DATA OBJECT: TIME/DATE
     
@@ -448,11 +515,13 @@ void testApp::update(){
         
         ofPoint intense = currentIntensity;
         intense *= (50. * particles.dataObject.elWeight);
-        intense.x = intense.x * .5 + particles.dataObject.getWeightedEL() * 50.;
-        intense.y = intense.y * .5 + particles.dataObject.getWeightedEL() * 50.;
-        intense.z = intense.z * .5 + particles.dataObject.getWeightedEL() * 50.;
+        intense.x = intense.x * .5 + particles.dataObject.getWeightedEL() * 50. + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.x) * 50.0;
+        intense.y = intense.y * .5 + particles.dataObject.getWeightedEL() * 50. + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.y) * 50.0;
+        intense.z = intense.z * .5 + particles.dataObject.getWeightedEL() * 50. + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.z) * 50.0;
         b->intensity.set( intense );
         b->timeFactor = particles.dataObject.getWeightedEL() / 1000.0;
+        b->mix = (randomMix * particles.dataObject.getWeightedEL()) + (1.0 - particles.dataObject.getWeightedEL());
+        ((ofxUISlider *)guis[2]->getWidget("mix"))->setValue(b->mix);
         
         // UPDATE GUI BASED ON DATA OBJECT
         ((ofxUISlider *)guis[2]->getWidget("intensityX"))->setValue(b->intensity.x);
