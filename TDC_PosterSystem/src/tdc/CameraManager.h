@@ -159,9 +159,11 @@ public:
                 
                 if ( lastPoint.distance(mouse) == 0) return;
                 
+                cv::Point2f c = blobTracker.getCenter(0);
                 ofPoint args;
                 args.x = mouse.x;
                 args.y = mouse.y;
+                args.z = kinect.getDepthPixelsRef().getColor(c.x,c.y).r /255.0f;
                 
                 ofNotifyEvent(cameraMove, args );
                 lastPoint.set(args.x, args.y);

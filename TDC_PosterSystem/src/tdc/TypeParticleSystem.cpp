@@ -500,7 +500,7 @@ void TypeParticleSystem::kinectMoved( ofPoint & p ){
     if (!bMeshIsUpdated) return;
     
     ofVec3f mp = ofVec3f(x,y,0);
-    float mouseMass = (lastMass * .9 + mp.distance(lastMouse) * 1.0);
+    float mouseMass = (lastKinectMass * .75 + (p.z * 100.0) * .25);
     lastKinect = mp;
     lastKinectMass = mouseMass;
     
