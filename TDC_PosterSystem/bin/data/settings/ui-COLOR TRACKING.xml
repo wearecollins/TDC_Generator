@@ -8,27 +8,37 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Edit which color</Name>
-    <Value>1</Value>
+    <Value>2</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Threshold</Name>
-    <Value>42.643581390</Value>
+    <Value>35.751689911</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Min Radius</Name>
-    <Value>9.907094002</Value>
+    <Value>3.015202761</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Max Radius</Name>
-    <Value>32.736484528</Value>
+    <Value>13.783783913</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>Use RGB</Name>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>Draw Tracker</Name>
     <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>Draw Blobs</Name>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
@@ -38,12 +48,12 @@
 <Widget>
     <Kind>11</Kind>
     <Name>ROI: XY</Name>
-    <XValue>364.000000000</XValue>
-    <YValue>60.000000000</YValue>
+    <XValue>508.000000000</XValue>
+    <YValue>228.000000000</YValue>
 </Widget>
 <Widget>
     <Kind>11</Kind>
     <Name>ROI: WH</Name>
-    <XValue>144.000000000</XValue>
-    <YValue>300.000000000</YValue>
+    <XValue>44.000000000</XValue>
+    <YValue>176.000000000</YValue>
 </Widget>

@@ -37,6 +37,9 @@ public:
     TypeParticle& operator=( const TypeParticle& p );
     
     ofVec3f seedPosition;
+    ofVec3f homePosition;
+    
+    float   weight;
     
 protected:
     

@@ -13,12 +13,17 @@
 <Widget>
     <Kind>42</Kind>
     <Name>Far thresh</Name>
-    <Value>1216</Value>
+    <Value>1993</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>Draw Kinect</Name>
     <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>Draw Sensing</Name>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
@@ -38,24 +43,24 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Threshold</Name>
-    <Value>47.381755829</Value>
+    <Value>47.812500000</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Skew Colors</Name>
-    <Value>0.706081033</Value>
+    <Value>0.618243217</Value>
 </Widget>
 <Widget>
     <Kind>11</Kind>
     <Name>Crop: TL</Name>
-    <XValue>-119.999984741</XValue>
-    <YValue>-13.333320618</YValue>
+    <XValue>-239.999969482</XValue>
+    <YValue>-186.666687012</YValue>
 </Widget>
 <Widget>
     <Kind>11</Kind>
     <Name>Crop: TR</Name>
-    <XValue>450.000000000</XValue>
-    <YValue>800.000000000</YValue>
+    <XValue>1600.000000000</XValue>
+    <YValue>1600.000000000</YValue>
 </Widget>
 <Widget>
     <Kind>11</Kind>

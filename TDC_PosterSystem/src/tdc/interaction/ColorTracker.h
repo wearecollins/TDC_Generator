@@ -34,7 +34,9 @@ public:
         threshold = 50;
         currentColor = 0;
         bDraw = false;
+        bDrawBlobs = false;
         bChoose = false;
+        bUseRGB = true;
         
         ofxXmlSettings settings;
         if ( settings.loadFile("settings/colortracker.xml")){
@@ -50,10 +52,10 @@ public:
         }
         
         for ( int i=0; i<colorTrackers.size(); i++){
-            colorTrackers[i].setTargetColor( trackingColors[i], ofxCv::TRACK_COLOR_RGB );
+            colorTrackers[i].setTargetColor( trackingColors[i], bUseRGB ? ofxCv::TRACK_COLOR_RGB : ofxCv::TRACK_COLOR_H );
             colorTrackers[i].setMinAreaRadius(10);
             colorTrackers[i].setMaxAreaRadius(200);
-            colorTrackers[i].getTracker().setPersistence(120);
+            colorTrackers[i].getTracker().setPersistence(360);
             numBlobsBuff.push_back(0);
         }
         
@@ -79,12 +81,12 @@ public:
                 trackingCvBuff = cv::Mat(trackingCv, roi);
 //                trackingCv.setRoi();
                 for ( int i=0; i<colorTrackers.size(); i++){
-                    colorTrackers[i].setTargetColor( trackingColors[i], ofxCv::TRACK_COLOR_RGB );
+                    colorTrackers[i].setTargetColor( trackingColors[i], bUseRGB ? ofxCv::TRACK_COLOR_RGB : ofxCv::TRACK_COLOR_H );
                     colorTrackers[i].setMinAreaRadius(minRad);
                     colorTrackers[i].setMaxAreaRadius(maxRad);
                     colorTrackers[i].setThreshold(threshold);
                     colorTrackers[i].findContours(trackingCvBuff);
-                    numBlobsBuff[i] = colorTrackers[i].size();
+                    numBlobsBuff[i] = colorTrackers[i].getTracker().getCurrentLabels().size();
                 }
                 numBlobs = numBlobsBuff;
                 unlock();
@@ -128,28 +130,33 @@ public:
     
     // debug draw for picking colors
     void draw(){
-        if ( !bDraw || !trackingImage.isAllocated() ) return;
+        if ( (!bDraw && !bDrawBlobs) || !trackingImage.isAllocated() ) return;
         ofPushStyle();
-        trackingImage.draw(0,0);
-        ofNoFill();
-        ofRect(roi.x, roi.y, roi.width, roi.height);
-        ofFill();
-        for ( int i=0; i<colorTrackers.size(); i++){
-            colorTrackers[i].draw();
-        }
-        ofSetColor(trialColor);
-        int x = 640;
-        int y = 0;
-        ofRect(x,y,20,20);
-        
-        y+= 20;
-        
-        for ( int i=0; i<colorTrackers.size(); i++){
-            ofSetColor(trackingColors[i]);
+        if ( bDraw ){
+            trackingImage.draw(0,0);
+            ofNoFill();
+            ofRect(roi.x, roi.y, roi.width, roi.height);
+            ofFill();
+            
+            int x = 640;
+            int y = 0;
             ofRect(x,y,20,20);
+            
             y+= 20;
+            
+            for ( int i=0; i<colorTrackers.size(); i++){
+                ofSetColor(trackingColors[i]);
+                ofRect(x,y,20,20);
+                y+= 20;
+            }
+        }
+        if ( bDrawBlobs ){
+            for ( int i=0; i<colorTrackers.size(); i++){
+                colorTrackers[i].draw();
+            }
         }
         ofPopStyle();
+            
     }
     
     void mouseMoved( ofMouseEventArgs & m ){
@@ -184,7 +191,7 @@ public:
     
     float minRad, maxRad;
     
-    bool bDraw, bChoose;
+    bool bDraw, bDrawBlobs, bChoose, bUseRGB;
     
     vector<ofxCv::ContourFinder> colorTrackers;
 	float threshold;

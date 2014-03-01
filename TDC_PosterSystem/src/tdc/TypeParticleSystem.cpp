@@ -20,6 +20,7 @@ TypeParticleSystem::~TypeParticleSystem(){
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::setup( string directory ){
+    home = 0.0;
     // setup data object
     dataObject.setup();
     
@@ -251,18 +252,23 @@ void TypeParticleSystem::threadedFunction(){
         {
             TypeParticle * p = (TypeParticle*)(it->second);
             
+            // set home weight
+            p->weight = home;
+            
             if ( currentBehavior != NULL ){
                 currentBehavior->update(p);
             }
+            ofVec3f dest(*p);
+            ofVec3f fin = (dest * (1-home)) + ofVec3f(ofGetWidth()/4.0, ofGetHeight()/2.0,0) * (home);
+            //p->set( fin );
             currentMeshBuffer->setVertex(p->index, *p);
             ind++;
+            ofFloatColor color = currentMeshBuffer->getColor(p->index);
+            color.a = color.a * .9 + (home * .1);
             if ( ind > lastIndex ){
-                ofFloatColor color = currentMeshBuffer->getColor(p->index);
                 color.a *= .75;
                 currentMeshBuffer->setColor(p->index, color);
             } else {
-                ofFloatColor color = currentMeshBuffer->getColor(p->index);
-                color.a -= (color.a - 1.0)/10.0f;
                 currentMeshBuffer->setColor(p->index, color);
             }
         }
@@ -276,6 +282,15 @@ void TypeParticleSystem::threadedFunction(){
     }
 }
 
+//-------------------------------------------------------------------------------------------
+void TypeParticleSystem::explode(){
+    
+    for( it = _particles.begin(); it != _particles.end(); ++it )
+    {
+        TypeParticle * p = (TypeParticle*)(it->second);
+        p->set(ofRandom(0,ofGetWidth()/2.0),ofRandom(0,ofGetHeight()),ofRandom(-100,100));
+    }
+}
 
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::setMesh( string name ){
@@ -485,7 +500,7 @@ Behavior *  TypeParticleSystem::getSettingsBehavior(){
 
 #pragma mark interaction
 /********************************************************************************************
- ___ _   _ _____ _____ ____      _    ____ _____ ___ ___  _   _
+  ___ _   _ _____ _____ ____      _    ____ _____ ___ ___  _   _
  |_ _| \ | |_   _| ____|  _ \    / \  / ___|_   _|_ _/ _ \| \ | |
   | ||  \| | | | |  _| | |_) |  / _ \| |     | |  | | | | |  \| |
   | || |\  | | | | |___|  _ <  / ___ \ |___  | |  | | |_| | |\  |
@@ -500,7 +515,7 @@ void TypeParticleSystem::kinectMoved( ofPoint & p ){
     if (!bMeshIsUpdated) return;
     
     ofVec3f mp = ofVec3f(x,y,0);
-    float mouseMass = (lastKinectMass * .75 + (p.z * 100.0) * .25);
+    float mouseMass = (lastKinectMass * .75 + (100.0) * .25);
     lastKinect = mp;
     lastKinectMass = mouseMass;
     

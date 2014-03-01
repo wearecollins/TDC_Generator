@@ -13,12 +13,12 @@
 <Widget>
     <Kind>4</Kind>
     <Name>intensityX</Name>
-    <Value>0.000000000</Value>
+    <Value>14.864865303</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>intensityY</Name>
-    <Value>0.000000000</Value>
+    <Value>10.979729652</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
@@ -28,10 +28,10 @@
 <Widget>
     <Kind>4</Kind>
     <Name>rate</Name>
-    <Value>0.000000000</Value>
+    <Value>0.050675675</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>mix</Name>
-    <Value>0.170608103</Value>
+    <Value>0.746621609</Value>
 </Widget>

@@ -75,6 +75,11 @@ public:
     // density is 0-1, wipes out some of the mesh
     float density;
     
+    // return home 0-1
+    float home;
+    
+    void explode();
+    
     float pointSize;
     float pointRandomization;
     

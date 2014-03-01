@@ -13,7 +13,7 @@
 <Widget>
     <Kind>2</Kind>
     <Name>Use grid or outline</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>42</Kind>
@@ -32,33 +32,38 @@
 </Widget>
 <Widget>
     <Kind>4</Kind>
+    <Name>Particle Home attraction</Name>
+    <Value>0.872820020</Value>
+</Widget>
+<Widget>
+    <Kind>4</Kind>
     <Name>Particle Color: R</Name>
-    <Value>0.114697188</Value>
+    <Value>0.314214021</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: G</Name>
-    <Value>0.715587139</Value>
+    <Value>0.995170236</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: B</Name>
-    <Value>0.873475552</Value>
+    <Value>0.826478958</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Color: Hue Randomization</Name>
-    <Value>0.194568619</Value>
+    <Value>0.431922078</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Particle Density</Name>
-    <Value>0.989168108</Value>
+    <Value>0.633333623</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Point size</Name>
-    <Value>0.854510069</Value>
+    <Value>1.699020147</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>

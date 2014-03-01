@@ -14,7 +14,9 @@ TypeParticle::TypeParticle() : ofxLabFlexParticle()
     radius = 1;
     offsetX = ofRandom(10000);
     offsetY = ofRandom(10000);
+    weight = 1.0;
     bSet = false;
+    homePosition.set( ofGetWidth() / 4.0, ofGetHeight()/2.0);
 };
 
 //-------------------------------------------------------------------------------------------
@@ -24,7 +26,9 @@ TypeParticle::TypeParticle( ofVec2f seedPos ) : ofxLabFlexParticle( seedPos )
     seedPosition = seedPos;
     offsetX = ofRandom(10000);
     offsetY = ofRandom(10000);
+    weight = 1.0;
     bSet = false;
+    homePosition.set( ofGetWidth() / 4.0, ofGetHeight()/2.0);
 }
 
 //-------------------------------------------------------------------------------------------
@@ -36,7 +40,9 @@ void TypeParticle::update()
         offsetY = ofRandom(10000);
         offsetZ = ofRandom(10000);
         seedPosition.z = ofRandom(-.01, .01);
+        homePosition.set( ofGetWidth() / 4.0, ofGetHeight()/2.0);
     }
+    ofVec3f seedWeight = seedPosition * weight + homePosition * (1-weight);
     ofxLabFlexParticle::update();
     velocity = velocity * .99 + (seedPosition - *this ) * .01;
     z = z * .99;

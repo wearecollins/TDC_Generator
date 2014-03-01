@@ -9,6 +9,11 @@ bool bStartedRendering = false;
 bool bSave    = false;
 bool bReload    = false;
 
+// time to reset
+bool bTurnOff = false;
+bool bWasOff = false;
+bool bExplode = false;
+
 // COLORS
 ofColor communicationColor = ofColor(255,125,5);
 ofColor communityColor = ofColor(255,216,0);
@@ -42,6 +47,7 @@ ofPoint posterPts[4];
 
 // tracking settings
 bool bDrawKinect        = false;
+bool bDrawTracking        = false;
 bool bTracking          = false;
 
 // SURF settings
@@ -67,7 +73,8 @@ float liveBright = 0;
 float posterSat = 1.0, posterBright = 1.0;
 float lastChanged = 0.0;
 
-
+// min and max for each value
+float maxSaturation = 1.0;
 
 //--------------------------------------------------------------
 void testApp::exit(){
@@ -168,6 +175,7 @@ void testApp::setup(){
     guis.back()->addToggle("Auto Clear Background", &bClear);
     guis.back()->addSlider("Background Alpha Clear", 0.0, 255.0f, &bgAlpha);
     guis.back()->addSpacer();
+    guis.back()->addSlider("Particle Home attraction", 0.0, 1.0, &particles.home);
     guis.back()->addSlider("Particle Color: R", 0.0, 1.0, &particleColor.r);
     guis.back()->addSlider("Particle Color: G", 0.0, 1.0, &particleColor.g);
     guis.back()->addSlider("Particle Color: B", 0.0, 1.0, &particleColor.b);
@@ -243,6 +251,7 @@ void testApp::setup(){
     guis.back()->addToggle("Use Homography", &bUseHomography);
     guis.back()->addToggle("Draw Render Buffer", &bDrawFBO);
     guis.back()->addToggle("Draw Poster", &bDrawPoster);
+    guis.back()->addToggle("Turn Off", &bTurnOff);
     
     gui->addCanvas(guis.back());
     ofAddListener(guis.back()->newGUIEvent, this, &testApp::onGui);
@@ -255,13 +264,15 @@ void testApp::setup(){
     guis.back()->addIntSlider("Far thresh", 0.0, 10000.0, &particles.camera.far );
     guis.back()->addSpacer();
     guis.back()->addToggle("Draw Kinect", &bDrawKinect);
+    guis.back()->addToggle("Draw Sensing", &bDrawTracking);
+
     guis.back()->addToggle("Flip Horiz", &particles.camera.bFlipHoriz);
     guis.back()->addToggle("Flip Vert", &particles.camera.bFlipVert);
     guis.back()->addToggle("Flip LR + TB", &particles.camera.bFlipAxes);
     guis.back()->addSlider("Threshold", 0, 255, &particles.camera.thresh );
     guis.back()->addSlider("Skew Colors", -1.0, 1.0, &particles.camera.cameraSkew);
-    guis.back()->add2DPad("Crop: TL", ofPoint(-800,800), ofPoint(-800,800), &particles.camera.quad[0], 160, 120, 0, 0);
-    guis.back()->add2DPad("Crop: TR", ofPoint(-800,800), ofPoint(-800,800), &particles.camera.quad[1], 160, 120, 200, 0);
+    guis.back()->add2DPad("Crop: TL", ofPoint(-1600,1600), ofPoint(-1600,1600), &particles.camera.quad[0], 160, 120, 0, 0);
+    guis.back()->add2DPad("Crop: TR", ofPoint(-1600,1600), ofPoint(-1600,1600), &particles.camera.quad[1], 160, 120, 200, 0);
     guis.back()->add2DPad("Crop: BL", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[2], 160, 120, 0, 140);
     guis.back()->add2DPad("Crop: BR", ofPoint(0,640), ofPoint(0,480), &particles.camera.quad[3], 160, 120, 200, 140);
     guis.back()->addSpacer();
@@ -277,8 +288,12 @@ void testApp::setup(){
     guis.back()->addSlider("Threshold", 0, 255, &particles.camera.tracker.threshold );
     guis.back()->addSlider("Min Radius", 0, 255, &particles.camera.tracker.minRad );
     guis.back()->addSlider("Max Radius", 0, 255, &particles.camera.tracker.maxRad );
+    guis.back()->addToggle("Use RGB", &particles.camera.tracker.bUseRGB);
+    
+    
     guis.back()->addSpacer();
     guis.back()->addToggle("Draw Tracker", &particles.camera.tracker.bDraw);
+    guis.back()->addToggle("Draw Blobs", &particles.camera.tracker.bDrawBlobs);
     guis.back()->addToggle("Enable Color Selection", &particles.camera.tracker.bChoose);
     guis.back()->add2DPad("ROI: XY", ofPoint(0,640), ofPoint(0,480), &particles.camera.tracker.rectXY, 160, 120, 0, 140);
     guis.back()->add2DPad("ROI: WH", ofPoint(0,640), ofPoint(0,480), &particles.camera.tracker.rectWH, 160, 120, 200, 140);
@@ -344,6 +359,24 @@ void testApp::randomize(){
 
 //--------------------------------------------------------------
 void testApp::update(){
+    if ( bTurnOff ){
+        maxSaturation *= .75;
+        particles.home *= .75;
+    } else {
+        maxSaturation = maxSaturation * .95 + .05;
+        if ( maxSaturation >= .9){
+            if ( bExplode ){
+                bExplode = false;
+                particles.explode();
+            }
+            particles.home = particles.home * .9 + .1;
+        }
+    }
+    if ( !bTurnOff && bWasOff ){
+        bExplode = true;
+    }
+    bWasOff = bTurnOff;
+    
     // CHECK FOR DRAW MODE + PARTICLE UPDATES
     if ( lastDrawMode != drawMode || particles.getDrawMode() != ((DrawMode) drawMode) ){
         lastDrawMode = drawMode;
@@ -433,7 +466,7 @@ void testApp::update(){
         posterColor.setHue(liveHueTop);
         posterColorBottom.setHue(liveHueBottom);
         
-        liveSat = liveSat * .9 + particles.dataObject.eiWeight * .1;
+        liveSat = (liveSat * .9 + particles.dataObject.eiWeight * .1) * maxSaturation;
         
         posterColor.setSaturation( liveSat );
         posterColorBottom.setSaturation( liveSat );
@@ -446,11 +479,11 @@ void testApp::update(){
         posterMesh.setColor(3, posterColorBottom );
         
     } else {
-        posterColor.setSaturation(posterSat);
-        posterColor.setBrightness(posterBright);
+        posterColor.setSaturation(posterSat * maxSaturation);
+        posterColor.setBrightness(posterBright * maxSaturation);
         
-        posterColorBottom.setBrightness(posterBright);
-        posterColorBottom.setSaturation(posterSat);
+        posterColorBottom.setBrightness(posterBright * maxSaturation);
+        posterColorBottom.setSaturation(posterSat * maxSaturation);
         
         posterMesh.setColor(0, posterColor );
         posterMesh.setColor(1, posterColor );
@@ -499,7 +532,9 @@ void testApp::update(){
 
 //--------------------------------------------------------------
 void testApp::draw(){
+    
     toSave.begin();
+    ofDisableDepthTest();
     ofPushMatrix();
     if ( bClear ) ofClear(posterColor.r,posterColor.g, posterColor.b,0);
     else renderBackground( bUseHomography );
@@ -523,12 +558,23 @@ void testApp::draw(){
             ofScale(scale, scale);
         }
         //if (!bDrawFBO ){
+            ofDisableDepthTest();
+        
+            //???
+            glDisable(GL_DEPTH_TEST);
+            glDisable(GL_LIGHTING);
+            
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            
             ofPushMatrix(); {
                 if ( bUseHomography ) ofMultMatrix(matrix);
                 posterMesh.draw();
             } ofPopMatrix();
             //renderParticles();
             ofPushMatrix(); {
+                ofFill();
+                ofSetColor(255);
                 if ( bUseHomography && (particles.getCurrentBehavior() != NULL && particles.getCurrentBehavior()->getName() == "flocking" )){
                     ofMultMatrix(matrix);
                 }
@@ -541,7 +587,7 @@ void testApp::draw(){
             ofPushMatrix(); {
                 if ( bUseHomography ) ofMultMatrix(matrix);
                 if ( particles.getCurrentBehavior() != NULL ) drawDataBar( !bUseHomography );
-                if ( bDrawKinect ) ofEllipse(particles.camera.lastPoint, 10, 10);
+                if ( bDrawTracking ) ofEllipse(particles.camera.lastPoint, 10, 10);
             } ofPopMatrix();
         //}
     } ofPopMatrix();
@@ -575,6 +621,7 @@ void testApp::renderBackground( bool bHomography ){
         ofMultMatrix(matrix);
     }
     if ( bClear){
+        ofDisableDepthTest();
         posterMesh.draw();
     } else {
         posterColor.a = bgAlpha  / 255.0f;
@@ -738,11 +785,13 @@ void testApp::keyPressed(int key){
     } else if ( key == 'c'){
         particles.camera.tracker.bDraw = !particles.camera.tracker.bDraw;
     } else if ( key == 'r' ){
-        particles.getCurrentBehavior()->reload();
+        if ( particles.getCurrentBehavior() != NULL ) particles.getCurrentBehavior()->reload();
     } else if ( key == 's' ){
         mask.loadImage("mask.png");
     } else if (key == 'S'){
         bCapture = true;
+    } else if ( key == 'R'){
+        bTurnOff = !bTurnOff;
     }
 }
 

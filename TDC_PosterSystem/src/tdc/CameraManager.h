@@ -91,7 +91,7 @@ public:
         quad.push_back(ofPoint(640,480));
         quad.push_back(ofPoint(0,480));
         
-        blobTracker.setMinAreaRadius(25);
+        blobTracker.setMinAreaRadius(10);
         blobTracker.setMaxAreaRadius(200);
         blobTracker.getTracker().setPersistence(120);
         
@@ -104,37 +104,40 @@ public:
         kinect.update();
         if ( kinect.isFrameNew() ){
             toDraw.setFromPixels(kinect.getDepthPixelsRef());
-            toDraw.mirror(bFlipVert, bFlipHoriz);
-            if ( bFlipAxes ) toDraw.rotate90(1);
+            
+            ofxCv::resize(toDraw,toTrack,.5,.5);
+            toTrack.update();
+            toTrack.mirror(bFlipVert, bFlipHoriz);
+            if ( bFlipAxes ) toTrack.rotate90(1);
             
             
             if ( cameraSkew != 0.0 ){
-                for ( int x = 0; x <toDraw.width; x++){
-                    for ( int y = 0; y <toDraw.height; y++){
-                        ofColor c = toDraw.getPixelsRef().getColor(x,y);
+                for ( int x = 0; x <toTrack.width; x++){
+                    for ( int y = 0; y <toTrack.height; y++){
+                        ofColor c = toTrack.getPixelsRef().getColor(x,y);
                         float m = 0;
                         if ( cameraSkew > 0 ){
-                            float s = ofMap(y, 0, toDraw.height, 0, 1.0);
+                            float s = ofMap(y, 0, toTrack.height, 0, 1.0);
                             m = s * cameraSkew;
                         } else {
-                            float s = ofMap(y, 0, toDraw.height, 1.0, 0.0);
+                            float s = ofMap(y, 0, toTrack.height, 1.0, 0.0);
                             m = s * -cameraSkew;
                         }
                         c.r *= m;
                         c.g *= m;
                         c.b *= m;
-                        toDraw.getPixelsRef().setColor(x,y,c);
+                        toTrack.getPixelsRef().setColor(x,y,c);
                     }
                 }
             }
-            toDraw.update();
+            toTrack.update();
             
             //getQuadSubImage(toDraw, toDraw, quad, toDraw.getPixelsRef().getImageType());
-            toDraw.update();
+            //toTrack.update();
             
-            ofxCv::threshold(toDraw, thresh);
-            toDraw.update();
-            blobTracker.findContours(toDraw);
+            ofxCv::threshold(toTrack, thresh);
+            toTrack.update();
+            blobTracker.findContours(toTrack);
             
             colorPixels.setFromPixels( kinect.getPixels(), kinect.getWidth(), kinect.getHeight(), kinect.getPixelsRef().getNumChannels());
             tracker.updateCamera( kinect.getPixelsRef() );
@@ -174,12 +177,12 @@ public:
     
     void draw( int x = 0, int y = 0, int width=160, int height=120){
         if ( toDraw.isAllocated()){
-            toDraw.draw(x,y,width,height);
+            toTrack.draw(x,y,width,height);
             
             //ofEllipse(lastPoint, 20, 20);
             ofPushMatrix();
             ofTranslate(x,y);
-            ofScale( (float) width/toDraw.width, (float) height/toDraw.height);
+            ofScale( (float) width/toTrack.width, (float) height/toTrack.height);
             blobTracker.draw();
             
             ofPushStyle();
@@ -221,7 +224,7 @@ protected:
     ofxCv::ContourFinder blobTracker;
     cv::Point minLoc, maxLoc;
     
-    ofImage toDraw;
+    ofImage toDraw, toTrack;
     ofPixels scaledPixels;
     ofxKinect kinect;
     
