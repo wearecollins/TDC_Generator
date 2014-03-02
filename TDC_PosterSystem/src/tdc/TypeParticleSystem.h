@@ -78,6 +78,8 @@ public:
     // return home 0-1
     float home;
     
+    float kinectWeight;
+    
     void explode();
     
     float pointSize;

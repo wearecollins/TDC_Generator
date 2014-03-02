@@ -21,6 +21,8 @@ TypeParticleSystem::~TypeParticleSystem(){
 //-------------------------------------------------------------------------------------------
 void TypeParticleSystem::setup( string directory ){
     home = 0.0;
+    kinectWeight = 100.0;
+    
     // setup data object
     dataObject.setup();
     
@@ -515,13 +517,13 @@ void TypeParticleSystem::kinectMoved( ofPoint & p ){
     if (!bMeshIsUpdated) return;
     
     ofVec3f mp = ofVec3f(x,y,0);
-    float mouseMass = (lastKinectMass * .75 + (100.0) * .25);
+    float mouseMass = (lastKinectMass * .75 + (kinectWeight) * .25);
     lastKinect = mp;
     lastKinectMass = mouseMass;
     
     lock();
     if ( currentBehavior != NULL ){
-        currentBehavior->setMouse( lastMouse );
+        currentBehavior->setMouse( lastKinect );
     }
     
     for( it = _particles.begin(); it != _particles.end(); ++it )

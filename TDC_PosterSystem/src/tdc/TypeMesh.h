@@ -28,7 +28,7 @@ public:
         
         // sets up grid
         
-        int inc = 1;
+        int inc = 2;
         
         string file = dir + "/" + svgFile.getBaseName() + SUFFIX;
         string xmlFile = dir + "/" + svgFile.getBaseName() +SUFFIX + ".xml";

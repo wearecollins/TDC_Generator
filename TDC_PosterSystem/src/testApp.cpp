@@ -6,6 +6,7 @@ bool bClear = true;
 bool bCapture = false;
 bool bRendering = false;
 bool bStartedRendering = false;
+int numFramesCaptured = 0;
 bool bSave    = false;
 bool bReload    = false;
 
@@ -78,6 +79,7 @@ float lastChanged = 0.0;
 
 // min and max for each value
 float maxSaturation = 1.0;
+float randomSize = 1.0;
 
 //--------------------------------------------------------------
 void testApp::exit(){
@@ -152,6 +154,14 @@ void testApp::setup(){
             surfers[it->first]->setSource(surfImages[it->first].getPixelsRef());
         }
     }
+    
+    // load weather
+    ofxXmlSettings weather;
+    weather.load("settings/weather.xml");
+    currentIntensity.x = weather.getValue("temperatureX", currentIntensity.x );
+    currentIntensity.y = weather.getValue("temperatureY", currentIntensity.y );
+    currentIntensity.z = weather.getValue("temperatureZ", currentIntensity.z );
+    currentCondition = weather.getValue("condition", currentCondition );
     
     lastDrawMode = 0;
     drawMode = DRAW_POINTS;
@@ -362,6 +372,9 @@ void testApp::randomize(){
     randomIntensity.set(ofRandom(0,1), ofRandom(0,1), ofRandom(0,1));
     randomMix = ofRandom(0,1.0);
     
+    particles.pointRandomization = ofRandom(.0, 1.0);
+    randomSize = ofRandom(.1,3.0);
+    
     DrawMode m = (DrawMode) drawMode;
     
     /*
@@ -371,13 +384,17 @@ void testApp::randomize(){
     DRAW_LINES_ARBITARY
     */
     
+    //time.svg
+    
     switch (m) {
         case DRAW_POINTS:
             bDrawTypeInSpace = false;
+            particles.kinectWeight = 200.0;
             switch (move) {
                 case MOVE_NOISE:
                 case MOVE_WARP:
                     bClear = floor(ofRandom(2));
+                    randomMix = ofRandom(0, .2);
                     break;
                 case MOVE_FLOCK:
                     bClear = false;
@@ -388,12 +405,13 @@ void testApp::randomize(){
             break;
             
         case DRAW_LINES:
+            particles.kinectWeight = 200.0;
             bDrawTypeInSpace = false;
-            bClear = floor(ofRandom(2));
+            bClear = false;//floor(ofRandom(2));
             switch (move) {
                 case MOVE_NOISE:
-                    
                 case MOVE_WARP:
+                    randomMix = ofRandom(0, .2);
                     break;
                     
                 case MOVE_FLOCK:
@@ -402,14 +420,34 @@ void testApp::randomize(){
             break;
             
         case DRAW_LINES_RANDOMIZED:
+            particles.kinectWeight = 200.0;
             bClear = true;
             bDrawTypeInSpace = true;
+            switch (move) {
+                case MOVE_NOISE:
+                case MOVE_WARP:
+                    randomMix = ofRandom(0, .2);
+                    break;
+                    
+                case MOVE_FLOCK:
+                    break;
+            }
             break;
             
         case DRAW_LINES_ARBITARY:
+            particles.kinectWeight = 200.0;
             bClear = true;
             bDrawTypeInSpace = true;
             randomIntensity.z = 0;
+            switch (move) {
+                case MOVE_NOISE:
+                case MOVE_WARP:
+                    randomMix = ofRandom(0, .2);
+                    break;
+                    
+                case MOVE_FLOCK:
+                    break;
+            }
             break;
     }
     switch (move) {
@@ -420,6 +458,9 @@ void testApp::randomize(){
             
         case MOVE_FLOCK:
             bDrawTypeInSpace = false;
+            bClear = false;
+            randomIntensity.set(ofRandom(.2,.5), ofRandom(.1,.3), ofRandom(0,1));
+            randomMix = ofRandom(.5,1.0);
             break;
     }
 }
@@ -493,7 +534,9 @@ void testApp::update(){
     // DATA OBJECT: COMMUNICATION
     
     if ( bUseLiveInput ){
-        particles.density = particles.density * .9 + (fmin(1.0,.3 + particles.dataObject.langWeight)) * .1;
+        particles.density = particles.density * .9 + (fmin(1.0,.1 + particles.dataObject.langWeight)) * .1;
+        particles.pointSize = particles.pointSize * .9 + (particles.dataObject.langWeight + (1-particles.dataObject.langWeight) * randomSize) * .1;
+        //particles.
     }
     
     // CLAP TO RANDOMIZE
@@ -520,7 +563,11 @@ void testApp::update(){
         intense.z = intense.z * .5 + particles.dataObject.getWeightedEL() * 50. + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.z) * 50.0;
         b->intensity.set( intense );
         b->timeFactor = particles.dataObject.getWeightedEL() / 1000.0;
-        b->mix = (randomMix * particles.dataObject.getWeightedEL()) + (1.0 - particles.dataObject.getWeightedEL());
+        if ( b->getName() == "warp" ){
+            b->mix = (randomMix * particles.dataObject.getWeightedEL()) + (.1 - particles.dataObject.getWeightedEL() * .1);
+        } else {
+            b->mix = (randomMix * particles.dataObject.getWeightedEL()) + (1.0 - particles.dataObject.getWeightedEL());
+        }
         ((ofxUISlider *)guis[2]->getWidget("mix"))->setValue(b->mix);
         
         // UPDATE GUI BASED ON DATA OBJECT
@@ -535,7 +582,11 @@ void testApp::update(){
         posterColor.setHue(liveHueTop);
         posterColorBottom.setHue(liveHueBottom);
         
-        liveSat = (liveSat * .9 + particles.dataObject.eiWeight * .1) * maxSaturation;
+        if ( maxSaturation > .75 ){
+            liveSat = (liveSat * .9 + particles.dataObject.eiWeight * .1);
+        } else {
+            liveSat = maxSaturation;
+        }
         
         posterColor.setSaturation( liveSat );
         posterColorBottom.setSaturation( liveSat );
@@ -610,14 +661,7 @@ void testApp::draw(){
     renderParticles( bUseHomography );
     ofPopMatrix();
     toSave.end();
-    
-    if ( bCapture ){
-        bCapture = false;
-        renderPoster(false);
-        renderPoster();
-    } else if ( bRendering ){
-        renderPoster(false);
-    }
+
     
     ofPushMatrix(); {
         if ( bUseHomography){
@@ -659,8 +703,36 @@ void testApp::draw(){
                 if ( bDrawTracking ) ofEllipse(particles.camera.lastPoint, 10, 10);
             } ofPopMatrix();
         //}
+        
+        if ( bCapture || bRendering ){
+            ofPushMatrix(); {
+                if ( bUseHomography ) ofMultMatrix(matrix);
+                ofPushStyle();
+                ofSetColor(0,150);
+                ofRect(0,0, toSave.getWidth(), toSave.getHeight());
+                ofSetColor(255);
+                ofTranslate(ofGetWidth()/4.0,ofGetHeight()/2.0);
+                ofRotateZ(90);
+                ofDrawBitmapString("RENDERING\nPLZ BE PATIENT", 0,0);
+                ofPopStyle();
+            } ofPopMatrix();
+        }
+        
     } ofPopMatrix();
     if ( bUseHomography ) mask.draw(0,0);
+    
+    if ( bCapture ){
+        bCapture = false;
+        renderPoster(false);
+        renderPoster();
+    } else if ( bRendering ){
+        numFramesCaptured++;
+        if ( numFramesCaptured > 300 ){
+            bCapture = true;
+            numFramesCaptured = 0;
+        }
+        renderPoster(false);
+    }
     
     if ( bDrawKinect ){
         ofSetColor(255);
@@ -674,6 +746,7 @@ void testApp::draw(){
 //            i++;
 //        }
     }
+    
     
     if ( bEditingMask ){
         maskEditor.draw();
@@ -716,8 +789,10 @@ void testApp::renderBackground( bool bHomography ){
 
 //--------------------------------------------------------------
 void testApp::renderPoster( bool bSave ){
+    if (  particles.getCurrentBehavior() == NULL ) return;
     if ( !bSave ){
         float oldSize = particles.pointSize;
+        
         
         particles.pointSize *= pixelDPI;
         particles.getCurrentBehavior()->pointSize = particles.pointSize;
@@ -944,6 +1019,8 @@ void testApp::setupSpacebrew(){
     spacebrew.addSubscribe("weather", "range");
     spacebrew.addSubscribe("condition", "range");
     
+    // print!
+    spacebrew.addSubscribe("print", "boolean");
     
     spacebrew.connect(server, name, description);
     
@@ -991,6 +1068,22 @@ void testApp::onMessage( Spacebrew::Message & m ){
         //particleColor.setHue(particles.dataObject.environmentLocal);
         currentIntensity = weather().getIntensity( ofToInt(m.value) );
         currentCondition = weather().getCondition( ofToInt(m.value) );
+        
+        ofxXmlSettings weather;
+        weather.addValue("temperatureX", currentIntensity.x );
+        weather.addValue("temperatureY", currentIntensity.y );
+        weather.addValue("temperatureZ", currentIntensity.z );
+        weather.addValue("condition", currentCondition );
+        weather.save("settings/weather.xml");
+    } else if ( m.name == "print" ){
+        if ( !bRendering ){
+            if ( !bClear ){
+                numFramesCaptured = 0;
+                bRendering = true;
+            } else {
+                bCapture = true;
+            }
+        }
     }
 }
 

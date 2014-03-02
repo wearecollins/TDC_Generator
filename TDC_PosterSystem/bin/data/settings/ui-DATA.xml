@@ -8,20 +8,20 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Local Weight</Name>
-    <Value>0.666666687</Value>
+    <Value>0.666666746</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Env Weight</Name>
-    <Value>0.333333343</Value>
+    <Value>0.333333284</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Lang Weight</Name>
-    <Value>0.333333343</Value>
+    <Value>0.666666567</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>Use Inputs</Name>
-    <Value>0</Value>
+    <Value>1</Value>
 </Widget>

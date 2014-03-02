@@ -44,7 +44,7 @@ void TypeParticle::update()
     }
     ofVec3f seedWeight = seedPosition * weight + homePosition * (1-weight);
     ofxLabFlexParticle::update();
-    velocity = velocity * .99 + (seedPosition - *this ) * .01;
+    velocity = velocity * .995 + (seedPosition - *this ) * .005;
     z = z * .99;
     if ( z > 100 ){
         z = 100;

@@ -97,9 +97,14 @@ public:
         
         ofAddListener( ofEvents().update, this, &CameraManager::update );
         tracker.setup();
+        frameCount = 0;
     }
     
     void update( ofEventArgs & e ){
+        if ( frameCount < 1000 ){
+            frameCount++;
+            return;
+        }
         kinect.setDepthClipping( near, far );
         kinect.update();
         if ( kinect.isFrameNew() ){
@@ -109,7 +114,6 @@ public:
             toTrack.update();
             toTrack.mirror(bFlipVert, bFlipHoriz);
             if ( bFlipAxes ) toTrack.rotate90(1);
-            
             
             if ( cameraSkew != 0.0 ){
                 for ( int x = 0; x <toTrack.width; x++){
@@ -219,6 +223,7 @@ public:
     float cameraSkew;
     ofVec2f lastPoint;
     float xMap, yMap;
+    int frameCount;
     
 protected:
     ofxCv::ContourFinder blobTracker;

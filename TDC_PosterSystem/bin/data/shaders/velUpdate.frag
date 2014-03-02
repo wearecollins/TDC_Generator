@@ -221,11 +221,11 @@ void main(void){
     
     // mouse interaction
     vec2 mouseNorm = mouse;
-    mouseNorm.x = mouse.x / screen.x;
-    mouseNorm.y = mouse.y / screen.y;
+    mouseNorm.x = mouse.x / 400.0;//screen.x;
+    mouseNorm.y = mouse.y / 600.0;//screen.y;
     
     float dist = length( pos - mouseNorm);
-    float mouseMass = .005; // this should be dynamic
+    float mouseMass = .05; // this should be dynamic
     float particleMass = .001; // this should be dynamic
     
     if( dist < .1 ) {
