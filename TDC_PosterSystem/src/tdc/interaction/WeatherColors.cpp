@@ -232,6 +232,8 @@ ofPoint WeatherColors::getIntensity( int condition ){
             break;
     }
     
+    toRet.set(toRet.x + ofRandom(.1,.2), toRet.y + ofRandom(.1,.2), toRet.z + ofRandom(.1,.2));
+    
     return toRet;
 }
 

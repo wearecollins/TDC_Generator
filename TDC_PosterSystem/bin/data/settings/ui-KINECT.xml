@@ -43,23 +43,23 @@
 <Widget>
     <Kind>4</Kind>
     <Name>Threshold</Name>
-    <Value>47.812500000</Value>
+    <Value>28.429054260</Value>
 </Widget>
 <Widget>
     <Kind>4</Kind>
     <Name>Skew Colors</Name>
-    <Value>0.618243217</Value>
+    <Value>0.358108163</Value>
 </Widget>
 <Widget>
     <Kind>11</Kind>
     <Name>Crop: TL</Name>
-    <XValue>-239.999969482</XValue>
-    <YValue>-186.666687012</YValue>
+    <XValue>-60.000038147</XValue>
+    <YValue>-266.666687012</YValue>
 </Widget>
 <Widget>
     <Kind>11</Kind>
     <Name>Crop: TR</Name>
-    <XValue>1600.000000000</XValue>
+    <XValue>1060.000000000</XValue>
     <YValue>1600.000000000</YValue>
 </Widget>
 <Widget>

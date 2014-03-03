@@ -162,6 +162,7 @@ void testApp::setup(){
     currentIntensity.y = weather.getValue("temperatureY", currentIntensity.y );
     currentIntensity.z = weather.getValue("temperatureZ", currentIntensity.z );
     currentCondition = weather.getValue("condition", currentCondition );
+    particles.dataObject.environmentLocal = .5;
     
     lastDrawMode = 0;
     drawMode = DRAW_POINTS;
@@ -369,11 +370,11 @@ void testApp::randomize(){
     particleColor.g = ofRandom(1.0);
     particleColor.b = ofRandom(1.0);
     lastParticleColor = ofColor(0,0,0,0);
-    randomIntensity.set(ofRandom(0,1), ofRandom(0,1), ofRandom(0,1));
+    randomIntensity.set(ofRandom(.01,1), ofRandom(.01,1), ofRandom(.01,1));
     randomMix = ofRandom(0,1.0);
     
     particles.pointRandomization = ofRandom(.0, 1.0);
-    randomSize = ofRandom(.1,3.0);
+    randomSize = ofRandom(.1,5.0);
     
     DrawMode m = (DrawMode) drawMode;
     
@@ -534,8 +535,8 @@ void testApp::update(){
     // DATA OBJECT: COMMUNICATION
     
     if ( bUseLiveInput ){
-        particles.density = particles.density * .9 + (fmin(1.0,.1 + particles.dataObject.langWeight)) * .1;
-        particles.pointSize = particles.pointSize * .9 + (particles.dataObject.langWeight + (1-particles.dataObject.langWeight) * randomSize) * .1;
+        particles.density = particles.density * .9 + (fmin(1.0,.01 + particles.dataObject.langWeight)) * .1;
+        particles.pointSize = particles.pointSize * .9 + (particles.dataObject.langWeight * 3.0 + (1-particles.dataObject.langWeight) * randomSize) * .1;
         //particles.
     }
     
@@ -558,9 +559,9 @@ void testApp::update(){
         
         ofPoint intense = currentIntensity;
         intense *= (50. * particles.dataObject.elWeight);
-        intense.x = intense.x * .5 + particles.dataObject.getWeightedEL() * 50. + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.x) * 50.0;
-        intense.y = intense.y * .5 + particles.dataObject.getWeightedEL() * 50. + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.y) * 50.0;
-        intense.z = intense.z * .5 + particles.dataObject.getWeightedEL() * 50. + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.z) * 50.0;
+        intense.x = intense.x * .5 + particles.dataObject.getWeightedEL() * 50.;// + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.x) * 50.0;
+        intense.y = intense.y * .5 + particles.dataObject.getWeightedEL() * 50.;// + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.y) * 50.0;
+        intense.z = intense.z * .5 + particles.dataObject.getWeightedEL() * 50.;// + ((1 - particles.dataObject.getWeightedEL()) * randomIntensity.z) * 50.0;
         b->intensity.set( intense );
         b->timeFactor = particles.dataObject.getWeightedEL() / 1000.0;
         if ( b->getName() == "warp" ){
@@ -1061,6 +1062,13 @@ void testApp::onMessage( Spacebrew::Message & m ){
         particles.dataObject.language = ofToFloat(m.value);
     } else if ( m.name == "weather" ){
         particles.dataObject.environmentLocal = ofToFloat(m.value) / 100.0f;
+        ofxXmlSettings weather;
+        weather.addValue("temperatureX", currentIntensity.x );
+        weather.addValue("temperatureY", currentIntensity.y );
+        weather.addValue("temperatureZ", currentIntensity.z );
+        weather.addValue("condition", currentCondition );
+        weather.addValue("weather", particles.dataObject.environmentLocal );
+        weather.save("settings/weather.xml");
     } else if ( m.name == "condition" ){
         //particles.dataObject.language = ofToFloat(m.value);
         // ?
@@ -1074,6 +1082,7 @@ void testApp::onMessage( Spacebrew::Message & m ){
         weather.addValue("temperatureY", currentIntensity.y );
         weather.addValue("temperatureZ", currentIntensity.z );
         weather.addValue("condition", currentCondition );
+        weather.addValue("weather", particles.dataObject.environmentLocal );
         weather.save("settings/weather.xml");
     } else if ( m.name == "print" ){
         if ( !bRendering ){

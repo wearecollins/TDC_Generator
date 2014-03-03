@@ -13,7 +13,7 @@ void testApp::setup(){
     
     ofSerial s;
     s.listDevices();
-    arduino.connect("/dev/tty.usbmodem1411", 57600);
+    arduino.connect("/dev/tty.usbmodem1451", 57600);
 	
 	// listen for EInitialized notification. this indicates that
 	// the arduino is ready to receive commands and it is safe to

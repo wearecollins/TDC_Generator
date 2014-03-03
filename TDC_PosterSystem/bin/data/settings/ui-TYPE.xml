@@ -53,12 +53,17 @@
 <Widget>
     <Kind>2</Kind>
     <Name>circumstance</Name>
-    <Value>1</Value>
+    <Value>0</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
     <Name>era</Name>
     <Value>0</Value>
+</Widget>
+<Widget>
+    <Kind>2</Kind>
+    <Name>final</Name>
+    <Value>1</Value>
 </Widget>
 <Widget>
     <Kind>2</Kind>
