@@ -11,6 +11,9 @@
 #include "ofxMaskEditor.h"
 #include "ofxSurf.h"
 
+// video recording
+#include "ofxQTKitRecorder.h"
+
 class TrackingImage : public ofImage
 {
 public:
@@ -113,4 +116,11 @@ class testApp : public ofBaseApp{
         // interaction
         Spacebrew::Connection spacebrew;
         void onMessage( Spacebrew::Message & m );
+    
+        // video recording
+        bool bIsSaving;
+        void renderToVideo();
+        ofxQTKitRecorder recorder;
+        ofFbo * fboSaver;
+        ofPixels fboPixels;
 };

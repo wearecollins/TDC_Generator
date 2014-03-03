@@ -239,7 +239,7 @@ void testApp::setup(){
     guis.back()->setColorBack(ofColor(0,0,0,0));
     guis.back()->setName("POSTER");
     guis.back()->addSlider("Poster X", 0.0, ofGetWidth(), &poster.x);
-    guis.back()->addSlider("Poster Y", 0.0, ofGetWidth(), &poster.y);
+    guis.back()->addSlider("Poster Y", -ofGetWidth(), ofGetWidth(), &poster.y);
     guis.back()->addSlider("Poster Width", 0.0, ofGetWidth(), &poster.width);
     guis.back()->addSlider("Poster Height", 0.0, ofGetWidth(), &poster.height);
     guis.back()->addSlider("Poster Color: R", 0.0, 1.0, &posterColor.r);
@@ -352,6 +352,10 @@ void testApp::setup(){
     }
     setupDataBar();
     setupDataBarRetina();
+    
+    // recording: false!
+    bIsSaving = false;
+    fboSaver = NULL;
     
     // randomize
     randomize();
@@ -754,6 +758,8 @@ void testApp::draw(){
     } else {
         particles.camera.tracker.draw();
     }
+    
+    renderToVideo();
 }
 
 //--------------------------------------------------------------
@@ -925,6 +931,14 @@ void testApp::keyPressed(int key){
         } else if ( !gui->isVisible()){
             ofHideCursor();
         }
+    } else if ( key == 'M'){
+        bIsSaving = !bIsSaving;
+        if ( !bIsSaving ){
+            recorder.flushToFile();
+            cout <<"SAVING MOVIE?"<<endl;
+            delete fboSaver;
+            fboSaver = NULL;
+        }
     } else if ( key == 't'){
         bTracking = true;
     } else if ( key == 'c'){
@@ -941,9 +955,7 @@ void testApp::keyPressed(int key){
 }
 
 //--------------------------------------------------------------
-void testApp::keyReleased(int key){
-
-}
+void testApp::keyReleased(int key){}
 
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y ){
@@ -1245,6 +1257,66 @@ void testApp::setupDataBar(){
         //            collabGui->addLabel("Community");
         collabGui->addSlider("Influence", 0,1.0, &particles.dataObject.eiWeight);
         collabGui->addLabel("data", "Local Sound Level: 0", OFX_UI_FONT_SMALL)->setAutoSize(false);
+    }
+}
+
+//--------------------------------------------------------------
+void testApp::renderToVideo(){
+    if ( bIsSaving ){
+        if ( fboSaver == NULL ){
+            string name = ofToString(ofGetFrameNum())+"_" + ofGetTimestampString();
+            recorder.releaseRecording();
+            recorder.setup(ofToDataPath("mov_"+name+".mov", true));
+            fboSaver = new ofFbo();
+            fboSaver->allocate(ofGetWidth(), ofGetHeight(), GL_RGB);
+            ofVec2f tl(-ofGetWidth(), 0), tr(ofGetWidth(), 0), bl(-ofGetWidth(), ofGetHeight()), br(ofGetWidth(), ofGetHeight());
+            particles.setupQuad(tl,bl,tr,br);
+            
+            fboSaver->begin();
+            ofClear(0,0,0);
+            fboSaver->end();
+        }
+        
+        // set postermesh to fill screen
+        posterMesh.setVertex(0, ofVec2f(0,0));
+        posterMesh.setVertex(1, ofVec2f(ofGetWidth(),0));
+        posterMesh.setVertex(2, ofVec2f(ofGetWidth(),ofGetHeight()));
+        posterMesh.setVertex(3, ofVec2f(0,ofGetHeight()));
+        
+        float oldSize = particles.pointSize;
+        
+        
+        particles.pointSize *= scale;
+        particles.getCurrentBehavior()->pointSize = particles.pointSize;
+        particles.getCurrentBehavior()->screen.x  = .75;
+        particles.getCurrentBehavior()->screen.y  = 2.0;
+        
+        fboSaver->begin();
+//        ofClear(0,0,0);
+        
+        ofPushMatrix(); {
+            ofDisableDepthTest();
+            renderBackground(false);
+            ofTranslate(poster.x, poster.y);
+            ofScale(scale, scale);
+            
+            ofDisableDepthTest();
+            
+            ofFill();
+            ofSetColor(255);
+            renderParticles(false);
+        } ofPopMatrix();
+        
+        fboSaver->end();
+        
+        particles.pointSize = oldSize;
+        particles.getCurrentBehavior()->pointSize = particles.pointSize;
+        particles.getCurrentBehavior()->screen.x  = 1.0;
+        particles.getCurrentBehavior()->screen.y  = 2.0;
+        
+        fboSaver->readToPixels(fboPixels);
+        recorder.addFrame(fboPixels);
+//        ofPixels fboPixels;
     }
 }
 

@@ -17,12 +17,23 @@ public:
     
     Noise() : Behavior(){
         name = "noise";
+        frame = 0;
+    }
+    
+    void updateAll( ofxLabFlexParticleSystem::Container * c ){
+        frame++;
     }
     
     void update( TypeParticle * p ){
-        (*p) += ofVec3f( ofSignedNoise(p->getSeedPosition().x + p->getOffsetX() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.x,
-                        ofSignedNoise(p->getSeedPosition().y + p->getOffsetY() + (ofGetElapsedTimeMillis() * timeFactor)) * intensity.y,
-                        ofSignedNoise(p->getSeedPosition().z + p->getOffsetZ() + (ofGetElapsedTimeMillis() * timeFactor)) * (intensity.z - .5));
+        (*p) += ofVec3f( ofSignedNoise(p->getSeedPosition().x + p->getOffsetX() + (getTime() * timeFactor)) * intensity.x,
+                        ofSignedNoise(p->getSeedPosition().y + p->getOffsetY() + (getTime() * timeFactor)) * intensity.y,
+                        ofSignedNoise(p->getSeedPosition().z + p->getOffsetZ() + (getTime() * timeFactor)) * (intensity.z - .5));
     }
     
+    float getTime(){
+        return frame;
+        // return ofGetElapsedTimeMillis();
+    }
+    
+    float frame;
 };

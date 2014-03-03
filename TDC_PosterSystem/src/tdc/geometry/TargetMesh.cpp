@@ -25,7 +25,7 @@ void TargetMesh::setup( string directory, int num ){
     for (int i=0; i<numFiles; i++){
         subMeshes.push_back( SubMesh());
         string name = dir.getFile(i).getBaseName();
-        cout <<"loading "<<name<<endl;
+        ofLogVerbose() <<"loading "<<name<<endl;
         subMeshes.back().setup( svgDirectory, name, numPositions);
     }
 }
@@ -142,7 +142,7 @@ void SubMesh::setup( string dir, string n, int num ){
                 
             } gridParticleSettings.popTag();
         }
-        cout << "LOADED "<<n<<" PARTICLES"<<endl;
+        ofLogVerbose() << "LOADED "<<n<<" PARTICLES"<<endl;
     }
     
     ofxXmlSettings outlineParticleSettings;
@@ -219,7 +219,7 @@ void SubMesh::setup( string dir, string n, int num ){
 //-------------------------------------------------------------------------------------------
 void SubMesh::createGrid(){
     ofMesh test;
-    cout<<"SVG "<<directory + "/sources/" + name + ".svg"<<endl;
+    ofLogVerbose()<<"SVG "<<directory + "/sources/" + name + ".svg"<<endl;
     test.load( directory + "/" + name + "/meshes/mesh_4_0" );
     
     ofxXmlSettings gridOutlineSettings;
@@ -271,12 +271,12 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
     
     mesh->load( file );
     
-    cout <<"LOADED? "<<file<<endl;
+    ofLogVerbose() <<"LOADED? "<<file<<endl;
     
     bool bLoad = mesh->getVertices().size() > 0;
     
     if ( bLoad ){
-        ofLogWarning()<<"Load success "<<mode<<":"<<type;
+        ofLogVerbose()<<"Load success "<<mode<<":"<<type;
         
         switch (mode) {
             case DRAW_LINES:
@@ -353,7 +353,7 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
             for (int j=0; j<letterParticles->size(); j++){
                 
                 vector <QuickVertex> quickVerts = letterParticles->at(j);
-                cout << quickVerts.size() << endl;
+                ofLogVerbose() << quickVerts.size() << endl;
                 
                 for (int k=0; k<quickVerts.size(); k++){
                     mesh->addIndex(quickVerts[k].index);
@@ -364,7 +364,7 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
                     if ( quickVerts.size() == 0 ) break;
                 }
             }
-            cout << "made lines"<<endl;
+            ofLogVerbose() << "made lines"<<endl;
             /*} else {
              // method 2: attach to anywhere inside letter
              
@@ -501,7 +501,7 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
             
             
         case DRAW_POINTS:
-            cout << "draw points "<<endl;
+            ofLogVerbose() << "draw points "<<endl;
             mesh->setMode(OF_PRIMITIVE_POINTS);
             mesh->clearIndices();
             
@@ -575,7 +575,7 @@ void SubMesh::buildMesh(DrawMode mode, GridType type ){
             break;
     }
     
-    cout << "SAVE! "<<file<<endl;
+    ofLogVerbose() << "SAVE! "<<file<<endl;
     
     // save that shit
     mesh->save(file, false);
