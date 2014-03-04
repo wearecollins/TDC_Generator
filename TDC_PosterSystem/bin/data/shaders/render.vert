@@ -23,8 +23,9 @@ void main() {
 //    pixPos.y *= scale;
 //    pixPos.x += .5;
 //    pixPos.y += .5;
-    pixPos.x += screenPos.x;
-    pixPos.y += screenPos.y;
+    pixPos.x += -0.5;//screenPos.x;
+    pixPos.y += -0.5;//screenPos.y;
+    
     pixPos.x *= screen.x;
     pixPos.y *= screen.y;
     

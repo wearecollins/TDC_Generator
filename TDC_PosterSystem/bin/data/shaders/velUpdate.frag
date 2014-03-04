@@ -191,11 +191,14 @@ vec2 flock(vec2 p, vec2 v) {
     vec2 ali = align(p,v);      // Alignment
     vec2 coh = cohesion(p,v);   // Cohesion
     // Arbitrarily weight these forces
-    sep *= (1.5);
+    sep *= 1.5;
     
     // ?
     ali *= (1.0);
     coh *= (1.0);
+//    
+    v.x += -.0005;
+    v.y += -.0005;
     
     // Add the force vectors to acceleration
     v = applyForce(v,sep);
