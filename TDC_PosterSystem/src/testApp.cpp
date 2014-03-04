@@ -81,6 +81,9 @@ float lastChanged = 0.0;
 float maxSaturation = 1.0;
 float randomSize = 1.0;
 
+// fullscreen rendering vars
+bool bRenderFullscreen = false;
+
 //--------------------------------------------------------------
 void testApp::exit(){
     particles.camera.getKinect().close();
@@ -197,6 +200,7 @@ void testApp::setup(){
     guis.back()->addSlider("Particle Density", 0.0, 1.0, &particles.density);
     guis.back()->addSlider("Point size", 0.01, 100.0f, &particles.pointSize);
     guis.back()->addSlider("Point randomization", 0.0, 10.0, &particles.pointRandomization);
+    guis.back()->addToggle("Render Fullscreen", &bRenderFullscreen);
     gui->addCanvas(guis.back());
     
     ofxUISuperCanvas * guiTypeOverlay = new ofxUISuperCanvas("TYPE",0,0,ofGetWidth()-200, ofGetHeight());
@@ -531,11 +535,19 @@ void testApp::update(){
     
     // yes OK
     
-    posterMesh.setVertex(0, posterPts[0]);
-    posterMesh.setVertex(1, posterPts[1]);
-    posterMesh.setVertex(2, posterPts[2]);
-    posterMesh.setVertex(3, posterPts[3]);
     
+    if ( bRenderFullscreen ){
+        posterMesh.setVertex(0, ofVec2f(0,0));
+        posterMesh.setVertex(1, ofVec2f(ofGetWidth(),0));
+        posterMesh.setVertex(2, ofVec2f(ofGetWidth(),ofGetHeight()));
+        posterMesh.setVertex(3, ofVec2f(0,ofGetHeight()));
+    } else {
+        posterMesh.setVertex(0, posterPts[0]);
+        posterMesh.setVertex(1, posterPts[1]);
+        posterMesh.setVertex(2, posterPts[2]);
+        posterMesh.setVertex(3, posterPts[3]);
+    }
+        
     // DATA OBJECT: COMMUNICATION
     
     if ( bUseLiveInput ){
@@ -1286,7 +1298,7 @@ void testApp::renderToVideo(){
         float oldSize = particles.pointSize;
         
         
-        particles.pointSize *= scale;
+        particles.pointSize *= 1920.0/800.0;
         particles.getCurrentBehavior()->pointSize = particles.pointSize;
         particles.getCurrentBehavior()->screen.x  = .75;
         particles.getCurrentBehavior()->screen.y  = 2.0;

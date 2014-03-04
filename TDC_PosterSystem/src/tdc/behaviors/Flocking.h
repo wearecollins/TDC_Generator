@@ -44,7 +44,8 @@ public:
                 
                 int i = textureRes * y + x;
                 
-                livepos[i*3 + 0] = it->second->x / (float) dimensionsX;
+                // NEED TO TEST WITH PROJECTION
+                livepos[i*3 + 0] = ( (ofGetWidth()/8.0 + it->second->x) / (float) dimensionsX * .4);
                 livepos[i*3 + 1] = it->second->y / (float) dimensionsY;
                 livepos[i*3 + 2] = 0.0;
                 it++;
@@ -152,8 +153,17 @@ public:
     }
     
     void beginDraw(){
+        myIntensity.x = myIntensity.x * .99 + intensity.x * .01;
+        myIntensity.y = myIntensity.y * .99 + intensity.y * .01;
+        myMix = myMix * .99 + mix * .01;
         if ( bNeedToReload){
             cout <<"refresh"<<endl;
+            updatePos.unload();
+            updatePos.load("","shaders/posUpdate.frag");// shader for updating the texture that store the particles position on RG channels
+            
+            updateVel.unload();
+            updateVel.load("","shaders/velUpdate.frag");// shader for updating the texture that store the particles velocity on RG channels
+            
             bNeedToReload = false;
             updateRender.unload();
             updateRender.setGeometryInputType(GL_POINTS);
@@ -184,9 +194,9 @@ public:
         updateVel.setUniform2f("screen", (float)dimensionsX, (float)dimensionsY);
         updateVel.setUniform2f("mouse", mouse.x, mouse.y);
         updateVel.setUniform1f("timestep", (float)timeStep);
-        updateVel.setUniform1f("maxspeed", intensity.x / 5000.0f);
-        updateVel.setUniform1f("maxforce", intensity.y / 5000.0f);
-        updateVel.setUniform1f("attractMix", mix);
+        updateVel.setUniform1f("maxspeed", myIntensity.x / 5000.0f);
+        updateVel.setUniform1f("maxforce", myIntensity.y / 5000.0f);
+        updateVel.setUniform1f("attractMix", myMix);
         updateVel.setUniform1f("scale", scale );
         
         // draw the source velocity texture to be updated
@@ -315,6 +325,8 @@ public:
     }
     
 protected:
+    ofVec3f myIntensity;
+    float myMix;
     bool bNeedToReload;
     bool bNeedToRefreshAttract;
     float * livepos;

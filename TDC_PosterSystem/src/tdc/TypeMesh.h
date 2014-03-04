@@ -180,6 +180,8 @@ public:
         bool bInMainShape = ofInsidePoly( pt, letter[0].getVertices());
         bool bInSubShape  = false;
         if ( bInMainShape && letter.size() > 1 ){
+        // fix for "i"
+        //if ( bInMainShape && letter.size() > 1 && whichLetter != 1){
             for ( int j=1; j<letter.size(); j++){
                 if ( letter[j].size() > 0 ){
                     bInSubShape = ofInsidePoly( pt, letter[j].getVertices());
@@ -187,6 +189,12 @@ public:
                 }
             }
         }
+        // fix for 'i'
+//        else if ( whichLetter == 1 ){
+//            if ( !bInMainShape ){
+//                bInMainShape = ofInsidePoly( pt, letter[1].getVertices());
+//            }
+//        }
         return bInMainShape && !bInSubShape;
     }
     
