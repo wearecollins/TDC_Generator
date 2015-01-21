@@ -30,7 +30,7 @@
 // interaction
 #include "CameraManager.h"
 
-class TypeParticleSystem : public ofxLabFlexParticleSystem, protected ofThread
+class TypeParticleSystem : public lab::ParticleSystem, protected ofThread
 {
 public:
     

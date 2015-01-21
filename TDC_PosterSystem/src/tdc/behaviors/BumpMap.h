@@ -20,7 +20,7 @@ public:
         camera = NULL;
     }
     
-    void setup( ofxLabFlexParticleSystem::Container * particles ){
+    void setup( lab::ParticleSystem::Container * particles ){
         
         shader.load("shaders/bumpmap.vert","");
         renderFBO.allocate(ofGetWidth(), ofGetHeight());

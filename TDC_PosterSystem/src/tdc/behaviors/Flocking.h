@@ -21,7 +21,7 @@ public:
         maxParticles = 5000;
     }
     
-    Flocking( ofxLabFlexParticleSystem::Container * particles ) : Behavior(){
+    Flocking( lab::ParticleSystem::Container * particles ) : Behavior(){
         name = "flocking";
         setup(particles);
         mix = 0.0;
@@ -35,9 +35,9 @@ public:
     float maxspeed;
     float maxforce;
     
-    void setLetters( ofxLabFlexParticleSystem::Container * particles ){
+    void setLetters( lab::ParticleSystem::Container * particles ){
         cout << "SET LETTERS"<<endl;
-        ofxLabFlexParticleSystem::Iterator it = particles->begin();
+        lab::ParticleSystem::Iterator it = particles->begin();
         for (int x = 0; x < textureRes; x++){
             for (int y = 0; y < textureRes; y++){
                 if ( it == particles->end() || it->first >= particles->size() ) break;
@@ -55,7 +55,7 @@ public:
         bNeedToRefreshAttract = true;
     }
     
-    void setup( ofxLabFlexParticleSystem::Container * particles ){
+    void setup( lab::ParticleSystem::Container * particles ){
         bNeedToReload = false;
         maxspeed = 3;
         maxforce = 0.05;
@@ -87,7 +87,7 @@ public:
         numParticles = textureRes * textureRes;
         
         // 1. Making arrays of float pixels with position information
-        ofxLabFlexParticleSystem::Iterator it = particles->begin();
+        lab::ParticleSystem::Iterator it = particles->begin();
         
         float * pos = new float[numParticles*3];
         for (int x = 0; x < textureRes; x++){
@@ -271,8 +271,8 @@ public:
     }
     
     
-    void updateAll( ofxLabFlexParticleSystem::Container * c ){
-        /*ofxLabFlexParticleSystem::Iterator it = c->begin();
+    void updateAll( lab::ParticleSystem::Container * c ){
+        /*lab::ParticleSystem::Iterator it = c->begin();
         for (int x = 0; x < textureRes; x++){
             for (int y = 0; y < textureRes; y++){
                 int i = textureRes * y + x;

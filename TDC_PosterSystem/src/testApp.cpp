@@ -771,7 +771,7 @@ void testApp::draw(){
         particles.camera.tracker.draw();
     }
     
-    renderToVideo();
+    //renderToVideo();
 }
 
 //--------------------------------------------------------------
@@ -1025,7 +1025,7 @@ void testApp::setupSpacebrew(){
     }
     
     // basix
-    spacebrew.setAutoReconnect();
+//    spacebrew.setAutoReconnect();
     
     // interaction settings
     spacebrew.addSubscribe("intensityx", "float_normalized");

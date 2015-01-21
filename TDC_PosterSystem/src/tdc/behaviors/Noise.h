@@ -20,7 +20,7 @@ public:
         frame = 0;
     }
     
-    void updateAll( ofxLabFlexParticleSystem::Container * c ){
+    void updateAll( lab::ParticleSystem::Container * c ){
         frame++;
     }
     

@@ -10,23 +10,22 @@ uniform float scale;
 void main() {
     // use the texture coordinates as an index into the position texture
     vec2 verPos = gl_MultiTexCoord0.xy;
-
+    
     // read position data from texture
     vec4 pixPos = texture2DRect( posTex, verPos );
     
     // Maps the position from the texture (from 0.0 to 1.0) to
     // the screen position (0 - screenWidth/screenHeight)
     //
-//    pixPos.x -= .5;
-//    pixPos.y -= .5;
-//    pixPos.x *= scale;
-//    pixPos.y *= scale;
-//    pixPos.x += .5;
-//    pixPos.y += .5;
-    pixPos.x += -0.5;//screenPos.x;
-    pixPos.y += -0.5;//screenPos.y;
-    
-    pixPos.x *= screen.x;
+    //    pixPos.x -= .5;
+    //    pixPos.y -= .5;
+    //    pixPos.x *= scale;
+    //    pixPos.y *= scale;
+    //    pixPos.x += .5;
+    //    pixPos.y += .5;
+    pixPos.x += .4 + screenPos.x;
+    pixPos.y += screenPos.y;
+    pixPos.x *= screen.x * 2.0;
     pixPos.y *= screen.y;
     
     gl_Position = pixPos;

@@ -18,6 +18,6 @@ ICON_FILE_PATH = $(OF_PATH)/libs/openFrameworksCompiled/project/osx/
 OFX_KINECT_HEADERS = "../../../addons/ofxKinect/libs/libusb-1.0/include" "../../../addons/ofxKinect/libs/libusb-1.0/include/libusb-1.0" " ../../../addons/ofxKinect/libs/libfreenect/include"
 OFX_CV_INCLUDES =  "../../../addons/ofxOpenCv/libs/opencv/include/" "../../../addons/ofxCv/libs/ofxCv/include/"
 
-OTHER_LDFLAGS = $(OF_CORE_LIBS) $(OFX_LWS_LIBS) "../../../addons/ofxKinect/libs/libusb-1.0/lib/osx/usb-1.0.a"
+OTHER_LDFLAGS = $(OF_CORE_LIBS) $(OFX_LWS_LIBS) "../../../addons/ofxKinect/libs/libusb-1.0/lib/osx/usb-1.0.a" "../../../addons/ofxNI2/libs/OpenNI2/lib/osx/libOpenNI2.dylib"
 HEADER_SEARCH_PATHS = $(OF_CORE_HEADERS) $(OFX_LWS_INCLUDES) $(OFX_KINECT_HEADERS) $(OFX_CV_INCLUDES)
-LIBRARY_SEARCH_PATHS = $(inherited) $(OFX_LWS_SEARCH) "../../../addons/ofxKinect/libs/libusb-1.0/lib/osx"
+LIBRARY_SEARCH_PATHS = $(inherited) $(OFX_LWS_SEARCH) "../../../addons/ofxKinect/libs/libusb-1.0/lib/osx" "../../../addons/ofxNI2/libs/OpenNI2/lib/osx"

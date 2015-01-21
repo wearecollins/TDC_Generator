@@ -191,14 +191,11 @@ vec2 flock(vec2 p, vec2 v) {
     vec2 ali = align(p,v);      // Alignment
     vec2 coh = cohesion(p,v);   // Cohesion
     // Arbitrarily weight these forces
-    sep *= 1.5;
+    sep *= (1.5);
     
     // ?
     ali *= (1.0);
     coh *= (1.0);
-//    
-    v.x += -.0005;
-    v.y += -.0005;
     
     // Add the force vectors to acceleration
     v = applyForce(v,sep);
@@ -248,18 +245,18 @@ void main(void){
     // If it´s going to collide change the velocity course
     //
     /*
-    vec2 nextPos = pos + vel;
-    if ( nextPos.x < 0.0)
-        vel.x = 0.5 * abs(vel.x);
-    
-    if ( nextPos.x > 1.0)
-        vel.x = -0.5 * abs(vel.x);
-    
-    if (nextPos.y < 0.0)
-        vel.y = 0.5 * abs(vel.y);
-    
-    if ( nextPos.y > 1.0)
-        vel.y = -0.5 * abs(vel.y);*/
+     vec2 nextPos = pos + vel;
+     if ( nextPos.x < 0.0)
+     vel.x = 0.5 * abs(vel.x);
+     
+     if ( nextPos.x > 1.0)
+     vel.x = -0.5 * abs(vel.x);
+     
+     if (nextPos.y < 0.0)
+     vel.y = 0.5 * abs(vel.y);
+     
+     if ( nextPos.y > 1.0)
+     vel.y = -0.5 * abs(vel.y);*/
     
     
     gl_FragColor = vec4(vel.x,vel.y,0.0,1.0);   // Then save the vel data into the velocity FBO

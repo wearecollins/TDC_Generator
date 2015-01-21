@@ -77,10 +77,10 @@ public:
     }
     
     virtual void setMouse( ofVec2f mousePosition ){ mouse = mousePosition; };
-    virtual void setup( ofxLabFlexParticleSystem::Container * c ){};
+    virtual void setup( lab::ParticleSystem::Container * c ){};
     
     virtual void update( TypeParticle * p ){};
-    virtual void updateAll( ofxLabFlexParticleSystem::Container * c ){};
+    virtual void updateAll( lab::ParticleSystem::Container * c ){};
     virtual void copyMesh( ofMesh * m ){};
     
     // call before/after draw (duh)

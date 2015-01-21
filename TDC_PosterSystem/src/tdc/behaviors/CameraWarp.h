@@ -14,7 +14,7 @@
 class CameraWarp : public Behavior {
 public:
     
-    void setup( ofxLabFlexParticleSystem::Container * c ){
+    void setup( lab::ParticleSystem::Container * c ){
         // load shaders
         knockBlack.load("","shaders/knockoutBlack.frag");
         bumpShader.load("shaders/bumpMap.vert","");

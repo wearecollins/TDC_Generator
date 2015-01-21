@@ -34,9 +34,9 @@ void TypeParticleSystem::setup( string directory ){
     
     // setup ourselves based on window size
     setupSquare(ofVec2f(ofGetWidth(), ofGetHeight()));
-    setOption(ofxLabFlexParticleSystem::HORIZONTAL_WRAP, false);
-    setOption(ofxLabFlexParticleSystem::VERTICAL_WRAP, false);
-    setOption( ofxLabFlexParticleSystem::DETECT_COLLISIONS, false);
+    setOption(lab::ParticleSystem::HORIZONTAL_WRAP, false);
+    setOption(lab::ParticleSystem::VERTICAL_WRAP, false);
+    setOption( lab::ParticleSystem::DETECT_COLLISIONS, false);
     
     sourceDirectory = directory;
     
@@ -242,7 +242,7 @@ void TypeParticleSystem::threadedFunction(){
         }
         
         lock();
-        ofxLabFlexParticleSystem::update();
+        lab::ParticleSystem::update();
         
         bMeshIsUpdated = false;
         
