@@ -154,7 +154,7 @@ void testApp::setup(){
             //setup surfers
             surfers[it->first] = ofPtr<ofxSurf>(new ofxSurf());
             surfImages[it->first].loadAndScale( "surf/" + it->first + ".png");
-            surfers[it->first]->setSource(surfImages[it->first].getPixelsRef());
+            surfers[it->first]->setSource(surfImages[it->first].getPixels());
         }
     }
     
@@ -631,10 +631,10 @@ void testApp::update(){
     // UPDATE: SURF
     if ( bTracking ){
         map<string, ofPtr<ofxSurf> >::iterator it = surfers.begin();
-        if ( particles.camera.getKinect().isFrameNew() && particles.camera.getKinect().getPixelsRef().getWidth() > 0 ){
+        if ( particles.camera.getKinect().isFrameNew() && particles.camera.getKinect().getPixels().getWidth() > 0 ){
             //camera.loadAndScale( particles.camera.colorPixels );
             for (it; it != surfers.end(); ++it){
-                it->second->detect( particles.camera.getKinect().getPixelsRef() );
+                it->second->detect( particles.camera.getKinect().getPixels() );
                 //it->second->draw(640,480 + colorSmall.height * i);
                 //                cout << surfers[i]->getMatches().size() << " : "<< i << endl;
                 // i need to figure this out!
