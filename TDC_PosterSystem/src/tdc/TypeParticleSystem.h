@@ -34,7 +34,7 @@ class TypeParticleSystem : public lab::ParticleSystem, protected ofThread
 {
 public:
     
-    typedef map<unsigned long, ofxLabFlexParticle*>::iterator               TypeIterator;
+    typedef map<unsigned long, lab::Particle*>::iterator               TypeIterator;
     
     ~TypeParticleSystem();
     

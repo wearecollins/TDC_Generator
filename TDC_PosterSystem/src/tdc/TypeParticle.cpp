@@ -9,7 +9,7 @@
 #include "TypeParticle.h"
 
 //-------------------------------------------------------------------------------------------
-TypeParticle::TypeParticle() : ofxLabFlexParticle()
+TypeParticle::TypeParticle() : lab::Particle()
 {
     radius = 1;
     offsetX = ofRandom(10000);
@@ -20,7 +20,7 @@ TypeParticle::TypeParticle() : ofxLabFlexParticle()
 };
 
 //-------------------------------------------------------------------------------------------
-TypeParticle::TypeParticle( ofVec2f seedPos ) : ofxLabFlexParticle( seedPos )
+TypeParticle::TypeParticle( ofVec2f seedPos ) : lab::Particle( seedPos )
 {
     radius = 1;
     seedPosition = seedPos;
@@ -43,7 +43,7 @@ void TypeParticle::update()
         homePosition.set( ofGetWidth() / 4.0, ofGetHeight()/2.0);
     }
     ofVec3f seedWeight = seedPosition * weight + homePosition * (1-weight);
-    ofxLabFlexParticle::update();
+    lab::Particle::update();
     velocity = velocity * .995 + (seedPosition - *this ) * .005;
     z = z * .99;
     if ( z > 100 ){
@@ -62,7 +62,7 @@ void TypeParticle::draw()
 
 //-------------------------------------------------------------------------------------------
 TypeParticle& TypeParticle::operator=( const TypeParticle& p ){
-    ofxLabFlexParticle::operator=(p);
+    lab::Particle::operator=(p);
     offsetX=p.offsetX;
     offsetY=p.offsetY;
     offsetZ=p.offsetZ;

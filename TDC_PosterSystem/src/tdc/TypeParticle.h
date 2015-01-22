@@ -12,7 +12,7 @@
 
 class Behavior;
 
-class TypeParticle : public ofxLabFlexParticle
+class TypeParticle : public lab::Particle
 {
     friend class TypeParticleSystem;
     friend class Behavior;

@@ -30,7 +30,7 @@ static void getQuadSubImage(ofImage& inputImage, ofImage& outputImage, vector <o
     outW = outputImage.width;
     outH = outputImage.height;
     
-    int bpp = inputImage.getPixelsRef().getNumChannels();
+    int bpp = inputImage.getPixels().getNumChannels();
     
     int xinput =0;
     int yinput = 0;
@@ -108,7 +108,7 @@ public:
         kinect.setDepthClipping( near, far );
         kinect.update();
         if ( kinect.isFrameNew() ){
-            toDraw.setFromPixels(kinect.getDepthPixelsRef());
+            toDraw.setFromPixels(kinect.getDepthPixels());
             
             ofxCv::resize(toDraw,toTrack,.5,.5);
             toTrack.update();
@@ -118,7 +118,7 @@ public:
             if ( cameraSkew != 0.0 ){
                 for ( int x = 0; x <toTrack.width; x++){
                     for ( int y = 0; y <toTrack.height; y++){
-                        ofColor c = toTrack.getPixelsRef().getColor(x,y);
+                        ofColor c = toTrack.getPixels().getColor(x,y);
                         float m = 0;
                         if ( cameraSkew > 0 ){
                             float s = ofMap(y, 0, toTrack.height, 0, 1.0);
@@ -130,21 +130,21 @@ public:
                         c.r *= m;
                         c.g *= m;
                         c.b *= m;
-                        toTrack.getPixelsRef().setColor(x,y,c);
+                        toTrack.getPixels().setColor(x,y,c);
                     }
                 }
             }
             toTrack.update();
             
-            //getQuadSubImage(toDraw, toDraw, quad, toDraw.getPixelsRef().getImageType());
+            //getQuadSubImage(toDraw, toDraw, quad, toDraw.getPixels().getImageType());
             //toTrack.update();
             
             ofxCv::threshold(toTrack, thresh);
             toTrack.update();
             blobTracker.findContours(toTrack);
             
-            colorPixels.setFromPixels( kinect.getPixels(), kinect.getWidth(), kinect.getHeight(), kinect.getPixelsRef().getNumChannels());
-            tracker.updateCamera( kinect.getPixelsRef() );
+            colorPixels.setFromPixels( kinect.getPixels(), kinect.getWidth(), kinect.getHeight(), kinect.getPixels().getNumChannels());
+            tracker.updateCamera( kinect.getPixels() );
             
             /*double minVal = 0, maxVal = 0;
             static cv::Rect rect;
@@ -170,7 +170,7 @@ public:
                 ofPoint args;
                 args.x = mouse.x;
                 args.y = mouse.y;
-                args.z = kinect.getDepthPixelsRef().getColor(c.x,c.y).r /255.0f;
+                args.z = kinect.getDepthPixels().getColor(c.x,c.y).r /255.0f;
                 
                 ofNotifyEvent(cameraMove, args );
                 lastPoint.set(args.x, args.y);

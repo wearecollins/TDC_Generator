@@ -10,7 +10,7 @@
 
 #include "ofMain.h"
 #include "TDCConstants.h"
-#include "ofxLabFlexParticleSystem.h"
+#include "ofxLabFlexParticle.h"
 #include "CameraManager.h"
 
 // PING PONG from shader particle ex

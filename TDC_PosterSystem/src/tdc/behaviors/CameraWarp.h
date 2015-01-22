@@ -94,7 +94,7 @@ public:
                 accumulation.begin();
                 ofPushStyle();
                 ofSetColor(0,0,0,accum);
-                ofRect(0,0,accumulation.getWidth(), accumulation.getHeight());
+                ofDrawRectangle(0,0,accumulation.getWidth(), accumulation.getHeight());
                 ofPopStyle();
                 accumulation.end();
                 accum += .001;
@@ -104,7 +104,7 @@ public:
         }
         
         last = diffImage;
-        lastDepth = camera->getKinect().getRawDepthPixelsRef();
+        lastDepth = camera->getKinect().getRawDepthPixels();
         lastMaxVal = lastMaxVal * .75 + maxVal * .25;
         
         bumpShader.begin();
@@ -112,7 +112,7 @@ public:
         bumpShader.setUniform2f("screenDims", (float) ofGetWidth(), (float) ofGetHeight());
         bumpShader.setUniform1f("extrusion", mix * 1000.0f);
         if ( camera != NULL ){
-            bumpShader.setUniformTexture("depthTex", accumulation.getTextureReference(), 0);
+            bumpShader.setUniformTexture("depthTex", accumulation.getTexture(), 0);
         } else {
             cout << "CAMERA IS NULL!"<<endl;
         }
