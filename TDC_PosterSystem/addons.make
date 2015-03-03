@@ -1,3 +1,9 @@
+ofxKinect
+ofxOpenCv
 ofxSvg
 ofxVectorGraphics
 ofxXmlSettings
+ofxCv
+ofxLibwebsockets
+ofxSpacebrew
+ofxUI
